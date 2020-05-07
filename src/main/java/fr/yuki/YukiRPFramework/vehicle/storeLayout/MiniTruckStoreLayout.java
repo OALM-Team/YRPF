@@ -1,6 +1,7 @@
 package fr.yuki.YukiRPFramework.vehicle.storeLayout;
 
 import fr.yuki.YukiRPFramework.job.WearableWorldObject;
+import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Vector;
 
 import java.util.ArrayList;
@@ -20,6 +21,15 @@ public class MiniTruckStoreLayout extends VehicleStoreLayout {
         logTransform.add(new StoreLayoutTransform(4, new Vector(-170,30,140), new Vector(0,90,0), new Vector(1,1,1)));
         logTransform.add(new StoreLayoutTransform(5, new Vector(-170,0,180), new Vector(0,90,0), new Vector(1,1,1)));
         this.layoutTransforms.put(50001, logTransform);
+
+        ArrayList<StoreLayoutTransform> plankTransform = new ArrayList<>();
+        plankTransform.add(new StoreLayoutTransform(0, new Vector(-170,-50,100), new Vector(0,90,0), new Vector(0.5,0.5,0.5)));
+        plankTransform.add(new StoreLayoutTransform(1, new Vector(-170,10,100), new Vector(0,90,0), new Vector(0.5,0.5,0.5)));
+        plankTransform.add(new StoreLayoutTransform(2, new Vector(-170,60,100), new Vector(0,90,0), new Vector(0.5,0.5,0.5)));
+        plankTransform.add(new StoreLayoutTransform(3, new Vector(-170,-30,100), new Vector(0,90,0), new Vector(0.5,0.5,0.5)));
+        plankTransform.add(new StoreLayoutTransform(4, new Vector(-170,30,100), new Vector(0,90,0), new Vector(0.5,0.5,0.5)));
+        plankTransform.add(new StoreLayoutTransform(5, new Vector(-170,0,120), new Vector(0,90,0), new Vector(0.5,0.5,0.5)));
+        this.layoutTransforms.put(1574, plankTransform);
     }
 
     @Override
@@ -30,7 +40,10 @@ public class MiniTruckStoreLayout extends VehicleStoreLayout {
 
     @Override
     public StoreLayoutTransform getStoreTransform(int index, WearableWorldObject wearableWorldObject) {
-        if(this.layoutTransforms.get(wearableWorldObject.getModelId()).size() <= index) return null;
+        if(this.layoutTransforms.get(wearableWorldObject.getModelId()).size() <= index){
+            Onset.print("Can't find a store layout transform for model="+wearableWorldObject.getModelId());
+            return null;
+        }
         return this.layoutTransforms.get(wearableWorldObject.getModelId()).get(index);
     }
 
@@ -41,6 +54,7 @@ public class MiniTruckStoreLayout extends VehicleStoreLayout {
 
     @Override
     public int maxLayoutSlot(int modelId) {
+        if(!this.layoutTransforms.containsKey(modelId)) return 0;
         return this.layoutTransforms.get(modelId).size();
     }
 }

@@ -37,6 +37,7 @@ public class WearableWorldObject {
 
     private void createWorldObject() {
         this.worldObject = Onset.getServer().createObject(this.position, this.modelId);
+        this.worldObject.setScale(this.toolAnimation.getScale());
         if(this.isPhysicEnable)
             this.worldObject.setProperty("enablePhysic", 1, true);
         if(ModdingManager.isCustomModelId(this.modelId))

@@ -25,15 +25,18 @@ public class CharacterToolAnimation {
 
     public void attach(Player player) {
         this.toolObject = Onset.getServer().createObject(new Vector(0, 0, 0), this.modelId);
-        this.toolObject.setScale(this.scale);
         if(ModdingManager.isCustomModelId(this.modelId)) {
             ModdingManager.assignCustomModel(this.toolObject, this.modelId);
         }
         this.toolObject.attach(player, this.position, this.rotation, this.attachSocket);
+        this.toolObject.setScale(this.scale);
     }
 
     public void unAttach() {
         this.toolObject.destroy();
     }
 
+    public Vector getScale() {
+        return scale;
+    }
 }

@@ -5,5 +5,5 @@ import net.onfirenetwork.onsetjava.entity.Player;
 
 public interface JobToolHandler {
     boolean canInteract(Player player);
-    void onUnwear(Player player, WearableWorldObject wearableWorldObject);
+    boolean onUnwear(Player player, WearableWorldObject wearableWorldObject);
 }

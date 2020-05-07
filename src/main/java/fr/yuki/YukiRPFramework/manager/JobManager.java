@@ -101,8 +101,9 @@ public class JobManager {
         if(jobToolNearby != null) {
             if(jobToolNearby.getJobToolHandler().canInteract(player)) {
                 Onset.print("Use job tool type="+jobToolNearby.getJobToolType());
-                CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject().requestUnwear(player, true);
-                jobToolNearby.getJobToolHandler().onUnwear(player, CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject());
+                if(jobToolNearby.getJobToolHandler().onUnwear(player, CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject())) {
+                    CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject().requestUnwear(player, true);
+                }
             }
             else {
                 UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Impossible d'utiliser cet outil avec cette ressource");

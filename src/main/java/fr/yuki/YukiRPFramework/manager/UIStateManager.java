@@ -78,6 +78,7 @@ public class UIStateManager {
 
     public static void handleUIReady(Player player) {
         Account account = WorldManager.getPlayerAccount(player);
+        MapManager.setupGameMap(player);
 
         // Apply style to character if there is one saved
         if(account.getCharacterCreationRequest() == 0) {

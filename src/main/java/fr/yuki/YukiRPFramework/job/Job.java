@@ -5,6 +5,7 @@ import fr.yuki.YukiRPFramework.enums.JobEnum;
 import fr.yuki.YukiRPFramework.job.harvest.HarvestableObject;
 import fr.yuki.YukiRPFramework.manager.JobManager;
 import fr.yuki.YukiRPFramework.model.JobNPC;
+import fr.yuki.YukiRPFramework.model.JobTool;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Location;
 import net.onfirenetwork.onsetjava.data.Vector;
@@ -27,10 +28,12 @@ public abstract class Job {
     protected ArrayList<HarvestableObject> harvestableObjectsTemplate;
     protected JobConfig jobConfig;
     protected ArrayList<WorldHarvestObject> worldHarvestObjects;
+    protected ArrayList<JobTool> jobTools;
 
     public Job() {
         this.worldHarvestObjects = new ArrayList<>();
         this.spawnNpcs();
+        this.spawnTools();
     }
 
     /**
@@ -43,6 +46,17 @@ public abstract class Job {
                     jobNPC.getY(), jobNPC.getZ() + 150, 0 , 0 ,0);
             npc.setProperty("clothing", jobNPC.getNpcClothing(), true);
             jobNPC.setNpc(npc);
+        }
+    }
+
+    /**
+     * Spawn tools for the job
+     */
+    private void spawnTools() {
+        this.jobTools = new ArrayList<>(JobManager.getJobTools().stream()
+                .filter(x -> x.getJobType().equals(this.getJobType().type)).collect(Collectors.toList()));
+        for(JobTool tool : this.jobTools) {
+            tool.spawn(this);
         }
     }
 
@@ -134,5 +148,9 @@ public abstract class Job {
 
     public JobConfig getJobConfig() {
         return jobConfig;
+    }
+
+    public ArrayList<JobTool> getJobTools() {
+        return jobTools;
     }
 }

@@ -131,10 +131,10 @@ public class WorldManager {
         }
 
         ATMManager.handleATMInteract(player);
-        GarageManager.handleGarageInteract(player);
         GarageManager.handleVSellerInteract(player);
         JobManager.tryToHarvest(player);
-        VehicleManager.handleVehicleChestStorageRequest(player);
+        if(player.getVehicle() == null) VehicleManager.handleVehicleChestStorageRequest(player);
+        GarageManager.handleGarageInteract(player);
     }
 
     /**

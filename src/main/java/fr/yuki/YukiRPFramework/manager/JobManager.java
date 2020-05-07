@@ -1,6 +1,7 @@
 package fr.yuki.YukiRPFramework.manager;
 
 import fr.yuki.YukiRPFramework.dao.JobNPCDAO;
+import fr.yuki.YukiRPFramework.dao.JobToolDAO;
 import fr.yuki.YukiRPFramework.enums.ItemTemplateEnum;
 import fr.yuki.YukiRPFramework.enums.JobEnum;
 import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
@@ -11,6 +12,7 @@ import fr.yuki.YukiRPFramework.job.WearableWorldObject;
 import fr.yuki.YukiRPFramework.job.WorldHarvestObject;
 import fr.yuki.YukiRPFramework.model.JobNPC;
 import fr.yuki.YukiRPFramework.model.JobNPCListItem;
+import fr.yuki.YukiRPFramework.model.JobTool;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.entity.Player;
 import net.onfirenetwork.onsetjava.enums.Animation;
@@ -22,10 +24,14 @@ public class JobManager {
     private static LinkedHashMap<JobEnum, Job> jobs;
     private static ArrayList<WearableWorldObject> wearableWorldObjects;
     private static ArrayList<JobNPC> jobNPCS;
+    private static ArrayList<JobTool> jobTools;
 
     public static void init() throws SQLException {
         jobNPCS = JobNPCDAO.loadJobNPCS();
         Onset.print("Loaded " + jobNPCS.size() + " job npc(s) from the database");
+
+        jobTools = JobToolDAO.loadJobTools();
+        Onset.print("Loaded " + jobTools.size() + " job tool(s) from the database");
 
         wearableWorldObjects = new ArrayList<>();
         jobs = new LinkedHashMap<>();
@@ -90,6 +96,20 @@ public class JobManager {
             return;
         }
 
+        // Try to use a job tool nearby
+        JobTool jobToolNearby = getNearbyJobTool(player);
+        if(jobToolNearby != null) {
+            if(jobToolNearby.getJobToolHandler().canInteract(player)) {
+                Onset.print("Use job tool type="+jobToolNearby.getJobToolType());
+                CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject().requestUnwear(player, true);
+                jobToolNearby.getJobToolHandler().onUnwear(player, CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject());
+            }
+            else {
+                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Impossible d'utiliser cet outil avec cette ressource");
+            }
+            return;
+        }
+
         // Unwear the item
         CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject().requestUnwear(player, false);
     }
@@ -97,6 +117,13 @@ public class JobManager {
     public static JobNPC getNearbyJobNPC(Player player) {
         for(JobNPC jobNPC : jobNPCS) {
             if(jobNPC.isNear(player)) return jobNPC;
+        }
+        return null;
+    }
+
+    public static JobTool getNearbyJobTool(Player player) {
+        for(JobTool jobTool : jobTools) {
+            if(jobTool.isNear(player)) return jobTool;
         }
         return null;
     }
@@ -111,5 +138,9 @@ public class JobManager {
 
     public static ArrayList<JobNPC> getJobNPCS() {
         return jobNPCS;
+    }
+
+    public static ArrayList<JobTool> getJobTools() {
+        return jobTools;
     }
 }

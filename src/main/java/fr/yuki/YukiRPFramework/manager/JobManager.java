@@ -1,18 +1,19 @@
 package fr.yuki.YukiRPFramework.manager;
 
+import com.google.gson.Gson;
+import fr.yuki.YukiRPFramework.character.CharacterJobLevel;
+import fr.yuki.YukiRPFramework.dao.JobLevelDAO;
 import fr.yuki.YukiRPFramework.dao.JobNPCDAO;
 import fr.yuki.YukiRPFramework.dao.JobToolDAO;
+import fr.yuki.YukiRPFramework.dao.JobVehicleRentalDAO;
 import fr.yuki.YukiRPFramework.enums.ItemTemplateEnum;
 import fr.yuki.YukiRPFramework.enums.JobEnum;
 import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
 import fr.yuki.YukiRPFramework.inventory.Inventory;
-import fr.yuki.YukiRPFramework.job.Job;
-import fr.yuki.YukiRPFramework.job.LumberjackJob;
-import fr.yuki.YukiRPFramework.job.WearableWorldObject;
-import fr.yuki.YukiRPFramework.job.WorldHarvestObject;
-import fr.yuki.YukiRPFramework.model.JobNPC;
-import fr.yuki.YukiRPFramework.model.JobNPCListItem;
-import fr.yuki.YukiRPFramework.model.JobTool;
+import fr.yuki.YukiRPFramework.job.*;
+import fr.yuki.YukiRPFramework.model.*;
+import fr.yuki.YukiRPFramework.net.payload.AddToastPayload;
+import fr.yuki.YukiRPFramework.net.payload.AddXpBarItemPayload;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.entity.Player;
 import net.onfirenetwork.onsetjava.enums.Animation;
@@ -25,6 +26,8 @@ public class JobManager {
     private static ArrayList<WearableWorldObject> wearableWorldObjects;
     private static ArrayList<JobNPC> jobNPCS;
     private static ArrayList<JobTool> jobTools;
+    private static ArrayList<JobLevel> jobLevels;
+    private static ArrayList<JobVehicleRental> jobVehicleRentals;
 
     public static void init() throws SQLException {
         jobNPCS = JobNPCDAO.loadJobNPCS();
@@ -33,9 +36,35 @@ public class JobManager {
         jobTools = JobToolDAO.loadJobTools();
         Onset.print("Loaded " + jobTools.size() + " job tool(s) from the database");
 
+        jobLevels = JobLevelDAO.loadJobLevels();
+        Onset.print("Loaded " + jobLevels.size() + " job level(s) from the database");
+
+        jobVehicleRentals = JobVehicleRentalDAO.loadJobVehicleRental();
+        Onset.print("Loaded " + jobVehicleRentals.size() + " job vehicle(s) from the database");
+
         wearableWorldObjects = new ArrayList<>();
         jobs = new LinkedHashMap<>();
         jobs.put(JobEnum.LUMBERJACK, new LumberjackJob());
+        jobs.put(JobEnum.GARBAGE, new GarbageJob());
+    }
+
+    /**
+     * Init job levels for the character
+     * @param player The player
+     */
+    public static void initCharacterJobs(Player player) {
+        Account account = WorldManager.getPlayerAccount(player);
+        ArrayList<CharacterJobLevel> characterJobLevels = account.decodeCharacterJob();
+        for(Map.Entry<JobEnum, Job> job : jobs.entrySet()) {
+            if(characterJobLevels.stream().filter(x -> x.getJobId().equals(job.getKey().type)).findFirst().orElse(null) == null) {
+                CharacterJobLevel characterJobLevel = new CharacterJobLevel();
+                characterJobLevel.setJobId(job.getKey().type);
+                characterJobLevel.setExp(0);
+                characterJobLevels.add(characterJobLevel);
+            }
+        }
+        account.setJobLevels(characterJobLevels);
+        WorldManager.savePlayer(player);
     }
 
     /**
@@ -56,6 +85,24 @@ public class JobManager {
                 }
             }
         }
+    }
+
+    public static void addExp(Player player, JobEnum job, int amount) {
+        Account account = WorldManager.getPlayerAccount(player);
+        ArrayList<CharacterJobLevel> characterJobLevels = account.decodeCharacterJob();
+        CharacterJobLevel characterJobLevel = characterJobLevels.stream().filter(x -> x.getJobId().equals(job.type)).findFirst().orElse(null);
+        if(characterJobLevel == null) return;
+
+        JobLevel previousJobLevel = characterJobLevel.getJobLevel();
+        characterJobLevel.setExp(characterJobLevel.getExp() + amount);
+        account.setJobLevels(characterJobLevels);
+        player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new AddXpBarItemPayload("+" + amount + " XP " + job.type)));
+        JobLevel nextJobLevel = characterJobLevel.getJobLevel();
+        if(previousJobLevel.getLevel() != nextJobLevel.getLevel()) {
+            player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new AddXpBarItemPayload("Vous etes desormais " + nextJobLevel.getName())));
+        }
+
+        WorldManager.savePlayer(player);
     }
 
     /**
@@ -99,6 +146,11 @@ public class JobManager {
         // Try to use a job tool nearby
         JobTool jobToolNearby = getNearbyJobTool(player);
         if(jobToolNearby != null) {
+            if(!jobToolNearby.getJobToolHandler().hasLevelRequired(player)) {
+                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Vous n'avez pas le niveau requis pour cet outil");
+                return;
+            }
+
             if(jobToolNearby.getJobToolHandler().canInteract(player)) {
                 Onset.print("Use job tool type="+jobToolNearby.getJobToolType());
                 if(jobToolNearby.getJobToolHandler().onUnwear(player, CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject())) {
@@ -143,5 +195,9 @@ public class JobManager {
 
     public static ArrayList<JobTool> getJobTools() {
         return jobTools;
+    }
+
+    public static ArrayList<JobLevel> getJobLevels() {
+        return jobLevels;
     }
 }

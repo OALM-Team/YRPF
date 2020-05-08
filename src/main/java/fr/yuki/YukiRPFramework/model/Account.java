@@ -1,9 +1,12 @@
 package fr.yuki.YukiRPFramework.model;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import fr.yuki.YukiRPFramework.character.CharacterJobLevel;
 import fr.yuki.YukiRPFramework.character.CharacterStyle;
 import fr.yuki.YukiRPFramework.net.payload.RequestBuyVehiclePayload;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 public class Account {
@@ -21,6 +24,7 @@ public class Account {
     private int characterCreationRequest;
     private String characterStyle;
     private String characterName;
+    private String jobLevels;
 
     public int getId() {
         return id;
@@ -135,11 +139,28 @@ public class Account {
         return new Gson().fromJson(this.characterStyle, CharacterStyle.class);
     }
 
+    public void setJobLevels(ArrayList<CharacterJobLevel> jobLevels) {
+        this.jobLevels = new Gson().toJson(jobLevels);
+    }
+
+    public ArrayList<CharacterJobLevel> decodeCharacterJob() {
+        if(this.jobLevels.equals("")) return new ArrayList<>();
+        return new Gson().fromJson(this.jobLevels, new TypeToken<ArrayList<CharacterJobLevel>>(){}.getType());
+    }
+
     public String getCharacterName() {
         return characterName;
     }
 
     public void setCharacterName(String characterName) {
         this.characterName = characterName;
+    }
+
+    public String getJobLevels() {
+        return jobLevels;
+    }
+
+    public void setJobLevels(String jobLevels) {
+        this.jobLevels = jobLevels;
     }
 }

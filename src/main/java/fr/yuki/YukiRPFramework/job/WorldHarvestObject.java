@@ -4,6 +4,7 @@ import fr.yuki.YukiRPFramework.character.CharacterLoopAnimation;
 import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
 import fr.yuki.YukiRPFramework.job.harvest.HarvestableObject;
 import fr.yuki.YukiRPFramework.manager.CharacterManager;
+import fr.yuki.YukiRPFramework.manager.JobManager;
 import fr.yuki.YukiRPFramework.manager.ModdingManager;
 import fr.yuki.YukiRPFramework.manager.UIStateManager;
 import net.onfirenetwork.onsetjava.Onset;
@@ -72,6 +73,7 @@ public class WorldHarvestObject {
             UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS,
                     "Vous avez récolté " + this.harvestableObject.getName() + " en " + (this.harvestableObject.getBaseHarvestTime() / 1000) + "s");
 
+            JobManager.addExp(player, job.getJobType(), this.harvestableObject.getXp());
             this.harvestableObject.onHarvestDone(player, this);
 
             this.delete();

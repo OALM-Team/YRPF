@@ -92,6 +92,7 @@ public class YukiRPFrameworkPlugin {
                 inventory.save();
             }
             else {
+                evt.getPlayer().setSpawnLocation(new Vector(account.getSaveX(), account.getSaveY(), account.getSaveZ()), 0);
                 evt.getPlayer().setLocation(new Vector(account.getSaveX(), account.getSaveY(), account.getSaveZ()));
             }
 
@@ -103,6 +104,8 @@ public class YukiRPFrameworkPlugin {
             // Set properties for the player
             evt.getPlayer().setProperty("accountId", account.getId(), true);
             evt.getPlayer().setProperty("uiState", new Gson().toJson(new UIState()), true);
+
+            JobManager.initCharacterJobs(evt.getPlayer());
             CharacterManager.getCharacterStates().put(evt.getPlayer().getSteamId(), new CharacterState());
         } catch (Exception e) {
             e.printStackTrace();

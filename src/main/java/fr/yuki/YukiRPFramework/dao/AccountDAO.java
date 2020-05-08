@@ -35,6 +35,7 @@ public class AccountDAO {
             account.setCharacterCreationRequest(resultSet.getInt("character_creation_request"));
             account.setCharacterStyle(resultSet.getString("character_style"));
             account.setCharacterName(resultSet.getString("character_name"));
+            account.setJobLevels(resultSet.getString("job_levels"));
             account.setCreatedAt(resultSet.getDate("created_at"));
             account.setUpdatedAt(resultSet.getDate("updated_at"));
         }
@@ -50,6 +51,7 @@ public class AccountDAO {
         account.setCharacterCreationRequest(1);
         account.setCharacterStyle("");
         account.setCharacterName("Unknown");
+        account.setJobLevels("[]");
         account.setCreatedAt(new java.util.Date());
         account.setUpdatedAt(new java.util.Date());
 
@@ -81,7 +83,7 @@ public class AccountDAO {
     public static void updateAccount(Account account, Player player) throws SQLException {
         PreparedStatement preparedStatement = Database.getConnection()
                 .prepareStatement("UPDATE tbl_account SET is_banned=?, bank_money=?, save_x=?, save_y=?, save_z=?, save_h=?, character_creation_request=?," +
-                        "character_style=?, character_name=? WHERE id_account=?");
+                        "character_style=?, character_name=?, job_levels=? WHERE id_account=?");
         Location loc = player.getLocationAndHeading();
         preparedStatement.setInt(1, account.getIsBanned());
         preparedStatement.setInt(2, account.getBankMoney());
@@ -92,7 +94,8 @@ public class AccountDAO {
         preparedStatement.setInt(7, account.getCharacterCreationRequest());
         preparedStatement.setString(8, account.getCharacterStyle());
         preparedStatement.setString(9, account.getCharacterName());
-        preparedStatement.setDouble(10, account.getId());
+        preparedStatement.setString(10, account.getJobLevels());
+        preparedStatement.setDouble(11, account.getId());
         preparedStatement.execute();
     }
 }

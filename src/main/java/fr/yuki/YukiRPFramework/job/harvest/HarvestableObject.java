@@ -10,6 +10,7 @@ import java.util.ArrayList;
 
 public interface HarvestableObject {
     String getName();
+    int getXp();
     ArrayList<Vector> getSpawns();
     int getBaseHarvestTime();
     int getLevelRequired();

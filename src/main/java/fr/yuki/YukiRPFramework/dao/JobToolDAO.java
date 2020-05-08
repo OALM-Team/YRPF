@@ -26,6 +26,7 @@ public class JobToolDAO {
             jobTool.setJobType(resultSet.getString("job_type"));
             jobTool.setLevelRequired(resultSet.getInt("level_required"));
             jobTool.setJobToolType(resultSet.getString("job_tool_type"));
+            jobTool.setReward(resultSet.getInt("reward"));
             jobTool.setX(resultSet.getDouble("x"));
             jobTool.setY(resultSet.getDouble("y"));
             jobTool.setZ(resultSet.getDouble("z"));

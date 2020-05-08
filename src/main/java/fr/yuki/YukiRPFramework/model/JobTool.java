@@ -1,6 +1,7 @@
 package fr.yuki.YukiRPFramework.model;
 
 import fr.yuki.YukiRPFramework.job.Job;
+import fr.yuki.YukiRPFramework.job.tools.GarbageBin;
 import fr.yuki.YukiRPFramework.job.tools.JobToolHandler;
 import fr.yuki.YukiRPFramework.job.tools.Sawmill;
 import fr.yuki.YukiRPFramework.manager.ModdingManager;
@@ -16,6 +17,7 @@ public class JobTool {
     private String jobType;
     private int levelRequired;
     private String jobToolType;
+    private int reward;
     private double x;
     private double y;
     private double z;
@@ -69,6 +71,10 @@ public class JobTool {
         switch (this.jobToolType) {
             case "sawmill":
                 this.jobToolHandler = new Sawmill(this);
+                break;
+
+            case "garbage_bin":
+                this.jobToolHandler = new GarbageBin(this);
                 break;
         }
     }
@@ -179,5 +185,13 @@ public class JobTool {
 
     public void setJobToolHandler(JobToolHandler jobToolHandler) {
         this.jobToolHandler = jobToolHandler;
+    }
+
+    public int getReward() {
+        return reward;
+    }
+
+    public void setReward(int reward) {
+        this.reward = reward;
     }
 }

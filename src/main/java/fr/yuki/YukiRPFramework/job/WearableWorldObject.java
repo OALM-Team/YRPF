@@ -66,11 +66,11 @@ public class WearableWorldObject {
         if(!delete) {
             Vehicle nearbyVehicle = VehicleManager.getNearestVehicle(player.getLocation());
             if(nearbyVehicle != null) {
-                if(nearbyVehicle.getLocation().distance(player.getLocation()) < 400) {
-                    if(!VehicleManager.canStoreWorldWearableObject(nearbyVehicle)) {
+                if(nearbyVehicle.getLocation().distance(player.getLocation()) < VehicleManager.getInteractionDistance(nearbyVehicle)) {
+                    /**if(!VehicleManager.canStoreWorldWearableObject(nearbyVehicle)) {
                         UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Impossible car ce véhicule ne le permet pas");
                         return;
-                    }
+                    }*/
                     if(nearbyVehicle.getPropertyInt("locked") == 1) {
                         UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Impossible car ce véhicule est verrouillé");
                         return;

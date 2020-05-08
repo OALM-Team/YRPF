@@ -66,6 +66,7 @@ public class YukiRPFrameworkPlugin {
             Onset.registerRemoteEvent("Job:WearObject");
             Onset.registerRemoteEvent("Character:RequestWearFromVehicleChest");
         } catch (Exception ex) {
+            ex.printStackTrace();
             Onset.print("Can't start the plugin because : " + ex.toString());
         }
     }

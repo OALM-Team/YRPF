@@ -11,6 +11,7 @@ import fr.yuki.YukiRPFramework.model.VehicleGarage;
 import fr.yuki.YukiRPFramework.net.payload.AddVChestItemPayload;
 import fr.yuki.YukiRPFramework.net.payload.AddVehicleGaragePayload;
 import fr.yuki.YukiRPFramework.utils.Basic;
+import fr.yuki.YukiRPFramework.vehicle.storeLayout.GarbageTruckStoreLayout;
 import fr.yuki.YukiRPFramework.vehicle.storeLayout.MiniTruckStoreLayout;
 import fr.yuki.YukiRPFramework.vehicle.storeLayout.VehicleStoreLayout;
 import net.onfirenetwork.onsetjava.Onset;
@@ -31,6 +32,7 @@ public class VehicleManager {
     public static void init() {
         vehicleStoreLayouts = new ArrayList<>();
         vehicleStoreLayouts.add(new MiniTruckStoreLayout());
+        vehicleStoreLayouts.add(new GarbageTruckStoreLayout());
     }
 
     public static class CreateVehicleResult {
@@ -215,6 +217,15 @@ public class VehicleManager {
         return false;
     }
 
+    public static int getInteractionDistance(Vehicle vehicle) {
+        if(vehicle.getModel() == 22 || vehicle.getModel() == 23)
+            return 500;
+        if(vehicle.getModel() == 9)
+            return 700;
+        return 400;
+    }
+
+
     public static boolean storeWorldWearableObject(Vehicle vehicle, WearableWorldObject wearableWorldObject) {
         VehicleStoreLayout vehicleStoreLayout = vehicleStoreLayouts.stream()
                 .filter(x -> x.isAdaptedForModel(vehicle.getModel())).findFirst().orElse(null);
@@ -233,7 +244,7 @@ public class VehicleManager {
         if(player.getVehicle() != null) return;
         Vehicle vehicle = getNearestVehicle(player.getLocation());
         if(vehicle == null) return;
-        if(vehicle.getLocation().distance(player.getLocation()) > 400) return;
+        if(vehicle.getLocation().distance(player.getLocation()) > getInteractionDistance(vehicle)) return;
         if(vehicle.getPropertyInt("locked") == 1) {
             UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Impossible car ce véhicule est verrouillé");
             return;
@@ -249,7 +260,7 @@ public class VehicleManager {
     public static void handleRequestWearFromVehicleChest(Player player, String uuid) {
         if(player.getVehicle() != null) return;
         Vehicle vehicle = getNearestVehicle(player.getLocation());
-        if(vehicle.getLocation().distance(player.getLocation()) > 400) return;
+        if(vehicle.getLocation().distance(player.getLocation()) > VehicleManager.getInteractionDistance(vehicle)) return;
         if(vehicle.getPropertyInt("locked") == 1) {
             UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Impossible car ce véhicule est verrouillé");
             return;

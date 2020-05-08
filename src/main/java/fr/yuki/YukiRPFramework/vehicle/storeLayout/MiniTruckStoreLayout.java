@@ -40,6 +40,7 @@ public class MiniTruckStoreLayout extends VehicleStoreLayout {
 
     @Override
     public StoreLayoutTransform getStoreTransform(int index, WearableWorldObject wearableWorldObject) {
+        if(!this.layoutTransforms.containsKey(wearableWorldObject.getModelId())) return null;
         if(this.layoutTransforms.get(wearableWorldObject.getModelId()).size() <= index){
             Onset.print("Can't find a store layout transform for model="+wearableWorldObject.getModelId());
             return null;

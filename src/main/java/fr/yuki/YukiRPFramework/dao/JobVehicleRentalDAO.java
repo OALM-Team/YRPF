@@ -19,8 +19,12 @@ public class JobVehicleRentalDAO {
 
             jobVehicleRental.setId(resultSet.getInt("id_job_vehicle_rental"));
             jobVehicleRental.setJobId(resultSet.getString("id_job"));
+            jobVehicleRental.setName(resultSet.getString("name"));
             jobVehicleRental.setVehicleModelId(resultSet.getInt("vehicle_model_id"));
             jobVehicleRental.setCost(resultSet.getInt("cost"));
+            jobVehicleRental.setX(resultSet.getDouble("x"));
+            jobVehicleRental.setY(resultSet.getDouble("y"));
+            jobVehicleRental.setZ(resultSet.getDouble("z"));
             jobVehicleRentals.add(jobVehicleRental);
         }
         return jobVehicleRentals;

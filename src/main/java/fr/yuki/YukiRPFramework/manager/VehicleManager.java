@@ -58,7 +58,8 @@ public class VehicleManager {
      * @param heading The heading
      * @param player Attach a player to the vehicle, the player will be the owner
      */
-    public static CreateVehicleResult createVehicle(int modelId, Vector position, double heading, Player player, VehicleGarage vehicleGarage) {
+    public static CreateVehicleResult createVehicle(int modelId, Vector position, double heading, Player player, VehicleGarage vehicleGarage,
+                                                    boolean isRental) {
         try {
             Vehicle vehicle = Onset.getServer().createVehicle(position, heading, modelId);
             vehicle.disableRespawn(); // Disable the respawn of it
@@ -76,12 +77,14 @@ public class VehicleManager {
                 vehicleGarage.setGarageLastId(WorldManager.getGarages().get(0).getId());
                 vehicleGarage.setModelId(modelId);
                 vehicleGarage.setDamage(0);
+                vehicleGarage.setRental(isRental);
                 vehicleGarage.setLicencePlate(vehicle.getLicensePlate());
                 vehicleGarage.setColor("#" + Integer.toHexString(vehicle.getColor().getRed()) + Integer.toHexString(vehicle.getColor().getGreen()) + Integer.toHexString(vehicle.getColor().getBlue()));
-                VehicleGarageDAO.createVehicleGarage(vehicleGarage);
+                if(!isRental) VehicleGarageDAO.createVehicleGarage(vehicleGarage);
                 GarageManager.getVehicleGarages().add(vehicleGarage);
             }
             else {
+                vehicleGarage.setRental(isRental);
                 vehicle.setLicensePlate(vehicleGarage.getLicencePlate());
                 vehicle.setProperty("uuid", vehicleGarage.getUuid(), true);
                 java.awt.Color color = java.awt.Color.decode(vehicleGarage.getColor());

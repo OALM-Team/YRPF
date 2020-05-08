@@ -135,6 +135,7 @@ public class WorldManager {
         JobManager.tryToHarvest(player);
         if(player.getVehicle() == null) VehicleManager.handleVehicleChestStorageRequest(player);
         GarageManager.handleGarageInteract(player);
+        if(player.getVehicle() == null) JobManager.requestVehicleRental(player);
     }
 
     /**

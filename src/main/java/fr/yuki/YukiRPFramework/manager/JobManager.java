@@ -15,11 +15,14 @@ import fr.yuki.YukiRPFramework.model.*;
 import fr.yuki.YukiRPFramework.net.payload.AddToastPayload;
 import fr.yuki.YukiRPFramework.net.payload.AddXpBarItemPayload;
 import net.onfirenetwork.onsetjava.Onset;
+import net.onfirenetwork.onsetjava.data.Vector;
+import net.onfirenetwork.onsetjava.entity.Pickup;
 import net.onfirenetwork.onsetjava.entity.Player;
 import net.onfirenetwork.onsetjava.enums.Animation;
 
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class JobManager {
     private static LinkedHashMap<JobEnum, Job> jobs;
@@ -46,6 +49,8 @@ public class JobManager {
         jobs = new LinkedHashMap<>();
         jobs.put(JobEnum.LUMBERJACK, new LumberjackJob());
         jobs.put(JobEnum.GARBAGE, new GarbageJob());
+
+        spawnVehicleRentalSpawns();
     }
 
     /**
@@ -64,7 +69,17 @@ public class JobManager {
             }
         }
         account.setJobLevels(characterJobLevels);
-        WorldManager.savePlayer(player);
+    }
+
+    private static void spawnVehicleRentalSpawns() {
+        for(JobVehicleRental jobVehicleRental : jobVehicleRentals) {
+            Pickup pickup = Onset.getServer().createPickup(new net.onfirenetwork.onsetjava.data.Vector
+                    (jobVehicleRental.getX(), jobVehicleRental.getY(), jobVehicleRental.getZ()-100), 336);
+            pickup.setScale(new Vector(4,4,0.3d));
+            pickup.setProperty("color", "0096a3", true);
+            Onset.getServer().createText3D(jobVehicleRental.getName() + " [Utiliser]", 20,
+                    jobVehicleRental.getX(), jobVehicleRental.getY(), jobVehicleRental.getZ() + 150, 0 , 0 ,0);
+        }
     }
 
     /**
@@ -165,6 +180,43 @@ public class JobManager {
 
         // Unwear the item
         CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject().requestUnwear(player, false);
+    }
+
+    public static void requestVehicleRental(Player player) {
+        JobVehicleRental nearbyJobVehicleRental = getNearbyVehicleRental(player);
+        if(nearbyJobVehicleRental == null) return;
+        if(player.getVehicle() != null) return;
+
+        // Check vehicle around
+        if(VehicleManager.getNearestVehicle(player.getLocation()) != null) {
+            if(VehicleManager.getNearestVehicle(player.getLocation()).getLocation().distance(player.getLocation()) < 600) {
+                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Il y a un véhicule dans la zone d'apparition");
+                return;
+            }
+        }
+
+        destroyRentalVehiclesForPlayer(player);
+
+        VehicleManager.createVehicle(nearbyJobVehicleRental.getVehicleModelId(),
+                new Vector(nearbyJobVehicleRental.getX(), nearbyJobVehicleRental.getY(), nearbyJobVehicleRental.getZ()),
+                player.getLocationAndHeading().getHeading(), player, null, true);
+        UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, "Vous avez loué un véhicule pour " +
+                nearbyJobVehicleRental.getCost() + "$");
+    }
+
+    public static void destroyRentalVehiclesForPlayer(Player player) {
+        Account account = WorldManager.getPlayerAccount(player);
+        for(VehicleGarage vehicleGarage : GarageManager.getVehicleGarages().stream()
+                .filter(x -> x.isRental() && x.getOwner() == account.getId()).collect(Collectors.toList())) {
+            vehicleGarage.destroy();
+        }
+    }
+
+    public static JobVehicleRental getNearbyVehicleRental(Player player) {
+        for(JobVehicleRental jobVehicleRental : jobVehicleRentals) {
+            if(jobVehicleRental.isNear(player)) return jobVehicleRental;
+        }
+        return null;
     }
 
     public static JobNPC getNearbyJobNPC(Player player) {

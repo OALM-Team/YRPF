@@ -2,6 +2,7 @@ package fr.yuki.YukiRPFramework.model;
 
 import fr.yuki.YukiRPFramework.dao.VehicleGarageDAO;
 import net.onfirenetwork.onsetjava.Onset;
+import net.onfirenetwork.onsetjava.entity.Vehicle;
 
 import java.sql.SQLException;
 import java.util.Date;
@@ -18,6 +19,7 @@ public class VehicleGarage {
     private String color;
     private Date createdAt;
     private Date updateAt;
+    private boolean isRental;
 
     public int getVehicleGarageId() {
         return vehicleGarageId;
@@ -109,9 +111,26 @@ public class VehicleGarage {
 
     public void save() {
         try {
-            VehicleGarageDAO.saveVehicleGarage(this);
+            if(!isRental) VehicleGarageDAO.saveVehicleGarage(this);
         } catch (Exception ex) {
             Onset.print("Can't save vehicle: " + ex.toString());
+        }
+    }
+
+    public boolean isRental() {
+        return isRental;
+    }
+
+    public void setRental(boolean rental) {
+        isRental = rental;
+    }
+
+    public void destroy() {
+        for(Vehicle vehicle : Onset.getVehicles()) {
+            if(vehicle.getPropertyString("uuid").equals(this.getUuid())) {
+                vehicle.destroy();
+                return;
+            }
         }
     }
 }

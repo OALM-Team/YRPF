@@ -97,7 +97,7 @@ public class GarageManager {
         // Update the vehicle instance
         VehicleGarage vehicleGarage = vehicleGarages.stream().filter(x -> x.getUuid().equals(vehicle.getPropertyString("uuid")))
                 .findFirst().orElse(null);
-        if(vehicleGarage == null) {
+        if(vehicleGarage == null || vehicleGarage.isRental()) {
             UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Ce véhicule ne vous appartient pas");
             return;
         }
@@ -152,7 +152,7 @@ public class GarageManager {
         vehicleGarage.setGarageLastId(garage.getId());
         VehicleManager.CreateVehicleResult createVehicleResult = VehicleManager.createVehicle(vehicleGarage.getModelId(),
                 new Vector(garage.getX(), garage.getY(), garage.getZ()), player.getLocationAndHeading().getHeading(),
-                player, vehicleGarage);
+                player, vehicleGarage, false);
         UIStateManager.handleUIToogle(player, "garage");
         vehicleGarage.save();
     }
@@ -222,7 +222,7 @@ public class GarageManager {
         // Remove cash and spawn vehicle
         inventory.removeItem(inventory.getItemByType(ItemTemplateEnum.CASH.id), sellListItem.getPrice());
         VehicleManager.CreateVehicleResult createVehicleResult = VehicleManager.createVehicle(sellListItem.getModelId(), player.getLocation(), player.getLocationAndHeading().getHeading(),
-                player, null);
+                player, null, false);
         createVehicleResult.getVehicleGarage().setColor(payload.getColor());
         createVehicleResult.getVehicleGarage().save();
         createVehicleResult.getVehicle().setColor(new Color(payload.getAWTColor().getRed(), payload.getAWTColor().getGreen(), payload.getAWTColor().getBlue()));

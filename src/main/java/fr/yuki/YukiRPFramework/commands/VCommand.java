@@ -10,7 +10,7 @@ public class VCommand implements CommandExecutor {
     public boolean onCommand(Player player, String s, String[] args) {
         int modelId = Integer.parseInt(args[0]);
         VehicleManager.createVehicle(modelId, player.getLocation(),
-                player.getLocationAndHeading().getHeading(), player, null);
+                player.getLocationAndHeading().getHeading(), player, null, false);
         return true;
     }
 }

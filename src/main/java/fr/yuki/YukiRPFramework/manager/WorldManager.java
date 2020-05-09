@@ -124,6 +124,10 @@ public class WorldManager {
      * @param player The player
      */
     public static void handleInteract(Player player) {
+        if(CharacterManager.getCharacterStateByPlayer(player).isDead()) {
+            return;
+        }
+
         // Check weared object
         if(CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject() != null && player.getVehicle() == null) {
             JobManager.handleUnwearObject(player);

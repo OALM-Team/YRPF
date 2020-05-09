@@ -87,6 +87,11 @@ public class UIStateManager {
         Account account = WorldManager.getPlayerAccount(player);
         MapManager.setupGameMap(player);
 
+        // If the player is dead
+        if(account.getIsDead() == 1) {
+            player.setHealth(0);
+        }
+
         // Apply style to character if there is one saved
         if(account.getCharacterCreationRequest() == 0) {
             account.decodeCharacterStyle().attachStyleToPlayer(player);

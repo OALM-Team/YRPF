@@ -5,6 +5,7 @@ import net.onfirenetwork.onsetjava.entity.Player;
 
 public class CharacterState {
     private WearableWorldObject wearableWorldObject;
+    private boolean isDead = false;
 
     public CharacterState() {}
 
@@ -19,5 +20,13 @@ public class CharacterState {
         } else {
             player.setProperty("wearId", "", true);
         }
+    }
+
+    public boolean isDead() {
+        return isDead;
+    }
+
+    public void setDead(boolean dead) {
+        isDead = dead;
     }
 }

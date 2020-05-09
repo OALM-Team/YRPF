@@ -13,6 +13,7 @@ import fr.yuki.YukiRPFramework.net.payload.RequestInventoryContentPayload;
 import fr.yuki.YukiRPFramework.net.payload.StyleSavePartPayload;
 import fr.yuki.YukiRPFramework.ui.UIState;
 import net.onfirenetwork.onsetjava.Onset;
+import net.onfirenetwork.onsetjava.data.Location;
 import net.onfirenetwork.onsetjava.data.Vector;
 import net.onfirenetwork.onsetjava.plugin.Plugin;
 import net.onfirenetwork.onsetjava.plugin.event.Event;
@@ -106,6 +107,7 @@ public class YukiRPFrameworkPlugin {
 
             JobManager.initCharacterJobs(evt.getPlayer());
             CharacterManager.getCharacterStates().put(evt.getPlayer().getSteamId(), new CharacterState());
+
         } catch (Exception e) {
             e.printStackTrace();
             evt.getPlayer().kick("There is a error for retrieving your account: " + e.toString());
@@ -197,7 +199,25 @@ public class YukiRPFrameworkPlugin {
     }
 
     @EventHandler
+    public void onPlayerVehicleExit(PlayerExitVehicleEvent evt) {
+        Onset.print("Player exit in the vehicle seat="+evt.getSeat());
+        VehicleManager.onPlayerVehicleExit(evt.getPlayer(), evt.getVehicle(), evt.getSeat());
+    }
+
+    @EventHandler
     public void onPlayerInteractDoor(PlayerInteractDoorEvent evt) {
         evt.getDoor().setOpen(evt.getDoor().isOpen() ? false : true);
+    }
+
+    @EventHandler
+    public void onPlayerDead(PlayerDeathEvent evt) {
+        Account account = WorldManager.getPlayerAccount(evt.getPlayer());
+        Location location = evt.getPlayer().getLocationAndHeading();
+        account.setSaveX(location.getX());
+        account.setSaveY(location.getY());
+        account.setSaveZ(location.getZ());
+        account.setSaveH(location.getHeading());
+
+        CharacterManager.onPlayerDeath(evt.getPlayer(), evt.getKiller());
     }
 }

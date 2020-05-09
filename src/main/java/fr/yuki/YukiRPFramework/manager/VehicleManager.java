@@ -7,11 +7,13 @@ import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
 import fr.yuki.YukiRPFramework.inventory.Inventory;
 import fr.yuki.YukiRPFramework.inventory.InventoryItem;
 import fr.yuki.YukiRPFramework.job.WearableWorldObject;
+import fr.yuki.YukiRPFramework.job.customGoal.DeliveryPointGoal;
 import fr.yuki.YukiRPFramework.model.VehicleGarage;
 import fr.yuki.YukiRPFramework.net.payload.AddVChestItemPayload;
 import fr.yuki.YukiRPFramework.net.payload.AddVehicleGaragePayload;
 import fr.yuki.YukiRPFramework.utils.Basic;
 import fr.yuki.YukiRPFramework.vehicle.storeLayout.GarbageTruckStoreLayout;
+import fr.yuki.YukiRPFramework.vehicle.storeLayout.MiniPickupStoreLayout;
 import fr.yuki.YukiRPFramework.vehicle.storeLayout.MiniTruckStoreLayout;
 import fr.yuki.YukiRPFramework.vehicle.storeLayout.VehicleStoreLayout;
 import net.onfirenetwork.onsetjava.Onset;
@@ -19,6 +21,8 @@ import net.onfirenetwork.onsetjava.data.Color;
 import net.onfirenetwork.onsetjava.data.Vector;
 import net.onfirenetwork.onsetjava.entity.Player;
 import net.onfirenetwork.onsetjava.entity.Vehicle;
+import net.onfirenetwork.onsetjava.plugin.event.EventHandler;
+import net.onfirenetwork.onsetjava.plugin.event.player.PlayerEnterVehicleEvent;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -33,6 +37,7 @@ public class VehicleManager {
         vehicleStoreLayouts = new ArrayList<>();
         vehicleStoreLayouts.add(new MiniTruckStoreLayout());
         vehicleStoreLayouts.add(new GarbageTruckStoreLayout());
+        vehicleStoreLayouts.add(new MiniPickupStoreLayout());
     }
 
     public static class CreateVehicleResult {
@@ -194,6 +199,26 @@ public class VehicleManager {
 
     public static void onPlayerEnterVehicle(Player player, Vehicle vehicle, int seatId) {
         if(seatId == 1) vehicle.setEngineOn(true);
+
+        // Show waypoints for items in storage
+        for(WearableWorldObject wearableWorldObject : getVehicleWearableObjects(vehicle)) {
+            if(wearableWorldObject.getDeliveryPointGoal() == null) continue;
+            DeliveryPointGoal deliveryPointGoal = wearableWorldObject.getDeliveryPointGoal();
+            player.callRemoteEvent("Map:AddWaypoint", "Point de livraison", deliveryPointGoal.getWearableWorldObject().getUuid(),
+                    deliveryPointGoal.getPosition().getX(), deliveryPointGoal.getPosition().getY(),
+                    deliveryPointGoal.getPosition().getZ());
+        }
+    }
+
+    public static void onPlayerVehicleExit(Player player, Vehicle vehicle, int seatId) {
+        if(seatId == 1) vehicle.setEngineOn(false);
+
+        // Remove waypoints for items in storage
+        for(WearableWorldObject wearableWorldObject : getVehicleWearableObjects(vehicle)) {
+            if(wearableWorldObject.getDeliveryPointGoal() == null) continue;
+            DeliveryPointGoal deliveryPointGoal = wearableWorldObject.getDeliveryPointGoal();
+            player.callRemoteEvent("Map:RemoveWaypoint", deliveryPointGoal.getWearableWorldObject().getUuid());
+        }
     }
 
     public static Vehicle getNearestVehicle(Vector position) {

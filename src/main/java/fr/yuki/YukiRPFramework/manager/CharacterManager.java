@@ -2,11 +2,14 @@ package fr.yuki.YukiRPFramework.manager;
 
 import fr.yuki.YukiRPFramework.character.CharacterState;
 import fr.yuki.YukiRPFramework.character.CharacterStyle;
+import fr.yuki.YukiRPFramework.dao.AccountDAO;
+import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
 import fr.yuki.YukiRPFramework.model.Account;
 import fr.yuki.YukiRPFramework.net.payload.StyleSavePartPayload;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.entity.Player;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 
 public class CharacterManager {
@@ -90,6 +93,25 @@ public class CharacterManager {
         } else {
             player.callRemoteEvent("Character:UnFreezePlayer");
         }
+    }
+
+    public static void onPlayerDeath(Player player, Player killer) {
+        // Update state
+        CharacterState characterState = getCharacterStateByPlayer(player);
+        characterState.setDead(true);
+        setCharacterFreeze(player, true);
+
+        // Update account
+        Account account = WorldManager.getPlayerAccount(player);
+        account.setIsDead(1);
+        try {
+            AccountDAO.updateAccount(account, null);
+        } catch (Exception ex) {
+            Onset.print("Can't save account: " + ex.toString());
+        }
+
+        UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Vous êtes mort, attendez les secours ou votre mort");
+        player.setRespawnTime(60000 * 5);
     }
 
     public static HashMap<String, CharacterState> getCharacterStates() {

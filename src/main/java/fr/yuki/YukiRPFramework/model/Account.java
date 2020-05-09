@@ -25,6 +25,7 @@ public class Account {
     private String characterStyle;
     private String characterName;
     private String jobLevels;
+    private int isDead;
 
     public int getId() {
         return id;
@@ -162,5 +163,13 @@ public class Account {
 
     public void setJobLevels(String jobLevels) {
         this.jobLevels = jobLevels;
+    }
+
+    public int getIsDead() {
+        return isDead;
+    }
+
+    public void setIsDead(int isDead) {
+        this.isDead = isDead;
     }
 }

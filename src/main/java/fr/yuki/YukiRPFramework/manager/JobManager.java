@@ -57,6 +57,7 @@ public class JobManager {
         jobs.put(JobEnum.LUMBERJACK, new LumberjackJob());
         jobs.put(JobEnum.GARBAGE, new GarbageJob());
         jobs.put(JobEnum.DELIVERY, new DeliveryJob());
+        jobs.put(JobEnum.MINER, new MinerJob());
 
         spawnVehicleRentalSpawns();
     }

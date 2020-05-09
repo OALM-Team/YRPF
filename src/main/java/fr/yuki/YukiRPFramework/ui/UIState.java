@@ -7,6 +7,7 @@ public class UIState {
     private boolean vseller = false;
     private boolean customCharacter = false;
     private boolean vchest = false;
+    private boolean bigmap = false;
 
     public boolean isInventory() {
         return inventory;
@@ -54,5 +55,13 @@ public class UIState {
 
     public void setVchest(boolean vchest) {
         this.vchest = vchest;
+    }
+
+    public boolean isBigmap() {
+        return bigmap;
+    }
+
+    public void setBigmap(boolean bigmap) {
+        this.bigmap = bigmap;
     }
 }

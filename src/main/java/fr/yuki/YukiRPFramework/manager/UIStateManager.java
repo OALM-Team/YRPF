@@ -61,6 +61,13 @@ public class UIStateManager {
                 player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new SetWindowStatePayload
                         ("vchest", uiState.isVchest())));
                 break;
+
+            case "bigmap":
+                uiState.setBigmap(!uiState.isBigmap());
+                r = uiState.isBigmap();
+                player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new SetWindowStatePayload
+                        ("bigmap", uiState.isBigmap())));
+                break;
         }
         player.setProperty("uiState", new Gson().toJson(uiState), true);
         return r;

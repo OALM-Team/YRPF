@@ -1,8 +1,12 @@
 package fr.yuki.YukiRPFramework.job;
 
 import fr.yuki.YukiRPFramework.character.CharacterToolAnimation;
+import fr.yuki.YukiRPFramework.enums.ItemTemplateEnum;
+import fr.yuki.YukiRPFramework.enums.JobEnum;
 import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
+import fr.yuki.YukiRPFramework.job.customGoal.DeliveryPointGoal;
 import fr.yuki.YukiRPFramework.manager.*;
+import fr.yuki.YukiRPFramework.ui.UIState;
 import fr.yuki.YukiRPFramework.vehicle.storeLayout.StoreLayoutTransform;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Vector;
@@ -24,6 +28,8 @@ public class WearableWorldObject {
     private WorldObject worldObject;
     private String vehicleUUID;
     private int vehicleStorageLayoutIndex;
+    private DeliveryPointGoal deliveryPointGoal;
+    private Vector originPosition;
 
     public WearableWorldObject(int modelId, boolean isPhysicEnable, Animation wearAnimation, CharacterToolAnimation toolAnimation, Vector position) {
         this.uuid = UUID.randomUUID().toString();
@@ -32,6 +38,7 @@ public class WearableWorldObject {
         this.wearAnimation = wearAnimation;
         this.toolAnimation = toolAnimation;
         this.position = position;
+        this.originPosition = position;
         this.createWorldObject();
     }
 
@@ -55,6 +62,15 @@ public class WearableWorldObject {
         this.toolAnimation.attach(player);
         player.setAnimation(this.wearAnimation);
         this.worldObject.destroy();
+
+        // Set the delivery location
+        if(deliveryPointGoal != null) {
+            UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS,
+                    "Cet objet doit être livré à un point de localisation");
+            player.callRemoteEvent("Map:AddWaypoint", "Point de livraison", deliveryPointGoal.getWearableWorldObject().getUuid(),
+                    deliveryPointGoal.getPosition().getX(), deliveryPointGoal.getPosition().getY(),
+                    deliveryPointGoal.getPosition().getZ());
+        }
     }
 
     /**
@@ -87,11 +103,28 @@ public class WearableWorldObject {
                     player.setAnimation(Animation.STOP);
                     CharacterManager.getCharacterStateByPlayer(player).setWearableWorldObject(player, null);
 
+                    if(deliveryPointGoal != null)
+                        player.callRemoteEvent("Map:RemoveWaypoint", deliveryPointGoal.getWearableWorldObject().getUuid());
+
                     return;
                 }
             }
         }
 
+        // Delivery reward
+        if(deliveryPointGoal != null) {
+            if(deliveryPointGoal.isNear(player)) {
+                JobManager.getWearableWorldObjects().remove(this);
+                int rewardPerDistance = (int)Math.floor(originPosition.distance(player.getLocation()) / 1000);
+                InventoryManager.addItemToPlayer(player, ItemTemplateEnum.CASH.id, rewardPerDistance);
+                SoundManager.playSound3D("sounds/cash_register.mp3", player.getLocation(), 200, 0.3);
+                delete = true;
+                JobManager.addExp(player, JobEnum.DELIVERY, 15);
+                UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS,
+                        "Vous avez livré le colis pour " + rewardPerDistance + "$ (" + Math.floor(originPosition.distance(player.getLocation()) / 100) + "m)");
+            }
+            player.callRemoteEvent("Map:RemoveWaypoint", deliveryPointGoal.getWearableWorldObject().getUuid());
+        }
 
         // Throw on ground
         this.position = player.getLocation();
@@ -99,6 +132,7 @@ public class WearableWorldObject {
         if(!delete) this.createWorldObject();
         player.setAnimation(Animation.STOP);
         CharacterManager.getCharacterStateByPlayer(player).setWearableWorldObject(player, null);
+
         if(delete) JobManager.getWearableWorldObjects().remove(this);
     }
 
@@ -153,5 +187,13 @@ public class WearableWorldObject {
 
     public void setVehicleStorageLayoutIndex(int vehicleStorageLayoutIndex) {
         this.vehicleStorageLayoutIndex = vehicleStorageLayoutIndex;
+    }
+
+    public DeliveryPointGoal getDeliveryPointGoal() {
+        return deliveryPointGoal;
+    }
+
+    public void setDeliveryPointGoal(DeliveryPointGoal deliveryPointGoal) {
+        this.deliveryPointGoal = deliveryPointGoal;
     }
 }

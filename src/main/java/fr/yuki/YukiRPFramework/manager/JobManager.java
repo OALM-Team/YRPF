@@ -20,6 +20,10 @@ import net.onfirenetwork.onsetjava.entity.Pickup;
 import net.onfirenetwork.onsetjava.entity.Player;
 import net.onfirenetwork.onsetjava.enums.Animation;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -31,8 +35,9 @@ public class JobManager {
     private static ArrayList<JobTool> jobTools;
     private static ArrayList<JobLevel> jobLevels;
     private static ArrayList<JobVehicleRental> jobVehicleRentals;
+    private static DeliveryPointConfig deliveryPointConfig;
 
-    public static void init() throws SQLException {
+    public static void init() throws SQLException, IOException {
         jobNPCS = JobNPCDAO.loadJobNPCS();
         Onset.print("Loaded " + jobNPCS.size() + " job npc(s) from the database");
 
@@ -45,12 +50,40 @@ public class JobManager {
         jobVehicleRentals = JobVehicleRentalDAO.loadJobVehicleRental();
         Onset.print("Loaded " + jobVehicleRentals.size() + " job vehicle(s) from the database");
 
+        loadDeliveryPoints();
+
         wearableWorldObjects = new ArrayList<>();
         jobs = new LinkedHashMap<>();
         jobs.put(JobEnum.LUMBERJACK, new LumberjackJob());
         jobs.put(JobEnum.GARBAGE, new GarbageJob());
+        jobs.put(JobEnum.DELIVERY, new DeliveryJob());
 
         spawnVehicleRentalSpawns();
+    }
+
+    private static void loadDeliveryPoints() throws IOException {
+        new File("yrpf").mkdir();
+        if(new File("yrpf/delivery_config.json").exists()) {
+            deliveryPointConfig = new Gson().fromJson(new FileReader("yrpf/delivery_config.json"), DeliveryPointConfig.class);
+        } else {
+            deliveryPointConfig = new DeliveryPointConfig();
+            deliveryPointConfig.setPoints(new HashMap<>());
+            deliveryPointConfig.getPoints().put("houses", new ArrayList<>());
+            new File("yrpf/delivery_config.json").createNewFile();
+            FileWriter fileWriter = new FileWriter("yrpf/delivery_config.json");
+            fileWriter.write(new Gson().toJson(deliveryPointConfig));
+            fileWriter.close();
+        }
+    }
+
+    public static void saveDeliveryPoints() {
+        try {
+            FileWriter fileWriter = new FileWriter("yrpf/delivery_config.json");
+            fileWriter.write(new Gson().toJson(deliveryPointConfig));
+            fileWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -103,6 +136,7 @@ public class JobManager {
     }
 
     public static void addExp(Player player, JobEnum job, int amount) {
+        if(amount <= 0) return;
         Account account = WorldManager.getPlayerAccount(player);
         ArrayList<CharacterJobLevel> characterJobLevels = account.decodeCharacterJob();
         CharacterJobLevel characterJobLevel = characterJobLevels.stream().filter(x -> x.getJobId().equals(job.type)).findFirst().orElse(null);
@@ -251,5 +285,13 @@ public class JobManager {
 
     public static ArrayList<JobLevel> getJobLevels() {
         return jobLevels;
+    }
+
+    public static ArrayList<JobVehicleRental> getJobVehicleRentals() {
+        return jobVehicleRentals;
+    }
+
+    public static DeliveryPointConfig getDeliveryPointConfig() {
+        return deliveryPointConfig;
     }
 }

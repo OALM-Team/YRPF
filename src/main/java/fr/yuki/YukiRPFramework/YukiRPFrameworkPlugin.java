@@ -17,10 +17,7 @@ import net.onfirenetwork.onsetjava.data.Vector;
 import net.onfirenetwork.onsetjava.plugin.Plugin;
 import net.onfirenetwork.onsetjava.plugin.event.Event;
 import net.onfirenetwork.onsetjava.plugin.event.EventHandler;
-import net.onfirenetwork.onsetjava.plugin.event.player.PlayerEnterVehicleEvent;
-import net.onfirenetwork.onsetjava.plugin.event.player.PlayerQuitEvent;
-import net.onfirenetwork.onsetjava.plugin.event.player.PlayerRemoteEvent;
-import net.onfirenetwork.onsetjava.plugin.event.player.PlayerSteamAuthEvent;
+import net.onfirenetwork.onsetjava.plugin.event.player.*;
 
 import javax.swing.*;
 
@@ -49,6 +46,7 @@ public class YukiRPFrameworkPlugin {
             Onset.registerCommand("listgatheritem", new ShowGatherItemListCommand());
             Onset.registerCommand("dct", new DebugCharacterToolCommand());
             Onset.registerCommand("dvsl", new DebugVehicleStorageLayoutCommand());
+            Onset.registerCommand("adddelivery", new AddDeliveryPointCommand());
 
             // Register remote events
             Onset.registerRemoteEvent("GlobalUI:ToogleWindow");
@@ -196,5 +194,10 @@ public class YukiRPFrameworkPlugin {
     public void onPlayerVehicleEnter(PlayerEnterVehicleEvent evt) {
         Onset.print("Player entered in the vehicle seat="+evt.getSeat());
         VehicleManager.onPlayerEnterVehicle(evt.getPlayer(), evt.getVehicle(), evt.getSeat());
+    }
+
+    @EventHandler
+    public void onPlayerInteractDoor(PlayerInteractDoorEvent evt) {
+        evt.getDoor().setOpen(evt.getDoor().isOpen() ? false : true);
     }
 }

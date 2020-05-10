@@ -1,7 +1,9 @@
 package fr.yuki.YukiRPFramework.manager;
 
 import com.google.gson.Gson;
+import fr.yuki.YukiRPFramework.enums.ItemTemplateEnum;
 import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
+import fr.yuki.YukiRPFramework.inventory.Inventory;
 import fr.yuki.YukiRPFramework.model.Account;
 import fr.yuki.YukiRPFramework.net.payload.AddToastPayload;
 import fr.yuki.YukiRPFramework.net.payload.SetWindowStatePayload;
@@ -68,6 +70,13 @@ public class UIStateManager {
                 player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new SetWindowStatePayload
                         ("bigmap", uiState.isBigmap())));
                 break;
+
+            case "death":
+                uiState.setDeath(!uiState.isDeath());
+                r = uiState.isDeath();
+                player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new SetWindowStatePayload
+                        ("death", uiState.isDeath())));
+                break;
         }
         player.setProperty("uiState", new Gson().toJson(uiState), true);
         return r;
@@ -87,16 +96,18 @@ public class UIStateManager {
         Account account = WorldManager.getPlayerAccount(player);
         MapManager.setupGameMap(player);
 
-        // If the player is dead
-        if(account.getIsDead() == 1) {
-            player.setHealth(0);
+        // Temp for beta
+        Inventory inventory = InventoryManager.getMainInventory(player);
+        if(inventory.getItemByType(ItemTemplateEnum.LUMBERJACK_HATCHET_1.id) == null) {
+            InventoryManager.addItemToPlayer(player, ItemTemplateEnum.LUMBERJACK_HATCHET_1.id, 1);
+        }
+        if(inventory.getItemByType(ItemTemplateEnum.MINER_PICKAXE_1.id) == null) {
+            InventoryManager.addItemToPlayer(player, ItemTemplateEnum.MINER_PICKAXE_1.id, 1);
         }
 
         // Apply style to character if there is one saved
         if(account.getCharacterCreationRequest() == 0) {
-            account.decodeCharacterStyle().attachStyleToPlayer(player);
-            player.setProperty("characterName", account.getCharacterName(), true);
-            player.setName(account.getCharacterName());
+            CharacterManager.setCharacterStyle(player);
         } else if(account.getCharacterCreationRequest() == 1) { // Request character creation if no style set
             UIStateManager.handleUIToogle(player, "customCharacter");
         }

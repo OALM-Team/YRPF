@@ -12,6 +12,7 @@ import net.onfirenetwork.onsetjava.plugin.CommandExecutor;
 public class ItemCommand implements CommandExecutor {
     @Override
     public boolean onCommand(Player player, String s, String[] args) {
+        if(WorldManager.getPlayerAccount(player).getAdminLevel() == 0) return false;
         ItemTemplate itemTemplate = InventoryManager.getItemTemplates().get(Integer.parseInt(args[0]));
         InventoryManager.addItemToPlayer(player, String.valueOf(itemTemplate.getId()), Integer.parseInt(args[1]));
         player.sendMessage("Add item " + itemTemplate.getName() + " to your inventory");

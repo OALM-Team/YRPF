@@ -37,6 +37,7 @@ public class AccountDAO {
             account.setCharacterName(resultSet.getString("character_name"));
             account.setJobLevels(resultSet.getString("job_levels"));
             account.setIsDead(resultSet.getInt("is_dead"));
+            account.setAdminLevel(resultSet.getInt("admin_level"));
             account.setCreatedAt(resultSet.getDate("created_at"));
             account.setUpdatedAt(resultSet.getDate("updated_at"));
         }
@@ -54,6 +55,7 @@ public class AccountDAO {
         account.setCharacterName("Unknown");
         account.setJobLevels("[]");
         account.setIsDead(0);
+        account.setAdminLevel(0);
         account.setCreatedAt(new java.util.Date());
         account.setUpdatedAt(new java.util.Date());
 
@@ -85,7 +87,7 @@ public class AccountDAO {
     public static void updateAccount(Account account, Player player) throws SQLException {
         PreparedStatement preparedStatement = Database.getConnection()
                 .prepareStatement("UPDATE tbl_account SET is_banned=?, bank_money=?, save_x=?, save_y=?, save_z=?, save_h=?, character_creation_request=?," +
-                        "character_style=?, character_name=?, job_levels=?, is_dead=? WHERE id_account=?");
+                        "character_style=?, character_name=?, job_levels=?, is_dead=?, admin_level=? WHERE id_account=?");
         preparedStatement.setInt(1, account.getIsBanned());
         preparedStatement.setInt(2, account.getBankMoney());
         if(player == null) {
@@ -105,7 +107,8 @@ public class AccountDAO {
         preparedStatement.setString(9, account.getCharacterName());
         preparedStatement.setString(10, account.getJobLevels());
         preparedStatement.setInt(11, account.getIsDead());
-        preparedStatement.setDouble(12, account.getId());
+        preparedStatement.setInt(12, account.getAdminLevel());
+        preparedStatement.setDouble(13, account.getId());
         preparedStatement.execute();
     }
 }

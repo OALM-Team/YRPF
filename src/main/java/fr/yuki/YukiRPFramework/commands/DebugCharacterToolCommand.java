@@ -1,6 +1,7 @@
 package fr.yuki.YukiRPFramework.commands;
 
 import fr.yuki.YukiRPFramework.character.CharacterToolAnimation;
+import fr.yuki.YukiRPFramework.manager.WorldManager;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Vector;
 import net.onfirenetwork.onsetjava.entity.Player;
@@ -9,6 +10,7 @@ import net.onfirenetwork.onsetjava.plugin.CommandExecutor;
 public class DebugCharacterToolCommand implements CommandExecutor {
     @Override
     public boolean onCommand(Player player, String s, String[] args) {
+        if(WorldManager.getPlayerAccount(player).getAdminLevel() == 0) return false;
         CharacterToolAnimation characterToolAnimation =
                 new CharacterToolAnimation(Integer.parseInt(args[0]),
                         new Vector(Integer.parseInt(args[1]), Integer.parseInt(args[2]), Integer.parseInt(args[3])),

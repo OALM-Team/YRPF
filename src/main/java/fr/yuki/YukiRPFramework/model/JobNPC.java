@@ -10,6 +10,7 @@ import java.util.ArrayList;
 public class JobNPC {
     private int id;
     private String jobId;
+    private String name;
     private double x;
     private double y;
     private double z;
@@ -111,5 +112,13 @@ public class JobNPC {
 
     public void setNpc(NPC npc) {
         this.npc = npc;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

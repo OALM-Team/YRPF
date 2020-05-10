@@ -4,6 +4,7 @@ import fr.yuki.YukiRPFramework.manager.InventoryManager;
 import fr.yuki.YukiRPFramework.model.ItemTemplate;
 
 import java.util.HashMap;
+import java.util.UUID;
 
 public class InventoryItem {
     private String id;
@@ -56,5 +57,14 @@ public class InventoryItem {
         if(!templateId.equals(inventoryItem.getTemplateId())) return false;
         if(!this.getExtraProperties().equals(inventoryItem.getExtraProperties())) return false;
         return true;
+    }
+
+    public InventoryItem copy() {
+        InventoryItem inventoryItem = new InventoryItem();
+        inventoryItem.setId(UUID.randomUUID().toString());
+        inventoryItem.setTemplateId(this.templateId);
+        inventoryItem.setAmount(this.amount);
+        inventoryItem.setExtraProperties(this.extraProperties);
+        return inventoryItem;
     }
 }

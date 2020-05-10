@@ -1,6 +1,7 @@
 package fr.yuki.YukiRPFramework.job;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class JobSpawn {
     private String name;

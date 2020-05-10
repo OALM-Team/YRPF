@@ -42,7 +42,7 @@ public abstract class Job {
     private void spawnNpcs() {
         for(JobNPC jobNPC : JobManager.getJobNPCS().stream().filter(x -> x.getJobId().equals(this.getJobType().type)).collect(Collectors.toList())) {
             NPC npc = Onset.getServer().createNPC(new Vector(jobNPC.getX(), jobNPC.getY(), jobNPC.getZ()), jobNPC.getH());
-            Onset.getServer().createText3D(this.getJobType().type + " [Utiliser]", 20, jobNPC.getX(),
+            Onset.getServer().createText3D(jobNPC.getName() + " [Utiliser]", 20, jobNPC.getX(),
                     jobNPC.getY(), jobNPC.getZ() + 150, 0 , 0 ,0);
             npc.setProperty("clothing", jobNPC.getNpcClothing(), true);
             jobNPC.setNpc(npc);
@@ -126,6 +126,10 @@ public abstract class Job {
             HarvestableObject harvestableObject = this.harvestableObjectsTemplate.stream()
                     .filter(x -> x.getName().equals(jobSpawn.getName())).findFirst().orElse(null);
             for(JobSpawnPosition jobSpawnPosition : jobSpawn.getSpawns()) {
+                if(this.worldHarvestObjects.stream().filter(x -> x.getJobSpawnPosition().getUuid().equals(jobSpawnPosition.getUuid()))
+                .findFirst().orElse(null) != null) {
+                    continue;
+                }
                 WorldObject worldObject = Onset.getServer().createObject(new Vector(jobSpawnPosition.getX(),
                         jobSpawnPosition.getY(), jobSpawnPosition.getZ() - 100), harvestableObject.getModelId());
                 worldObject.setProperty("harvestable", 1, true);
@@ -136,6 +140,10 @@ public abstract class Job {
                 this.worldHarvestObjects.add(worldHarvestObject);
             }
         }
+
+        Onset.delay(this.getRefillInterval(), () -> {
+            refillHarvestResources();
+        });
     }
 
     public ArrayList<WorldHarvestObject> getWorldHarvestObjects() {

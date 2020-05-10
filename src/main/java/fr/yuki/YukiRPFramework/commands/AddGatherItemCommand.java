@@ -6,6 +6,7 @@ import fr.yuki.YukiRPFramework.job.JobSpawn;
 import fr.yuki.YukiRPFramework.job.JobSpawnPosition;
 import fr.yuki.YukiRPFramework.job.harvest.HarvestableObject;
 import fr.yuki.YukiRPFramework.manager.JobManager;
+import fr.yuki.YukiRPFramework.manager.WorldManager;
 import net.onfirenetwork.onsetjava.data.Vector;
 import net.onfirenetwork.onsetjava.entity.Player;
 import net.onfirenetwork.onsetjava.plugin.CommandExecutor;
@@ -16,6 +17,7 @@ import java.util.Map;
 public class AddGatherItemCommand implements CommandExecutor {
     @Override
     public boolean onCommand(Player player, String s, String[] args) {
+        if(WorldManager.getPlayerAccount(player).getAdminLevel() == 0) return false;
         Job job = new ArrayList<Job>(JobManager.getJobs().values()).get(Integer.parseInt(args[0]));
         JobSpawn jobSpawn = job.getJobConfig().getResources().get(Integer.parseInt(args[1]));
         JobSpawnPosition jobSpawnPosition = new JobSpawnPosition();

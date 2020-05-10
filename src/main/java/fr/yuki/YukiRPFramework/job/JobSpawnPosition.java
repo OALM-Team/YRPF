@@ -1,9 +1,16 @@
 package fr.yuki.YukiRPFramework.job;
 
+import java.util.UUID;
+
 public class JobSpawnPosition {
+    private final String uuid;
     private double x;
     private double y;
     private double z;
+
+    public JobSpawnPosition() {
+        this.uuid = UUID.randomUUID().toString();
+    }
 
     public double getX() {
         return x;
@@ -27,5 +34,9 @@ public class JobSpawnPosition {
 
     public void setZ(double z) {
         this.z = z;
+    }
+
+    public String getUuid() {
+        return uuid;
     }
 }

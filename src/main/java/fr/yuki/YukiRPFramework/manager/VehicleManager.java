@@ -107,6 +107,7 @@ public class VehicleManager {
 
             return new CreateVehicleResult(vehicle, vehicleGarage);
         } catch (Exception ex) {
+            ex.printStackTrace();
             Onset.print("Can't create the vehicle: " + ex.toString());
             return null;
         }

@@ -11,6 +11,7 @@ import java.util.Date;
 
 public class Account {
     private int id;
+    private int adminLevel;
     private String steamName;
     private String steamId;
     private Date createdAt;
@@ -171,5 +172,13 @@ public class Account {
 
     public void setIsDead(int isDead) {
         this.isDead = isDead;
+    }
+
+    public int getAdminLevel() {
+        return adminLevel;
+    }
+
+    public void setAdminLevel(int adminLevel) {
+        this.adminLevel = adminLevel;
     }
 }

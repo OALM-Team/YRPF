@@ -138,6 +138,7 @@ public class JobManager {
 
     public static void addExp(Player player, JobEnum job, int amount) {
         if(amount <= 0) return;
+        amount = amount * WorldManager.getServerConfig().getXpRate();
         Account account = WorldManager.getPlayerAccount(player);
         ArrayList<CharacterJobLevel> characterJobLevels = account.decodeCharacterJob();
         CharacterJobLevel characterJobLevel = characterJobLevels.stream().filter(x -> x.getJobId().equals(job.type)).findFirst().orElse(null);

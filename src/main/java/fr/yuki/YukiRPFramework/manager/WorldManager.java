@@ -1,13 +1,14 @@
 package fr.yuki.YukiRPFramework.manager;
 
+import com.google.gson.Gson;
+import fr.yuki.YukiRPFramework.character.CharacterState;
 import fr.yuki.YukiRPFramework.dao.ATMDAO;
 import fr.yuki.YukiRPFramework.dao.AccountDAO;
 import fr.yuki.YukiRPFramework.dao.GarageDAO;
 import fr.yuki.YukiRPFramework.dao.VehicleSellerDAO;
-import fr.yuki.YukiRPFramework.model.ATM;
-import fr.yuki.YukiRPFramework.model.Account;
-import fr.yuki.YukiRPFramework.model.Garage;
-import fr.yuki.YukiRPFramework.model.VehicleSeller;
+import fr.yuki.YukiRPFramework.job.DeliveryPointConfig;
+import fr.yuki.YukiRPFramework.model.*;
+import fr.yuki.YukiRPFramework.utils.ServerConfig;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Location;
 import net.onfirenetwork.onsetjava.data.Vector;
@@ -16,22 +17,26 @@ import net.onfirenetwork.onsetjava.entity.Pickup;
 import net.onfirenetwork.onsetjava.entity.Player;
 import net.onfirenetwork.onsetjava.entity.Vehicle;
 
+import java.io.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class WorldManager {
+    private static ServerConfig serverConfig;
     private static HashMap<Integer, Account> accounts;
     private static ArrayList<ATM> atms;
     private static ArrayList<Garage> garages;
     private static ArrayList<VehicleSeller> vehicleSellers;
+    private static ArrayList<GroundItem> groundItems;
 
     /**
      * Init the world manager
      * @throws SQLException
      */
-    public static void init() throws SQLException {
+    public static void init() throws SQLException, IOException {
         accounts = new HashMap<>();
+        groundItems = new ArrayList<>();
 
         // Load atms
         atms = ATMDAO.loadATMs();
@@ -47,6 +52,19 @@ public class WorldManager {
         vehicleSellers = VehicleSellerDAO.loadVehicleSellers();
         Onset.print("Loaded " + vehicleSellers.size() + " vehicle seller(s) from the database");
         spawnVehicleSellers();
+    }
+
+    public static void initServerConfig() throws IOException {
+        new File("yrpf").mkdir();
+        if(new File("yrpf/server_config.json").exists()) {
+            serverConfig = new Gson().fromJson(new FileReader("yrpf/server_config.json"), ServerConfig.class);
+        } else {
+            serverConfig = new ServerConfig();
+            new File("yrpf/server_config.json").createNewFile();
+            FileWriter fileWriter = new FileWriter("yrpf/server_config.json");
+            fileWriter.write(new Gson().toJson(serverConfig));
+            fileWriter.close();
+        }
     }
 
     /**
@@ -112,6 +130,8 @@ public class WorldManager {
      */
     public static Player findPlayerByAccountId(int accountId) {
         for (Player p : Onset.getPlayers()) {
+            if(CharacterManager.getCharacterStateByPlayer(p) == null) continue;
+            if(p.getProperty("accountId") == null) continue;
             if(p.getPropertyInt("accountId") == accountId) {
                 return p;
             }
@@ -140,6 +160,7 @@ public class WorldManager {
         if(player.getVehicle() == null) VehicleManager.handleVehicleChestStorageRequest(player);
         GarageManager.handleGarageInteract(player);
         if(player.getVehicle() == null) JobManager.requestVehicleRental(player);
+        if(player.getVehicle() == null) handlePickupGroundItem(player);
     }
 
     /**
@@ -153,6 +174,29 @@ public class WorldManager {
         } catch (Exception ex) {
             Onset.print("Can't save the account: " + ex.toString());
         }
+    }
+
+    public static GroundItem getNearestGroundItem(Vector position) {
+        GroundItem nearestGroundItem = null;
+        for(GroundItem groundItem : groundItems) {
+            if(nearestGroundItem == null) {
+                if(groundItem.getPosition().distance(position) < 150) {
+                    nearestGroundItem = groundItem;
+                }
+            }
+            else {
+                if(groundItem.getPosition().distance(position) < nearestGroundItem.getPosition().distance(position)) {
+                    nearestGroundItem = groundItem;
+                }
+            }
+        }
+        return nearestGroundItem;
+    }
+
+    public static void handlePickupGroundItem(Player player) {
+        GroundItem groundItem = getNearestGroundItem(player.getLocation());
+        if(groundItem == null) return;
+        groundItem.pickByPlayer(player);
     }
 
     /**
@@ -178,5 +222,13 @@ public class WorldManager {
 
     public static ArrayList<VehicleSeller> getVehicleSellers() {
         return vehicleSellers;
+    }
+
+    public static ServerConfig getServerConfig() {
+        return serverConfig;
+    }
+
+    public static ArrayList<GroundItem> getGroundItems() {
+        return groundItems;
     }
 }

@@ -7,6 +7,8 @@ public class ItemTemplate {
     private float weight;
     private String pictureName;
     private int itemType;
+    private int modelId;
+    private double modelScale;
 
     public int getId() {
         return id;
@@ -54,5 +56,21 @@ public class ItemTemplate {
 
     public void setItemType(int itemType) {
         this.itemType = itemType;
+    }
+
+    public int getModelId() {
+        return modelId;
+    }
+
+    public void setModelId(int modelId) {
+        this.modelId = modelId;
+    }
+
+    public double getModelScale() {
+        return modelScale;
+    }
+
+    public void setModelScale(double modelScale) {
+        this.modelScale = modelScale;
     }
 }

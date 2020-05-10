@@ -72,6 +72,7 @@ public class Inventory {
     public void addItemPlayerView(InventoryItem inventoryItem) {
         if(WorldManager.findPlayerByAccountId(this.getCharacterId()) == null) return;
         Player player = WorldManager.findPlayerByAccountId(this.getCharacterId());
+        if(player == null) return;
         player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new AddItemInventoryPayload(inventoryItem)));
         player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new UpdateInventoryWeightPayload(this.getCurrentWeight(), this.getMaxWeight())));
     }
@@ -83,6 +84,7 @@ public class Inventory {
     public void updateItemPlayerView(InventoryItem inventoryItem) {
         if(WorldManager.findPlayerByAccountId(this.getCharacterId()) == null) return;
         Player player = WorldManager.findPlayerByAccountId(this.getCharacterId());
+        if(player == null) return;
         player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new UpdateItemInventoryPayload(inventoryItem)));
         player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new UpdateInventoryWeightPayload(this.getCurrentWeight(), this.getMaxWeight())));
     }
@@ -161,6 +163,10 @@ public class Inventory {
         return this.inventoryItems.stream().filter(x -> x.getTemplateId().equals(type)).findFirst().orElse(null);
     }
 
+    public InventoryItem getItem(String id) {
+        return this.inventoryItems.stream().filter(x -> x.getId().equals(id)).findFirst().orElse(null);
+    }
+
     public ArrayList<InventoryItem> getItemsByType(String type) {
         return new ArrayList<>(this.inventoryItems.stream().filter(x -> x.getTemplateId().equals(type)).collect(Collectors.toList()));
     }
@@ -201,6 +207,10 @@ public class Inventory {
                     ToastTypeEnum.WARN,
                     "-" + amount + " " + item.getTemplate().getName());
         }
+    }
+
+    public void throwItem(InventoryItem item, int quantity) {
+
     }
 
     public int getId() {

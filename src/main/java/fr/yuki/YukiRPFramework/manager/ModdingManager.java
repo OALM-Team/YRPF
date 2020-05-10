@@ -5,6 +5,7 @@ import fr.yuki.YukiRPFramework.job.JobConfig;
 import fr.yuki.YukiRPFramework.modding.ModdingCustomModel;
 import fr.yuki.YukiRPFramework.modding.ModdingFile;
 import net.onfirenetwork.onsetjava.Onset;
+import net.onfirenetwork.onsetjava.entity.Pickup;
 import net.onfirenetwork.onsetjava.entity.WorldObject;
 
 import java.io.FileNotFoundException;
@@ -33,5 +34,14 @@ public class ModdingManager {
             return;
         }
         worldObject.setProperty("customModelPath", moddingCustomModel.getPath(), true);
+    }
+
+    public static void assignCustomModel(Pickup pickup, int modelId) {
+        ModdingCustomModel moddingCustomModel = moddingFile.getCustomModels().stream().filter(x -> x.getId() == modelId).findFirst().orElse(null);
+        if(moddingCustomModel == null) {
+            Onset.print("Can't assign custom model, can't find the model: " + modelId);
+            return;
+        }
+        pickup.setProperty("customModelPath", moddingCustomModel.getPath(), true);
     }
 }

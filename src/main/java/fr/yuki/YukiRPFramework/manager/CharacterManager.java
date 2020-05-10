@@ -7,6 +7,7 @@ import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
 import fr.yuki.YukiRPFramework.model.Account;
 import fr.yuki.YukiRPFramework.net.payload.StyleSavePartPayload;
 import net.onfirenetwork.onsetjava.Onset;
+import net.onfirenetwork.onsetjava.data.Location;
 import net.onfirenetwork.onsetjava.entity.Player;
 
 import java.sql.SQLException;
@@ -21,6 +22,7 @@ public class CharacterManager {
     }
 
     public static CharacterState getCharacterStateByPlayer(Player player) {
+        if(!characterStates.containsKey(player.getSteamId())) return null;
         return characterStates.get(player.getSteamId());
     }
 
@@ -110,8 +112,46 @@ public class CharacterManager {
             Onset.print("Can't save account: " + ex.toString());
         }
 
+        UIStateManager.handleUIToogle(player, "death");
         UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Vous êtes mort, attendez les secours ou votre mort");
-        player.setRespawnTime(60000 * 5);
+        player.setRespawnTime(WorldManager.getServerConfig().getDeathRespawnDelay());
+    }
+
+    public static void onPlayerSpawn(Player player) {
+        if(CharacterManager.getCharacterStateByPlayer(player) == null)
+            CharacterManager.getCharacterStates().put(player.getSteamId(), new CharacterState());
+
+        CharacterState characterState = getCharacterStateByPlayer(player);
+        if(characterState.isFirstSpawn()) {
+            characterState.setFirstSpawn(false);
+            Onset.print("First spawn for player");
+        } else {
+            Account account = WorldManager.getPlayerAccount(player);
+            if(account != null) {
+                if(account.getIsDead() == 1) {
+                    UIStateManager.handleUIToogle(player, "death");
+                    account.setIsDead(0);
+                    CharacterManager.setCharacterFreeze(player, false);
+                    Onset.print("Player respawned after death");
+                    UIStateManager.sendNotification(player, ToastTypeEnum.WARN,
+                            "Après un moment a l'hôpital vous êtes sortis du coma, vous avez du mal à vous rappeler des derniers événements");
+                    player.setLocationAndHeading(new Location(WorldManager.getServerConfig().getDeathRespawnX(),
+                            WorldManager.getServerConfig().getDeathRespawnY(),
+                            WorldManager.getServerConfig().getDeathRespawnZ(),
+                            WorldManager.getServerConfig().getDeathRespawnH()));
+                    characterState.setDead(false);
+                    WorldManager.savePlayer(player);
+                }
+                setCharacterStyle(player);
+            }
+        }
+    }
+
+    public static void setCharacterStyle(Player player) {
+        Account account = WorldManager.getPlayerAccount(player);
+        account.decodeCharacterStyle().attachStyleToPlayer(player);
+        player.setProperty("characterName", account.getCharacterName(), true);
+        player.setName(account.getCharacterName());
     }
 
     public static HashMap<String, CharacterState> getCharacterStates() {

@@ -5,11 +5,13 @@ import fr.yuki.YukiRPFramework.character.CharacterState;
 import fr.yuki.YukiRPFramework.commands.*;
 import fr.yuki.YukiRPFramework.dao.AccountDAO;
 import fr.yuki.YukiRPFramework.dao.InventoryDAO;
+import fr.yuki.YukiRPFramework.enums.ItemTemplateEnum;
 import fr.yuki.YukiRPFramework.inventory.Inventory;
 import fr.yuki.YukiRPFramework.manager.*;
 import fr.yuki.YukiRPFramework.model.Account;
 import fr.yuki.YukiRPFramework.net.payload.RequestBuyVehiclePayload;
 import fr.yuki.YukiRPFramework.net.payload.RequestInventoryContentPayload;
+import fr.yuki.YukiRPFramework.net.payload.RequestThrowItemPayload;
 import fr.yuki.YukiRPFramework.net.payload.StyleSavePartPayload;
 import fr.yuki.YukiRPFramework.ui.UIState;
 import net.onfirenetwork.onsetjava.Onset;
@@ -27,6 +29,7 @@ public class YukiRPFrameworkPlugin {
 
     public void onEnable() {
         try {
+            WorldManager.initServerConfig();
             Database.init();
             Onset.registerListener(this);
             ModdingManager.init();
@@ -43,11 +46,17 @@ public class YukiRPFrameworkPlugin {
             Onset.registerCommand("item", new ItemCommand());
             Onset.registerCommand("loc", new LocCommand());
             Onset.registerCommand("v", new VCommand());
+            Onset.registerCommand("dv", new DVCommand());
             Onset.registerCommand("addgatheritem", new AddGatherItemCommand());
             Onset.registerCommand("listgatheritem", new ShowGatherItemListCommand());
             Onset.registerCommand("dct", new DebugCharacterToolCommand());
             Onset.registerCommand("dvsl", new DebugVehicleStorageLayoutCommand());
             Onset.registerCommand("adddelivery", new AddDeliveryPointCommand());
+            Onset.registerCommand("setadmin", new SetAdminLevelCommand());
+            Onset.registerCommand("ban", new BanCommand());
+            Onset.registerCommand("goto", new GotoCommand());
+            Onset.registerCommand("bring", new BringCommand());
+            Onset.registerCommand("flip", new FlipCommand());
 
             // Register remote events
             Onset.registerRemoteEvent("GlobalUI:ToogleWindow");
@@ -64,6 +73,7 @@ public class YukiRPFrameworkPlugin {
             Onset.registerRemoteEvent("Global:UIReady");
             Onset.registerRemoteEvent("Job:WearObject");
             Onset.registerRemoteEvent("Character:RequestWearFromVehicleChest");
+            Onset.registerRemoteEvent("Inventory:ThrowItem");
         } catch (Exception ex) {
             ex.printStackTrace();
             Onset.print("Can't start the plugin because : " + ex.toString());
@@ -90,8 +100,24 @@ public class YukiRPFrameworkPlugin {
                 inventory.setCharacterId(account.getId());
                 InventoryManager.getInventories().put(inventory.getId(), inventory);
                 inventory.save();
+
+                // Set properties for the player
+                evt.getPlayer().setProperty("accountId", account.getId(), true);
+                evt.getPlayer().setProperty("uiState", new Gson().toJson(new UIState()), true);
+
+                // Start money
+                InventoryManager.addItemToPlayer(evt.getPlayer(), ItemTemplateEnum.CASH.id, 15000);
             }
             else {
+                if(account.getIsBanned()==1) {
+                    evt.getPlayer().kick("You have been banned, bye bye");
+                    return;
+                }
+
+                // Set properties for the player
+                evt.getPlayer().setProperty("accountId", account.getId(), true);
+                evt.getPlayer().setProperty("uiState", new Gson().toJson(new UIState()), true);
+
                 evt.getPlayer().setSpawnLocation(new Vector(account.getSaveX(), account.getSaveY(), account.getSaveZ()), 0);
                 evt.getPlayer().setLocation(new Vector(account.getSaveX(), account.getSaveY(), account.getSaveZ()));
             }
@@ -101,13 +127,14 @@ public class YukiRPFrameworkPlugin {
                 WorldManager.getAccounts().put(account.getId(), account);
             }
 
-            // Set properties for the player
-            evt.getPlayer().setProperty("accountId", account.getId(), true);
-            evt.getPlayer().setProperty("uiState", new Gson().toJson(new UIState()), true);
-
             JobManager.initCharacterJobs(evt.getPlayer());
-            CharacterManager.getCharacterStates().put(evt.getPlayer().getSteamId(), new CharacterState());
+            if(CharacterManager.getCharacterStateByPlayer(evt.getPlayer()) == null)
+                CharacterManager.getCharacterStates().put(evt.getPlayer().getSteamId(), new CharacterState());
 
+            // If the player is dead
+            if(account.getIsDead() == 1) {
+                evt.getPlayer().setHealth(0);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             evt.getPlayer().kick("There is a error for retrieving your account: " + e.toString());
@@ -184,6 +211,11 @@ public class YukiRPFrameworkPlugin {
                 case "Character:RequestWearFromVehicleChest":
                     VehicleManager.handleRequestWearFromVehicleChest(evt.getPlayer(), (evt.getArgs()[0]).toString());
                     break;
+
+                case "Inventory:ThrowItem":
+                    InventoryManager.handleThrowItem(evt.getPlayer(), new Gson().fromJson((evt.getArgs()[0]).toString(),
+                            RequestThrowItemPayload.class));
+                    break;
             }
         }
         catch (Exception ex) {
@@ -219,5 +251,24 @@ public class YukiRPFrameworkPlugin {
         account.setSaveH(location.getHeading());
 
         CharacterManager.onPlayerDeath(evt.getPlayer(), evt.getKiller());
+    }
+
+    @EventHandler
+    public void onPlayerSpawn(PlayerSpawnEvent evt) {
+        Onset.print("Player spawn steamid="+evt.getPlayer().getSteamId());
+        CharacterManager.onPlayerSpawn(evt.getPlayer());
+    }
+
+    @EventHandler
+    public void onPlayerChatMessage(PlayerChatEvent evt) {
+        Onset.print("Player chat message="+evt.getMessage());
+        Account account = WorldManager.getPlayerAccount(evt.getPlayer());
+        if(account.getAdminLevel() > 0) {
+            Onset.broadcast("<span color=\"#ff0000\">[Admin] " + account.getCharacterName() + "(" + evt.getPlayer().getId() + ")</>: "
+                    + evt.getMessage());
+        } else {
+            Onset.broadcast("<span color=\"#ffae00\">[Citoyen] " + account.getCharacterName() + "(" + evt.getPlayer().getId() + ")</>: "
+                + evt.getMessage());
+        }
     }
 }

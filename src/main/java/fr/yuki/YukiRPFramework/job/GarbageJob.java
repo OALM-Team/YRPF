@@ -26,6 +26,6 @@ public class GarbageJob extends Job {
 
     @Override
     public int getRefillInterval() {
-        return 0;
+        return 60000 * 10;
     }
 }

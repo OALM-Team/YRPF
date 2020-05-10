@@ -6,7 +6,7 @@ import net.onfirenetwork.onsetjava.entity.Player;
 public class CharacterState {
     private WearableWorldObject wearableWorldObject;
     private boolean isDead = false;
-
+    private boolean firstSpawn = true;
     public CharacterState() {}
 
     public WearableWorldObject getWearableWorldObject() {
@@ -28,5 +28,13 @@ public class CharacterState {
 
     public void setDead(boolean dead) {
         isDead = dead;
+    }
+
+    public boolean isFirstSpawn() {
+        return firstSpawn;
+    }
+
+    public void setFirstSpawn(boolean firstSpawn) {
+        this.firstSpawn = firstSpawn;
     }
 }

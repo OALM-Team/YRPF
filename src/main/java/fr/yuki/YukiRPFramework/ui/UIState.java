@@ -8,6 +8,7 @@ public class UIState {
     private boolean customCharacter = false;
     private boolean vchest = false;
     private boolean bigmap = false;
+    private boolean death = false;
 
     public boolean isInventory() {
         return inventory;
@@ -63,5 +64,13 @@ public class UIState {
 
     public void setBigmap(boolean bigmap) {
         this.bigmap = bigmap;
+    }
+
+    public boolean isDeath() {
+        return death;
+    }
+
+    public void setDeath(boolean death) {
+        this.death = death;
     }
 }

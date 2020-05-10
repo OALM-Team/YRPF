@@ -2,6 +2,7 @@ package fr.yuki.YukiRPFramework.commands;
 
 import fr.yuki.YukiRPFramework.manager.CharacterManager;
 import fr.yuki.YukiRPFramework.manager.VehicleManager;
+import fr.yuki.YukiRPFramework.manager.WorldManager;
 import fr.yuki.YukiRPFramework.vehicle.storeLayout.StoreLayoutTransform;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Vector;
@@ -13,6 +14,7 @@ import net.onfirenetwork.onsetjava.plugin.CommandExecutor;
 public class DebugVehicleStorageLayoutCommand implements CommandExecutor {
     @Override
     public boolean onCommand(Player player, String s, String[] args) {
+        if(WorldManager.getPlayerAccount(player).getAdminLevel() == 0) return false;
         if(CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject() == null) return true;
 
         StoreLayoutTransform storeLayoutTransform = new StoreLayoutTransform(0, new Vector(Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2])),

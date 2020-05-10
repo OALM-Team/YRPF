@@ -21,6 +21,8 @@ public class ItemTemplateDAO {
             itemTemplate.setWeight(resultSet.getFloat("weight"));
             itemTemplate.setPictureName(resultSet.getString("picture_name"));
             itemTemplate.setItemType(resultSet.getInt("item_type"));
+            itemTemplate.setModelId(resultSet.getInt("model_id"));
+            itemTemplate.setModelScale(resultSet.getDouble("model_scale"));
             itemTemplateHashMap.put(itemTemplate.getId(), itemTemplate);
         }
         return itemTemplateHashMap;

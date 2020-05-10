@@ -23,6 +23,7 @@ public class JobNPCDAO {
 
             jobNPC.setId(resultSet.getInt("id_job_npc"));
             jobNPC.setJobId(resultSet.getString("id_job"));
+            jobNPC.setName(resultSet.getString("name"));
             jobNPC.setX(resultSet.getDouble("x"));
             jobNPC.setY(resultSet.getDouble("y"));
             jobNPC.setZ(resultSet.getDouble("z"));

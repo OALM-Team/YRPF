@@ -1,12 +1,18 @@
 package fr.yuki.YukiRPFramework.manager;
 
+import com.google.gson.Gson;
 import fr.yuki.YukiRPFramework.dao.InventoryDAO;
 import fr.yuki.YukiRPFramework.dao.ItemTemplateDAO;
 import fr.yuki.YukiRPFramework.inventory.Inventory;
 import fr.yuki.YukiRPFramework.inventory.InventoryItem;
+import fr.yuki.YukiRPFramework.model.GroundItem;
 import fr.yuki.YukiRPFramework.model.ItemTemplate;
+import fr.yuki.YukiRPFramework.net.payload.RemoteItemInventoryPayload;
 import fr.yuki.YukiRPFramework.net.payload.RequestInventoryContentPayload;
+import fr.yuki.YukiRPFramework.net.payload.RequestThrowItemPayload;
+import fr.yuki.YukiRPFramework.utils.Basic;
 import net.onfirenetwork.onsetjava.Onset;
+import net.onfirenetwork.onsetjava.data.Vector;
 import net.onfirenetwork.onsetjava.entity.Player;
 
 import java.sql.SQLException;
@@ -57,7 +63,7 @@ public class InventoryManager {
      * @return The fresh or existing item
      */
     public static InventoryItem addItemToPlayer(Player player, String templateId, int quantity) {
-        Onset.print("Add item=" + templateId + " to player=" + player.getPropertyInt("accountId") + " size=" + getInventoriesForAccount(player.getPropertyInt("accountId")).size());
+        Onset.print("Add item=" + templateId + " to size=" + getInventoriesForAccount(player.getPropertyInt("accountId")).size());
         Inventory inventory = getInventoriesForAccount(player.getPropertyInt("accountId")).get(0);
         InventoryItem inventoryItem = new InventoryItem();
         inventoryItem.setId(UUID.randomUUID().toString());
@@ -105,6 +111,33 @@ public class InventoryManager {
                         .sendInventoryContent(player);
                 break;
         }
+    }
+
+    public static void handleThrowItem(Player player, RequestThrowItemPayload payload) {
+        Onset.print("Player request to throw a item id=" + payload.getId() + " quantity=" + payload.getQuantity());
+        if(payload.getQuantity() <= 0) return;
+        Inventory inventory = getMainInventory(player);
+        InventoryItem sourceItem = inventory.getItem(payload.getId());
+        if(sourceItem == null) return;
+        if(payload.getQuantity() > sourceItem.getAmount()) return;
+
+        InventoryItem inventoryItem = sourceItem;
+        if(payload.getQuantity() < sourceItem.getAmount()) {
+            inventoryItem = sourceItem.copy();
+            inventoryItem.setAmount(payload.getQuantity());
+            sourceItem.setAmount(sourceItem.getAmount() - payload.getQuantity());
+            inventory.updateItemPlayerView(sourceItem);
+        } else {
+            inventory.getInventoryItems().remove(sourceItem);
+            player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new RemoteItemInventoryPayload(sourceItem.getId())));
+        }
+
+        GroundItem groundItem = new GroundItem(inventoryItem, payload.getQuantity(),
+                new Vector(player.getLocation().getX() + Basic.randomNumber(20, 60),
+                        player.getLocation().getY() + Basic.randomNumber(20, 60),
+                        player.getLocation().getZ()));
+        WorldManager.getGroundItems().add(groundItem);
+        InventoryManager.getMainInventory(player).save();
     }
 
     public static HashMap<Integer, ItemTemplate> getItemTemplates() {

@@ -34,6 +34,6 @@ public class LumberjackJob extends Job {
 
     @Override
     public int getRefillInterval() {
-        return 60000 * 1;
+        return 60000 * 5;
     }
 }

@@ -154,13 +154,19 @@ public class WorldManager {
             return;
         }
 
-        ATMManager.handleATMInteract(player);
-        GarageManager.handleVSellerInteract(player);
-        JobManager.tryToHarvest(player);
-        if(player.getVehicle() == null) VehicleManager.handleVehicleChestStorageRequest(player);
-        GarageManager.handleGarageInteract(player);
-        if(player.getVehicle() == null) JobManager.requestVehicleRental(player);
-        if(player.getVehicle() == null) handlePickupGroundItem(player);
+        if(ATMManager.handleATMInteract(player)) return;
+        if(GarageManager.handleVSellerInteract(player)) return;
+        if(player.getVehicle() == null)
+            if(handlePickupGroundItem(player)) return;
+        if(JobManager.tryToHarvest(player)) return;
+        if(player.getVehicle() == null) {
+            if(VehicleManager.handleVehicleChestStorageRequest(player)) return;
+        }
+        if(GarageManager.handleGarageInteract(player)) return;
+        if(player.getVehicle() == null)
+            if(JobManager.requestVehicleRental(player)) return;
+        if(player.getVehicle() == null)
+            if(JobManager.handleSellJobNpcInventoryItem(player)) return;
     }
 
     /**
@@ -193,10 +199,11 @@ public class WorldManager {
         return nearestGroundItem;
     }
 
-    public static void handlePickupGroundItem(Player player) {
+    public static boolean handlePickupGroundItem(Player player) {
         GroundItem groundItem = getNearestGroundItem(player.getLocation());
-        if(groundItem == null) return;
+        if(groundItem == null) return false;
         groundItem.pickByPlayer(player);
+        return true;
     }
 
     /**

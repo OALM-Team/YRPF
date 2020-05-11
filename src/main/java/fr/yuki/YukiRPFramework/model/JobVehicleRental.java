@@ -12,6 +12,9 @@ public class JobVehicleRental {
     private double x;
     private double y;
     private double z;
+    private double spawnX;
+    private double spawnY;
+    private double spawnZ;
 
     public int getId() {
         return id;
@@ -75,6 +78,30 @@ public class JobVehicleRental {
 
     public void setZ(double z) {
         this.z = z;
+    }
+
+    public double getSpawnX() {
+        return spawnX;
+    }
+
+    public void setSpawnX(double spawnX) {
+        this.spawnX = spawnX;
+    }
+
+    public double getSpawnY() {
+        return spawnY;
+    }
+
+    public void setSpawnY(double spawnY) {
+        this.spawnY = spawnY;
+    }
+
+    public double getSpawnZ() {
+        return spawnZ;
+    }
+
+    public void setSpawnZ(double spawnZ) {
+        this.spawnZ = spawnZ;
     }
 
     public boolean isNear(Player player) {

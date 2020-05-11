@@ -6,6 +6,10 @@ public class ServerConfig {
     private double deathRespawnZ;
     private double deathRespawnH;
     private int deathRespawnDelay;
+    private double spawnPointX;
+    private double spawnPointY;
+    private double spawnPointZ;
+    private double spawnPointH;
     private int xpRate;
     private String sqlHost;
     private String sqlUsername;
@@ -90,5 +94,37 @@ public class ServerConfig {
 
     public void setSqlPassword(String sqlPassword) {
         this.sqlPassword = sqlPassword;
+    }
+
+    public double getSpawnPointX() {
+        return spawnPointX;
+    }
+
+    public void setSpawnPointX(double spawnPointX) {
+        this.spawnPointX = spawnPointX;
+    }
+
+    public double getSpawnPointY() {
+        return spawnPointY;
+    }
+
+    public void setSpawnPointY(double spawnPointY) {
+        this.spawnPointY = spawnPointY;
+    }
+
+    public double getSpawnPointZ() {
+        return spawnPointZ;
+    }
+
+    public void setSpawnPointZ(double spawnPointZ) {
+        this.spawnPointZ = spawnPointZ;
+    }
+
+    public double getSpawnPointH() {
+        return spawnPointH;
+    }
+
+    public void setSpawnPointH(double spawnPointH) {
+        this.spawnPointH = spawnPointH;
     }
 }

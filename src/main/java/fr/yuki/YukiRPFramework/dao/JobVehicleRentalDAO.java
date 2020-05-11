@@ -25,6 +25,9 @@ public class JobVehicleRentalDAO {
             jobVehicleRental.setX(resultSet.getDouble("x"));
             jobVehicleRental.setY(resultSet.getDouble("y"));
             jobVehicleRental.setZ(resultSet.getDouble("z"));
+            jobVehicleRental.setSpawnX(resultSet.getDouble("spawn_x"));
+            jobVehicleRental.setSpawnY(resultSet.getDouble("spawn_y"));
+            jobVehicleRental.setSpawnZ(resultSet.getDouble("spawn_z"));
             jobVehicleRentals.add(jobVehicleRental);
         }
         return jobVehicleRentals;

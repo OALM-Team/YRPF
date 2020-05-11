@@ -32,7 +32,7 @@ public class CooperOre implements HarvestableObject {
 
     @Override
     public int getBaseHarvestTime() {
-        return 5000;
+        return 20000;
     }
 
     @Override

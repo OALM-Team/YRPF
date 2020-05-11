@@ -104,6 +104,9 @@ public class UIStateManager {
         if(inventory.getItemByType(ItemTemplateEnum.MINER_PICKAXE_1.id) == null) {
             InventoryManager.addItemToPlayer(player, ItemTemplateEnum.MINER_PICKAXE_1.id, 1);
         }
+        if(inventory.getItemByType(ItemTemplateEnum.FISHING_ROD.id) == null) {
+            InventoryManager.addItemToPlayer(player, ItemTemplateEnum.FISHING_ROD.id, 1);
+        }
 
         // Apply style to character if there is one saved
         if(account.getCharacterCreationRequest() == 0) {

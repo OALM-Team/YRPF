@@ -15,6 +15,7 @@ public abstract class VehicleStoreLayout {
     public boolean store(Vehicle vehicle, WearableWorldObject wearableWorldObject) {
         ArrayList<WearableWorldObject> wearableWorldObjectsChest = VehicleManager.getVehicleWearableObjects(vehicle);
         if(wearableWorldObjectsChest.size() + 1 > this.maxStorageQuantity()) return false;
+        if(wearableWorldObjectsChest.size() + 1 > this.maxLayoutSlot(wearableWorldObject.getModelId())) return false;
 
         // Find a free slot
         int index = 0;

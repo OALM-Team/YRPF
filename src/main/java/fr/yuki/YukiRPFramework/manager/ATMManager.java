@@ -13,13 +13,14 @@ public class ATMManager {
      * Check the interaction request with a atm, check if is nearby a atm
      * @param player The player
      */
-    public static void handleATMInteract(Player player) {
+    public static boolean handleATMInteract(Player player) {
         for(ATM atm : WorldManager.getAtms()) {
             if(atm.isNear(player)) {
                 openATM(player, atm);
-                return;
+                return true;
             }
         }
+        return false;
     }
 
     /**
@@ -28,7 +29,9 @@ public class ATMManager {
      * @param atm The ATM
      */
     public static void openATM(Player player, ATM atm) {
-        UIStateManager.handleUIToogle(player, "atm");
+        if(UIStateManager.handleUIToogle(player, "atm")) {
+            SoundManager.playSound3D("sounds/atm_sound_in.mp3", player.getLocation(), 200, 0.2);
+        }
     }
 
     /**

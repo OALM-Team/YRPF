@@ -4,11 +4,10 @@ import fr.yuki.YukiRPFramework.manager.GarageManager;
 import fr.yuki.YukiRPFramework.manager.VehicleManager;
 import fr.yuki.YukiRPFramework.manager.WorldManager;
 import fr.yuki.YukiRPFramework.model.VehicleGarage;
+import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.entity.Player;
 import net.onfirenetwork.onsetjava.entity.Vehicle;
 import net.onfirenetwork.onsetjava.plugin.CommandExecutor;
-
-import java.util.stream.Collectors;
 
 public class DVCommand implements CommandExecutor {
     @Override
@@ -19,9 +18,13 @@ public class DVCommand implements CommandExecutor {
         VehicleGarage vehicleGarage = GarageManager.getVehicleGarages().stream()
                 .filter(x -> x.getUuid().equals(vehicle.getPropertyString("uuid")))
                 .findFirst().orElse(null);
-        if(vehicleGarage == null);
+        if(vehicleGarage == null) return true;
         if(!vehicleGarage.isRental()) vehicleGarage.setGarageId(1);
-        vehicle.destroy();
+        if(vehicle.getDriver() != null) vehicle.getDriver().exitVehicle();
+
+        Onset.delay(1000, () -> {
+            vehicle.destroy();
+        });
         return true;
     }
 }

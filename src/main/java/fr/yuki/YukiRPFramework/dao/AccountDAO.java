@@ -1,7 +1,9 @@
 package fr.yuki.YukiRPFramework.dao;
 
 import fr.yuki.YukiRPFramework.Database;
+import fr.yuki.YukiRPFramework.manager.WorldManager;
 import fr.yuki.YukiRPFramework.model.Account;
+import fr.yuki.YukiRPFramework.utils.ServerConfig;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Location;
 import net.onfirenetwork.onsetjava.entity.Player;
@@ -45,6 +47,8 @@ public class AccountDAO {
     }
 
     public static Account createAccount(Player player) throws SQLException {
+        ServerConfig serverConfig = WorldManager.getServerConfig();
+
         // Create the account object
         Account account = new Account();
         account.setSteamName(player.getName());
@@ -56,14 +60,19 @@ public class AccountDAO {
         account.setJobLevels("[]");
         account.setIsDead(0);
         account.setAdminLevel(0);
+        account.setSaveX(serverConfig.getSpawnPointX());
+        account.setSaveY(serverConfig.getSpawnPointY());
+        account.setSaveZ(serverConfig.getSpawnPointZ());
+        account.setSaveH(serverConfig.getSpawnPointH());
         account.setCreatedAt(new java.util.Date());
         account.setUpdatedAt(new java.util.Date());
 
         // Execute the query
         PreparedStatement preparedStatement = Database.getConnection()
                 .prepareStatement("INSERT INTO tbl_account " +
-                        "(steam_account_name, steam_id, is_banned, created_at, updated_at, character_creation_request, character_style, character_name) VALUES " +
-                        "(?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+                        "(steam_account_name, steam_id, is_banned, created_at, updated_at, character_creation_request," +
+                        " character_style, character_name, save_x, save_y, save_z, save_h) VALUES " +
+                        "(?,?,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
 
         preparedStatement.setString(1, account.getSteamName());
         preparedStatement.setString(2, account.getSteamId());
@@ -73,6 +82,10 @@ public class AccountDAO {
         preparedStatement.setInt(6, account.getCharacterCreationRequest());
         preparedStatement.setString(7, account.getCharacterStyle());
         preparedStatement.setString(8, account.getCharacterName());
+        preparedStatement.setDouble(9, account.getSaveX());
+        preparedStatement.setDouble(10, account.getSaveY());
+        preparedStatement.setDouble(11, account.getSaveZ());
+        preparedStatement.setDouble(12, account.getSaveH());
         preparedStatement.executeUpdate();
 
         ResultSet returnId = preparedStatement.getGeneratedKeys();

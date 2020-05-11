@@ -14,6 +14,7 @@ import fr.yuki.YukiRPFramework.net.payload.RequestInventoryContentPayload;
 import fr.yuki.YukiRPFramework.net.payload.RequestThrowItemPayload;
 import fr.yuki.YukiRPFramework.net.payload.StyleSavePartPayload;
 import fr.yuki.YukiRPFramework.ui.UIState;
+import fr.yuki.YukiRPFramework.utils.ServerConfig;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Location;
 import net.onfirenetwork.onsetjava.data.Vector;
@@ -86,12 +87,20 @@ public class YukiRPFrameworkPlugin {
         try {
             Onset.print("Player joining steamId=" + evt.getPlayer().getSteamId());
             Account account = AccountDAO.findAccountBySteamId(evt.getPlayer().getSteamId());
+            ServerConfig serverConfig = WorldManager.getServerConfig();
 
             // Create the account if doesnt exist
             if(account == null) {
                 Onset.print("Create the account for the steamId=" + evt.getPlayer().getSteamId());
                 account = AccountDAO.createAccount(evt.getPlayer());
                 WorldManager.getAccounts().put(account.getId(), account);
+
+                // Set spawn location
+                evt.getPlayer().setSpawnLocation(new Vector(serverConfig.getSpawnPointX(),
+                        serverConfig.getSpawnPointY(), serverConfig.getSpawnPointZ()), serverConfig.getSpawnPointH());
+                evt.getPlayer().setLocation(new Vector(serverConfig.getSpawnPointX(),
+                        serverConfig.getSpawnPointY(), serverConfig.getSpawnPointZ()));
+                evt.getPlayer().setHeading(serverConfig.getSpawnPointH());
 
                 // Create the default inventory for character
                 Inventory inventory = InventoryDAO.createInventory();

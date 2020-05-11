@@ -266,21 +266,23 @@ public class VehicleManager {
                 .collect(Collectors.toList()));
     }
 
-    public static void handleVehicleChestStorageRequest(Player player) {
-        if(player.getVehicle() != null) return;
+    public static boolean handleVehicleChestStorageRequest(Player player) {
+        if(player.getVehicle() != null) return false;
         Vehicle vehicle = getNearestVehicle(player.getLocation());
-        if(vehicle == null) return;
-        if(vehicle.getLocation().distance(player.getLocation()) > getInteractionDistance(vehicle)) return;
+        if(vehicle == null) return false;
+        if(vehicle.getModel() == 33 || vehicle.getModel() == 34) return false;
+        if(vehicle.getLocation().distance(player.getLocation()) > getInteractionDistance(vehicle)) return false;
         if(vehicle.getPropertyInt("locked") == 1) {
             UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Impossible car ce véhicule est verrouillé");
-            return;
+            return true;
         }
-        if(!UIStateManager.handleUIToogle(player, "vchest")) return;
+        if(!UIStateManager.handleUIToogle(player, "vchest")) return true;
 
         for(WearableWorldObject wearableWorldObject : getVehicleWearableObjects(vehicle)) {
             player.callRemoteEvent("GlobalUI:DispatchToUI",
                     new Gson().toJson(new AddVChestItemPayload(wearableWorldObject.getUuid(), wearableWorldObject.getModelId(), "")));
         }
+        return true;
     }
 
     public static void handleRequestWearFromVehicleChest(Player player, String uuid) {

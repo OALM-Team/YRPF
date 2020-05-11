@@ -36,13 +36,14 @@ public class GarageManager {
      * Check if the player is near a garage to interact with
      * @param player The player
      */
-    public static void handleGarageInteract(Player player) {
+    public static boolean handleGarageInteract(Player player) {
         for(Garage garage : WorldManager.getGarages()) {
             if(garage.isNear(player)) {
                 openGarage(player, garage);
-                return;
+                return true;
             }
         }
+        return false;
     }
 
     public static Garage getNearestGarage(Player player) {
@@ -161,13 +162,14 @@ public class GarageManager {
         return vehicleGarages;
     }
 
-    public static void handleVSellerInteract(Player player) {
+    public static boolean handleVSellerInteract(Player player) {
         for(VehicleSeller vehicleSeller : WorldManager.getVehicleSellers()) {
             if(vehicleSeller.isNear(player)) {
                 openVehicleSeller(player, vehicleSeller);
-                return;
+                return true;
             }
         }
+        return false;
     }
 
     public static VehicleSeller getNearVehicleSeller(Player player) {

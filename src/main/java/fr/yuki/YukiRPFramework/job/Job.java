@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import fr.yuki.YukiRPFramework.enums.JobEnum;
 import fr.yuki.YukiRPFramework.job.harvest.HarvestableObject;
 import fr.yuki.YukiRPFramework.manager.JobManager;
+import fr.yuki.YukiRPFramework.manager.ModdingManager;
 import fr.yuki.YukiRPFramework.model.JobNPC;
 import fr.yuki.YukiRPFramework.model.JobTool;
 import net.onfirenetwork.onsetjava.Onset;
@@ -135,6 +136,8 @@ public abstract class Job {
                 worldObject.setProperty("harvestable", 1, true);
                 worldObject.setProperty("harvestableResourceName", harvestableObject.getName(), true);
                 worldObject.setProperty("harvestableInteractDistance", harvestableObject.distanceToInteract(), true);
+                if(ModdingManager.isCustomModelId(harvestableObject.getModelId()))
+                    ModdingManager.assignCustomModel(worldObject, harvestableObject.getModelId());
                 WorldHarvestObject worldHarvestObject = new WorldHarvestObject(jobSpawn, jobSpawnPosition,
                         harvestableObject, worldObject, this);
                 this.worldHarvestObjects.add(worldHarvestObject);

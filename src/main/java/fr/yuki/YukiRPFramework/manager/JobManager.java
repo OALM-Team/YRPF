@@ -10,6 +10,7 @@ import fr.yuki.YukiRPFramework.enums.ItemTemplateEnum;
 import fr.yuki.YukiRPFramework.enums.JobEnum;
 import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
 import fr.yuki.YukiRPFramework.inventory.Inventory;
+import fr.yuki.YukiRPFramework.inventory.InventoryItem;
 import fr.yuki.YukiRPFramework.job.*;
 import fr.yuki.YukiRPFramework.model.*;
 import fr.yuki.YukiRPFramework.net.payload.AddToastPayload;
@@ -58,6 +59,7 @@ public class JobManager {
         jobs.put(JobEnum.GARBAGE, new GarbageJob());
         jobs.put(JobEnum.DELIVERY, new DeliveryJob());
         jobs.put(JobEnum.MINER, new MinerJob());
+        jobs.put(JobEnum.FISHER, new FisherJob());
 
         spawnVehicleRentalSpawns();
     }
@@ -120,20 +122,21 @@ public class JobManager {
      * Try to find a object to harvest for the player
      * @param player The player
      */
-    public static void tryToHarvest(Player player) {
+    public static boolean tryToHarvest(Player player) {
         for(Map.Entry<JobEnum, Job> job : jobs.entrySet()) {
             for(WorldHarvestObject worldHarvestObject : job.getValue().getWorldHarvestObjects()) {
                 if(worldHarvestObject.isNear(player)) {
                     if(CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject() != null) {
                         UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Impossible de porter cette objet car vous portez déjà un objet");
-                        return;
+                        return true;
                     }
 
                     worldHarvestObject.harvest(player);
-                    return;
+                    return true;
                 }
             }
         }
+        return false;
     }
 
     public static void addExp(Player player, JobEnum job, int amount) {
@@ -150,6 +153,7 @@ public class JobManager {
         player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new AddXpBarItemPayload("+" + amount + " XP " + job.type)));
         JobLevel nextJobLevel = characterJobLevel.getJobLevel();
         if(previousJobLevel.getLevel() != nextJobLevel.getLevel()) {
+            SoundManager.playSound3D("sounds/success_1.mp3", player.getLocation(), 200, 0.3);
             player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new AddXpBarItemPayload("Vous etes desormais " + nextJobLevel.getName())));
         }
 
@@ -172,6 +176,25 @@ public class JobManager {
             return;
         }
         wearableWorldObject.requestWear(player);
+    }
+
+    public static boolean handleSellJobNpcInventoryItem(Player player) {
+        JobNPC jobNPCNearby = getNearbyJobNPC(player);
+        if(jobNPCNearby == null) return false;
+        Inventory inventory = InventoryManager.getMainInventory(player);
+        for (JobNPCListItem sellListItem : jobNPCNearby.getBuyList()) {
+            if(!sellListItem.getType().equals("item")) continue;
+            InventoryItem inventoryItem = inventory.getItemByType(String.valueOf(sellListItem.getItemId()));
+            if(inventoryItem == null) continue;
+            Onset.print("Selling item to the npc price=" + sellListItem.getPrice());
+            inventory.removeItem(inventoryItem, 1);
+            SoundManager.playSound3D("sounds/cash_register.mp3", player.getLocation(), 200, 0.3);
+            UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, "Vous avez vendu votre " + inventoryItem.getTemplate().getName() +
+                    " pour " + sellListItem.getPrice() + "$");
+            jobNPCNearby.getNpc().setAnimation(Animation.THUMBSUP);
+            InventoryManager.addItemToPlayer(player, ItemTemplateEnum.CASH.id, sellListItem.getPrice());
+        }
+        return true;
     }
 
     public static void handleUnwearObject(Player player) {
@@ -218,26 +241,28 @@ public class JobManager {
         CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject().requestUnwear(player, false);
     }
 
-    public static void requestVehicleRental(Player player) {
+    public static boolean requestVehicleRental(Player player) {
         JobVehicleRental nearbyJobVehicleRental = getNearbyVehicleRental(player);
-        if(nearbyJobVehicleRental == null) return;
-        if(player.getVehicle() != null) return;
+        if(nearbyJobVehicleRental == null) return false;
+        if(player.getVehicle() != null) return false;
 
         // Check vehicle around
-        if(VehicleManager.getNearestVehicle(player.getLocation()) != null) {
-            if(VehicleManager.getNearestVehicle(player.getLocation()).getLocation().distance(player.getLocation()) < 600) {
+        Vector spawnPoint = new Vector(nearbyJobVehicleRental.getSpawnX(), nearbyJobVehicleRental.getSpawnY(), nearbyJobVehicleRental.getSpawnZ());
+        if(VehicleManager.getNearestVehicle(spawnPoint) != null) {
+            if(VehicleManager.getNearestVehicle(spawnPoint).getLocation().distance(spawnPoint) < 600) {
                 UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Il y a un véhicule dans la zone d'apparition");
-                return;
+                return true;
             }
         }
 
         destroyRentalVehiclesForPlayer(player);
 
         VehicleManager.createVehicle(nearbyJobVehicleRental.getVehicleModelId(),
-                new Vector(nearbyJobVehicleRental.getX(), nearbyJobVehicleRental.getY(), nearbyJobVehicleRental.getZ()),
+                new Vector(nearbyJobVehicleRental.getSpawnX(), nearbyJobVehicleRental.getSpawnY(), nearbyJobVehicleRental.getSpawnZ()),
                 player.getLocationAndHeading().getHeading(), player, null, true);
         UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, "Vous avez loué un véhicule pour " +
                 nearbyJobVehicleRental.getCost() + "$");
+        return true;
     }
 
     public static void destroyRentalVehiclesForPlayer(Player player) {

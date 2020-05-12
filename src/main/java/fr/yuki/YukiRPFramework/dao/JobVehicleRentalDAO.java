@@ -19,6 +19,7 @@ public class JobVehicleRentalDAO {
 
             jobVehicleRental.setId(resultSet.getInt("id_job_vehicle_rental"));
             jobVehicleRental.setJobId(resultSet.getString("id_job"));
+            jobVehicleRental.setLevelRequired(resultSet.getInt("level_required"));
             jobVehicleRental.setName(resultSet.getString("name"));
             jobVehicleRental.setVehicleModelId(resultSet.getInt("vehicle_model_id"));
             jobVehicleRental.setCost(resultSet.getInt("cost"));

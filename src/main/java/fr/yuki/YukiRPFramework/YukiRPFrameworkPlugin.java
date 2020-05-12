@@ -24,6 +24,8 @@ import net.onfirenetwork.onsetjava.plugin.event.EventHandler;
 import net.onfirenetwork.onsetjava.plugin.event.player.*;
 
 import javax.swing.*;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 @Plugin(name = "YukiRPFramework", author = "Yuki")
 public class YukiRPFrameworkPlugin {
@@ -41,6 +43,7 @@ public class YukiRPFrameworkPlugin {
             SoundManager.init();
             WorldManager.init();
             JobManager.init();
+            AccountManager.init();
             MapManager.init();
 
             // Register commands
@@ -73,6 +76,7 @@ public class YukiRPFrameworkPlugin {
             Onset.registerRemoteEvent("Character:Style:CustomDone");
             Onset.registerRemoteEvent("Global:UIReady");
             Onset.registerRemoteEvent("Job:WearObject");
+            Onset.registerRemoteEvent("Job:CharacterJobRequest");
             Onset.registerRemoteEvent("Character:RequestWearFromVehicleChest");
             Onset.registerRemoteEvent("Inventory:ThrowItem");
         } catch (Exception ex) {
@@ -227,11 +231,16 @@ public class YukiRPFrameworkPlugin {
                     InventoryManager.handleThrowItem(evt.getPlayer(), new Gson().fromJson((evt.getArgs()[0]).toString(),
                             RequestThrowItemPayload.class));
                     break;
+
+                case "Job:CharacterJobRequest":
+                    JobManager.handleRequestCharacterJobs(evt.getPlayer());
+                    break;
             }
         }
         catch (Exception ex) {
-            ex.printStackTrace();
-            Onset.print(ex.toString());
+            StringWriter sw = new StringWriter();
+            ex.printStackTrace(new PrintWriter(sw));
+            Onset.print(sw.toString());
         }
     }
 

@@ -6,6 +6,7 @@ import net.onfirenetwork.onsetjava.entity.Player;
 public class JobVehicleRental {
     private int id;
     private String jobId;
+    private int levelRequired;
     private String name;
     private int vehicleModelId;
     private int cost;
@@ -106,5 +107,13 @@ public class JobVehicleRental {
 
     public boolean isNear(Player player) {
         return new Vector(this.x, this.y, this.z).distance(player.getLocation()) < 350;
+    }
+
+    public int getLevelRequired() {
+        return levelRequired;
+    }
+
+    public void setLevelRequired(int levelRequired) {
+        this.levelRequired = levelRequired;
     }
 }

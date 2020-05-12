@@ -2,10 +2,8 @@ package fr.yuki.YukiRPFramework.manager;
 
 import com.google.gson.Gson;
 import fr.yuki.YukiRPFramework.character.CharacterJobLevel;
-import fr.yuki.YukiRPFramework.dao.JobLevelDAO;
-import fr.yuki.YukiRPFramework.dao.JobNPCDAO;
-import fr.yuki.YukiRPFramework.dao.JobToolDAO;
-import fr.yuki.YukiRPFramework.dao.JobVehicleRentalDAO;
+import fr.yuki.YukiRPFramework.character.CharacterStyle;
+import fr.yuki.YukiRPFramework.dao.*;
 import fr.yuki.YukiRPFramework.enums.ItemTemplateEnum;
 import fr.yuki.YukiRPFramework.enums.JobEnum;
 import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
@@ -13,8 +11,10 @@ import fr.yuki.YukiRPFramework.inventory.Inventory;
 import fr.yuki.YukiRPFramework.inventory.InventoryItem;
 import fr.yuki.YukiRPFramework.job.*;
 import fr.yuki.YukiRPFramework.model.*;
+import fr.yuki.YukiRPFramework.net.payload.AddCharacterJobPayload;
 import fr.yuki.YukiRPFramework.net.payload.AddToastPayload;
 import fr.yuki.YukiRPFramework.net.payload.AddXpBarItemPayload;
+import fr.yuki.YukiRPFramework.ui.UIState;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Vector;
 import net.onfirenetwork.onsetjava.entity.Pickup;
@@ -37,10 +37,14 @@ public class JobManager {
     private static ArrayList<JobLevel> jobLevels;
     private static ArrayList<JobVehicleRental> jobVehicleRentals;
     private static DeliveryPointConfig deliveryPointConfig;
+    private static ArrayList<JobOutfit> jobOutfits;
 
     public static void init() throws SQLException, IOException {
         jobNPCS = JobNPCDAO.loadJobNPCS();
         Onset.print("Loaded " + jobNPCS.size() + " job npc(s) from the database");
+
+        jobOutfits = JobOutfitDAO.loadJobOutfits();
+        Onset.print("Loaded " + jobOutfits.size() + " job outfit(s) from the database");
 
         jobTools = JobToolDAO.loadJobTools();
         Onset.print("Loaded " + jobTools.size() + " job tool(s) from the database");
@@ -60,7 +64,9 @@ public class JobManager {
         jobs.put(JobEnum.DELIVERY, new DeliveryJob());
         jobs.put(JobEnum.MINER, new MinerJob());
         jobs.put(JobEnum.FISHER, new FisherJob());
+        jobs.put(JobEnum.POLICE, new PoliceJob());
 
+        spawnJobOutfitsPoint();
         spawnVehicleRentalSpawns();
     }
 
@@ -118,11 +124,84 @@ public class JobManager {
         }
     }
 
+    private static void spawnJobOutfitsPoint() {
+        for(JobOutfit jobOutfit : jobOutfits) {
+            Pickup pickup = Onset.getServer().createPickup(new net.onfirenetwork.onsetjava.data.Vector
+                    (jobOutfit.getX(), jobOutfit.getY(), jobOutfit.getZ()-100), 336);
+            pickup.setScale(new Vector(4,4,0.3d));
+            pickup.setProperty("color", "0030a1", true);
+            Onset.getServer().createText3D(jobOutfit.getName() + " [Utiliser]", 17,
+                    jobOutfit.getX(), jobOutfit.getY(), jobOutfit.getZ() + 150, 0 , 0 ,0);
+        }
+    }
+
+    private static JobOutfit getNearbyJobOutfit(Player player) {
+        for(JobOutfit jobOutfit : jobOutfits) {
+            if(jobOutfit.isNear(player)) return jobOutfit;
+        }
+        return null;
+    }
+
+    public static boolean handleJobOutfitRequest(Player player) {
+        JobOutfit jobOutfit = getNearbyJobOutfit(player);
+        if(jobOutfit == null) return false;
+        Account account = WorldManager.getPlayerAccount(player);
+        Job job = jobs.values().stream().filter(x -> x.getJobType().type.equals(jobOutfit.getJobId())).findFirst().orElse(null);
+        if(job == null) return false;
+
+        // Check level and whitelist level
+        if(job.isWhitelisted()) {
+            AccountJobWhitelist accountJobWhitelist = AccountManager.getAccountJobWhitelists().stream()
+                    .filter(x -> x.getAccountId() == account.getId() && x.getJobId().equals(job.getJobType().type))
+                    .findFirst().orElse(null);
+            if(accountJobWhitelist == null) {
+                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Vous n'avez pas le niveau requis pour cette tenue");
+                return true;
+            }
+            if(accountJobWhitelist.getJobLevel() < jobOutfit.getLevelRequired()) {
+                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Vous n'avez pas le niveau requis pour cette tenue");
+                return true;
+            }
+        } else {
+            ArrayList<CharacterJobLevel> characterJobLevels = account.decodeCharacterJob();
+            CharacterJobLevel characterJobLevel = characterJobLevels.stream().filter(x -> x.getJobId().equals(jobOutfit.getJobId())).findFirst().orElse(null);
+            if(characterJobLevel == null) return false;
+            if(characterJobLevel.getJobLevel().getLevel() < jobOutfit.getLevelRequired()) {
+                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Vous n'avez pas le niveau requis pour cette tenue");
+                return true;
+            }
+        }
+
+        // Apply the outfit
+        CharacterStyle characterStyle = account.decodeCharacterStyle();
+        for(JobOutfitItem jobOutfitItem : jobOutfit.decodeOutfit()) {
+            switch (jobOutfitItem.getType().toLowerCase()) {
+                case "top":
+                    characterStyle.setTop(jobOutfitItem.getValue());
+                    break;
+
+                case "pant":
+                    characterStyle.setPant(jobOutfitItem.getValue());
+                    break;
+
+                case "shoes":
+                    characterStyle.setShoes(jobOutfitItem.getValue());
+                    break;
+            }
+        }
+        account.setCharacterStyle(characterStyle);
+        characterStyle.attachStyleToPlayer(player);
+        UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, "Vous avez changé de tenue");
+
+        return true;
+    }
+
     /**
      * Try to find a object to harvest for the player
      * @param player The player
      */
     public static boolean tryToHarvest(Player player) {
+        if(player.getVehicle() != null) return false;
         for(Map.Entry<JobEnum, Job> job : jobs.entrySet()) {
             for(WorldHarvestObject worldHarvestObject : job.getValue().getWorldHarvestObjects()) {
                 if(worldHarvestObject.isNear(player)) {
@@ -255,6 +334,33 @@ public class JobManager {
             }
         }
 
+        Account account = WorldManager.getPlayerAccount(player);
+        Job job = jobs.values().stream().filter(x -> x.getJobType().type.equals(nearbyJobVehicleRental.getJobId())).findFirst().orElse(null);
+        if(job == null) return false;
+
+        // Check level and whitelist level
+        if(job.isWhitelisted()) {
+            AccountJobWhitelist accountJobWhitelist = AccountManager.getAccountJobWhitelists().stream()
+                    .filter(x -> x.getAccountId() == account.getId() && x.getJobId().equals(job.getJobType().type))
+                    .findFirst().orElse(null);
+            if(accountJobWhitelist == null) {
+                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Vous n'avez pas le niveau requis");
+                return true;
+            }
+            if(accountJobWhitelist.getJobLevel() < nearbyJobVehicleRental.getLevelRequired()) {
+                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Vous n'avez pas le niveau requis");
+                return true;
+            }
+        } else {
+            ArrayList<CharacterJobLevel> characterJobLevels = account.decodeCharacterJob();
+            CharacterJobLevel characterJobLevel = characterJobLevels.stream().filter(x -> x.getJobId().equals(nearbyJobVehicleRental.getJobId())).findFirst().orElse(null);
+            if(characterJobLevel == null) return false;
+            if(characterJobLevel.getJobLevel().getLevel() < nearbyJobVehicleRental.getLevelRequired()) {
+                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Vous n'avez pas le niveau requis");
+                return true;
+            }
+        }
+
         destroyRentalVehiclesForPlayer(player);
 
         VehicleManager.createVehicle(nearbyJobVehicleRental.getVehicleModelId(),
@@ -270,6 +376,15 @@ public class JobManager {
         for(VehicleGarage vehicleGarage : GarageManager.getVehicleGarages().stream()
                 .filter(x -> x.isRental() && x.getOwner() == account.getId()).collect(Collectors.toList())) {
             vehicleGarage.destroy();
+        }
+    }
+
+    public static void handleRequestCharacterJobs(Player player) {
+        if(!UIStateManager.handleUIToogle(player, "characterjob")) return;
+        Account account = WorldManager.getPlayerAccount(player);
+        ArrayList<CharacterJobLevel> characterJobLevels = account.decodeCharacterJob();
+        for(CharacterJobLevel characterJobLevel : characterJobLevels) {
+            player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new AddCharacterJobPayload(characterJobLevel)));
         }
     }
 

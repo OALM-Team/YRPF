@@ -77,6 +77,13 @@ public class UIStateManager {
                 player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new SetWindowStatePayload
                         ("death", uiState.isDeath())));
                 break;
+
+            case "characterjob":
+                uiState.setCharacterJob(!uiState.isCharacterJob());
+                r = uiState.isCharacterJob();
+                player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new SetWindowStatePayload
+                        ("characterjob", uiState.isCharacterJob())));
+                break;
         }
         player.setProperty("uiState", new Gson().toJson(uiState), true);
         return r;

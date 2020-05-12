@@ -5,6 +5,7 @@ public enum JobEnum {
     DELIVERY("DELIVERY"),
     MINER("MINER"),
     FISHER("FISHER"),
+    POLICE("POLICE"),
     GARBAGE("GARBAGE");
 
     public final String type;

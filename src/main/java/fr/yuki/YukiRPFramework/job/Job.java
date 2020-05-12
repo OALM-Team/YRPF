@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 public abstract class Job {
     public abstract JobEnum getJobType();
     public abstract int getRefillInterval();
+    public abstract boolean isWhitelisted();
 
     protected ArrayList<HarvestableObject> harvestableObjectsTemplate;
     protected JobConfig jobConfig;
@@ -46,6 +47,8 @@ public abstract class Job {
             Onset.getServer().createText3D(jobNPC.getName() + " [Utiliser]", 20, jobNPC.getX(),
                     jobNPC.getY(), jobNPC.getZ() + 150, 0 , 0 ,0);
             npc.setProperty("clothing", jobNPC.getNpcClothing(), true);
+            npc.setRespawnTime(1);
+            npc.setHealth(999999);
             jobNPC.setNpc(npc);
         }
     }

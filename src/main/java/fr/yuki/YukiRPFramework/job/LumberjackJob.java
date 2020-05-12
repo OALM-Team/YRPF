@@ -36,4 +36,9 @@ public class LumberjackJob extends Job {
     public int getRefillInterval() {
         return 60000 * 5;
     }
+
+    @Override
+    public boolean isWhitelisted() {
+        return false;
+    }
 }

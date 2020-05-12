@@ -29,4 +29,9 @@ public class MinerJob extends Job {
     public int getRefillInterval() {
         return 60000 * 10;
     }
+
+    @Override
+    public boolean isWhitelisted() {
+        return false;
+    }
 }

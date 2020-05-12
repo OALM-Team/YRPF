@@ -107,6 +107,8 @@ public class WorldManager {
                     vehicleSeller.getY(), vehicleSeller.getZ() + 150, 0 , 0 ,0);
             NPC npc = Onset.getServer().createNPC(new Location(vehicleSeller.getX(), vehicleSeller.getY(),
                     vehicleSeller.getZ(), vehicleSeller.getH()));
+            npc.setRespawnTime(1);
+            npc.setHealth(999999);
             npc.setProperty("clothing", vehicleSeller.getNpcClothing(), true);
         }
     }
@@ -167,6 +169,7 @@ public class WorldManager {
             if(JobManager.requestVehicleRental(player)) return;
         if(player.getVehicle() == null)
             if(JobManager.handleSellJobNpcInventoryItem(player)) return;
+        if(player.getVehicle() == null) JobManager.handleJobOutfitRequest(player);
     }
 
     /**

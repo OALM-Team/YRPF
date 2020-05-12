@@ -71,7 +71,7 @@ public class CooperOre implements HarvestableObject {
 
     @Override
     public CharacterLoopAnimation getCharacterLoopHarvestAnimation(Player player) {
-        CharacterLoopAnimation characterLoopAnimation = new CharacterLoopAnimation(player, Animation.PICKAXE_SWING, 5000, 1,
+        CharacterLoopAnimation characterLoopAnimation = new CharacterLoopAnimation(player, Animation.PICKAXE_SWING, 5000, 4,
                 "sounds/pickaxe_hit.mp3");
         characterLoopAnimation.setTool(new CharacterToolAnimation(50003, new Vector(-8,5,20),
                 new Vector(-90,90,0), new Vector(2, 2, 2), "hand_r"));

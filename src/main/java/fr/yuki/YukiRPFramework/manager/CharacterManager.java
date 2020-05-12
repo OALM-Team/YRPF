@@ -66,6 +66,7 @@ public class CharacterManager {
 
             case "name":
                 account.setCharacterName(payload.getValue());
+                Onset.broadcast("<span color=\"#ffee00\">Bienvenue " + account.getCharacterName() + " sur la Preview OALM</>");
                 break;
         }
         account.setCharacterStyle(characterStyle);

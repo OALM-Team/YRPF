@@ -129,6 +129,8 @@ public class YukiRPFrameworkPlugin {
 
                 evt.getPlayer().setSpawnLocation(new Vector(account.getSaveX(), account.getSaveY(), account.getSaveZ()), 0);
                 evt.getPlayer().setLocation(new Vector(account.getSaveX(), account.getSaveY(), account.getSaveZ()));
+
+                Onset.broadcast("<span color=\"#ffee00\">" + account.getCharacterName() + " est de retour !</>");
             }
 
             // Insert the account in the cache if not exist

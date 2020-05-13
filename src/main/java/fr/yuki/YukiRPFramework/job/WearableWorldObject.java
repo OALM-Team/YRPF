@@ -1,5 +1,6 @@
 package fr.yuki.YukiRPFramework.job;
 
+import fr.yuki.YukiRPFramework.character.CharacterJobLevel;
 import fr.yuki.YukiRPFramework.character.CharacterToolAnimation;
 import fr.yuki.YukiRPFramework.enums.ItemTemplateEnum;
 import fr.yuki.YukiRPFramework.enums.JobEnum;
@@ -17,6 +18,7 @@ import net.onfirenetwork.onsetjava.entity.Vehicle;
 import net.onfirenetwork.onsetjava.entity.WorldObject;
 import net.onfirenetwork.onsetjava.enums.Animation;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 
@@ -118,7 +120,10 @@ public class WearableWorldObject {
         if(deliveryPointGoal != null) {
             if(deliveryPointGoal.isNear(player)) {
                 JobManager.getWearableWorldObjects().remove(this);
-                int rewardPerDistance = (int)Math.floor(originPosition.distance(player.getLocation()) / 1000);
+                ArrayList<CharacterJobLevel> characterJobLevels = account.decodeCharacterJob();
+                CharacterJobLevel characterJobLevel = characterJobLevels.stream().filter(x -> x.getJobId().equals(JobEnum.DELIVERY.type)).findFirst().orElse(null);
+
+                int rewardPerDistance = (int)Math.floor((originPosition.distance(player.getLocation()) / 1000) * characterJobLevel.getJobLevel().getLevel());
                 InventoryManager.addItemToPlayer(player, ItemTemplateEnum.CASH.id, rewardPerDistance);
                 SoundManager.playSound3D("sounds/cash_register.mp3", player.getLocation(), 200, 0.3);
                 delete = true;

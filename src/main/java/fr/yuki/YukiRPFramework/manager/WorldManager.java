@@ -275,6 +275,8 @@ public class WorldManager {
         if(sellerItem == null) return;
         if(payload.getQuantity() <= 0) return;
 
+        Account account = WorldManager.getPlayerAccount(player);
+
         ItemTemplate itemTemplate = InventoryManager.getItemTemplates().get(sellerItem.getId());
         Inventory inventory = InventoryManager.getMainInventory(player);
         if(sellerItem.getPrice() > 0) {
@@ -282,28 +284,28 @@ public class WorldManager {
             int totalPrice = sellerItem.getPrice() * payload.getQuantity();
             if(inventory.getCashAmount() < totalPrice) {
                 UIStateManager.sendNotification(player, ToastTypeEnum.ERROR,
-                        "Vous n'avez pas assez d'argent sur vous pour x" + payload.getQuantity() + " " + itemTemplate.getName());
+                        I18n.t(account.getLang(), "toast.seller.no_enought_money_on_me", String.valueOf(payload.getQuantity()),itemTemplate.getName()));
                 return;
             }
             if(InventoryManager.addItemToPlayer(player, String.valueOf(itemTemplate.getId()), payload.getQuantity()) == null) {
                 return;
             }
             inventory.removeItem(inventory.getItemByType(ItemTemplateEnum.CASH.id), totalPrice);
-            UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS,
-                    "Vous avez acheté x" + payload.getQuantity() + " " + itemTemplate.getName());
+            UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, I18n.t(account.getLang(), "toast.seller.success_buy", String.valueOf(payload.getQuantity()),itemTemplate.getName()));
         } else {
             // Sell
             InventoryItem inventoryItem = inventory.getItemByType(payload.getId());
+            if(inventoryItem == null) return;
             if(inventoryItem.getAmount() < payload.getQuantity()) {
                 UIStateManager.sendNotification(player, ToastTypeEnum.ERROR,
-                        "Vous n'avez pas x" + payload.getQuantity() + " " + itemTemplate.getName() + " pour vendre");
+                        I18n.t(account.getLang(), "toast.seller.no_enought_item_on_me", String.valueOf(payload.getQuantity()),itemTemplate.getName()));
                 return;
             }
             int totalPrice = (-(sellerItem.getPrice())) * payload.getQuantity();
             inventory.removeItem(inventoryItem, payload.getQuantity());
             InventoryManager.addItemToPlayer(player, ItemTemplateEnum.CASH.id, totalPrice);
             UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS,
-                    "Vous avez vendu x" + payload.getQuantity() + " " + itemTemplate.getName());
+                    I18n.t(account.getLang(), "toast.seller.sell_success", String.valueOf(payload.getQuantity()),itemTemplate.getName()));
         }
         WorldManager.savePlayer(player);
     }

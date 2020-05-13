@@ -264,7 +264,16 @@ public class YukiRPFrameworkPlugin {
 
     @EventHandler
     public void onPlayerInteractDoor(PlayerInteractDoorEvent evt) {
-        evt.getDoor().setOpen(evt.getDoor().isOpen() ? false : true);
+        if(VehicleManager.getNearestVehicle(evt.getPlayer().getLocation()) != null) {
+            if(VehicleManager.getNearestVehicle(evt.getPlayer().getLocation())
+                    .getLocation().distance(evt.getPlayer().getLocation()) < VehicleManager.getInteractionDistance(VehicleManager.getNearestVehicle(evt.getPlayer().getLocation()))) {
+                return;
+            } else {
+                evt.getDoor().setOpen(evt.getDoor().isOpen() ? false : true);
+            }
+        } else {
+            evt.getDoor().setOpen(evt.getDoor().isOpen() ? false : true);
+        }
     }
 
     @EventHandler

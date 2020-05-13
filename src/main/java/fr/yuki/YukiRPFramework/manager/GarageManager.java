@@ -112,7 +112,7 @@ public class GarageManager {
         // Destroy the vehicle
         vehicle.destroy();
 
-        UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, I18n.t(account.getLang(), "toast.garage.not_owner_vehicle", garage.getName()));
+        UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, I18n.t(account.getLang(), "toast.garage.vehicle_stored", garage.getName()));
     }
 
     /**

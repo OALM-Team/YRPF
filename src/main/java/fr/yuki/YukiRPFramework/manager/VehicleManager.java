@@ -14,10 +14,7 @@ import fr.yuki.YukiRPFramework.model.VehicleGarage;
 import fr.yuki.YukiRPFramework.net.payload.AddVChestItemPayload;
 import fr.yuki.YukiRPFramework.net.payload.AddVehicleGaragePayload;
 import fr.yuki.YukiRPFramework.utils.Basic;
-import fr.yuki.YukiRPFramework.vehicle.storeLayout.GarbageTruckStoreLayout;
-import fr.yuki.YukiRPFramework.vehicle.storeLayout.MiniPickupStoreLayout;
-import fr.yuki.YukiRPFramework.vehicle.storeLayout.MiniTruckStoreLayout;
-import fr.yuki.YukiRPFramework.vehicle.storeLayout.VehicleStoreLayout;
+import fr.yuki.YukiRPFramework.vehicle.storeLayout.*;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Color;
 import net.onfirenetwork.onsetjava.data.Vector;
@@ -40,6 +37,7 @@ public class VehicleManager {
         vehicleStoreLayouts.add(new MiniTruckStoreLayout());
         vehicleStoreLayouts.add(new GarbageTruckStoreLayout());
         vehicleStoreLayouts.add(new MiniPickupStoreLayout());
+        vehicleStoreLayouts.add(new TruckStoreLayout());
     }
 
     public static class CreateVehicleResult {
@@ -250,7 +248,7 @@ public class VehicleManager {
     public static int getInteractionDistance(Vehicle vehicle) {
         if(vehicle.getModel() == 22 || vehicle.getModel() == 23)
             return 500;
-        if(vehicle.getModel() == 9)
+        if(vehicle.getModel() == 9 || vehicle.getModel() == 28)
             return 700;
         return 400;
     }

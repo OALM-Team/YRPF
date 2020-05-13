@@ -6,13 +6,11 @@ import fr.yuki.YukiRPFramework.commands.*;
 import fr.yuki.YukiRPFramework.dao.AccountDAO;
 import fr.yuki.YukiRPFramework.dao.InventoryDAO;
 import fr.yuki.YukiRPFramework.enums.ItemTemplateEnum;
+import fr.yuki.YukiRPFramework.i18n.I18n;
 import fr.yuki.YukiRPFramework.inventory.Inventory;
 import fr.yuki.YukiRPFramework.manager.*;
 import fr.yuki.YukiRPFramework.model.Account;
-import fr.yuki.YukiRPFramework.net.payload.RequestBuyVehiclePayload;
-import fr.yuki.YukiRPFramework.net.payload.RequestInventoryContentPayload;
-import fr.yuki.YukiRPFramework.net.payload.RequestThrowItemPayload;
-import fr.yuki.YukiRPFramework.net.payload.StyleSavePartPayload;
+import fr.yuki.YukiRPFramework.net.payload.*;
 import fr.yuki.YukiRPFramework.ui.UIState;
 import fr.yuki.YukiRPFramework.utils.ServerConfig;
 import net.onfirenetwork.onsetjava.Onset;
@@ -33,6 +31,7 @@ public class YukiRPFrameworkPlugin {
     public void onEnable() {
         try {
             WorldManager.initServerConfig();
+            I18n.init();
             Database.init();
             Onset.registerListener(this);
             ModdingManager.init();
@@ -79,6 +78,7 @@ public class YukiRPFrameworkPlugin {
             Onset.registerRemoteEvent("Job:CharacterJobRequest");
             Onset.registerRemoteEvent("Character:RequestWearFromVehicleChest");
             Onset.registerRemoteEvent("Inventory:ThrowItem");
+            Onset.registerRemoteEvent("Seller:BuySellItem");
         } catch (Exception ex) {
             ex.printStackTrace();
             Onset.print("Can't start the plugin because : " + ex.toString());
@@ -234,6 +234,11 @@ public class YukiRPFrameworkPlugin {
 
                 case "Job:CharacterJobRequest":
                     JobManager.handleRequestCharacterJobs(evt.getPlayer());
+                    break;
+
+                case "Seller:BuySellItem":
+                    WorldManager.handleBuySellItemSeller(evt.getPlayer(), new Gson().fromJson((evt.getArgs()[0]).toString(),
+                            BuySellItemRequestPayload.class));
                     break;
             }
         }

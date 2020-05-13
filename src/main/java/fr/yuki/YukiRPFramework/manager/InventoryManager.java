@@ -3,8 +3,11 @@ package fr.yuki.YukiRPFramework.manager;
 import com.google.gson.Gson;
 import fr.yuki.YukiRPFramework.dao.InventoryDAO;
 import fr.yuki.YukiRPFramework.dao.ItemTemplateDAO;
+import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
+import fr.yuki.YukiRPFramework.i18n.I18n;
 import fr.yuki.YukiRPFramework.inventory.Inventory;
 import fr.yuki.YukiRPFramework.inventory.InventoryItem;
+import fr.yuki.YukiRPFramework.model.Account;
 import fr.yuki.YukiRPFramework.model.GroundItem;
 import fr.yuki.YukiRPFramework.model.ItemTemplate;
 import fr.yuki.YukiRPFramework.net.payload.RemoteItemInventoryPayload;
@@ -70,8 +73,10 @@ public class InventoryManager {
         inventoryItem.setTemplateId(templateId);
         inventoryItem.setAmount(quantity);
         inventoryItem.setExtraProperties(new HashMap<>());
+
+        Account account = WorldManager.getPlayerAccount(player);
         if(!checkInventoryWeight(player, inventoryItem)) {
-            //TODO: Display notification that the give have fail
+            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.inventory.no_space_left"));
             return null;
         }
         inventoryItem = inventory.addItem(inventoryItem);

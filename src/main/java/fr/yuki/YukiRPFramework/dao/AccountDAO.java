@@ -39,6 +39,7 @@ public class AccountDAO {
             account.setCharacterName(resultSet.getString("character_name"));
             account.setJobLevels(resultSet.getString("job_levels"));
             account.setIsDead(resultSet.getInt("is_dead"));
+            account.setLang(resultSet.getString("lang"));
             account.setAdminLevel(resultSet.getInt("admin_level"));
             account.setCreatedAt(resultSet.getDate("created_at"));
             account.setUpdatedAt(resultSet.getDate("updated_at"));
@@ -60,6 +61,7 @@ public class AccountDAO {
         account.setJobLevels("[]");
         account.setIsDead(0);
         account.setAdminLevel(0);
+        account.setLang("fr");
         account.setSaveX(serverConfig.getSpawnPointX());
         account.setSaveY(serverConfig.getSpawnPointY());
         account.setSaveZ(serverConfig.getSpawnPointZ());

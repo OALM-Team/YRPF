@@ -4,8 +4,10 @@ import fr.yuki.YukiRPFramework.character.CharacterToolAnimation;
 import fr.yuki.YukiRPFramework.enums.ItemTemplateEnum;
 import fr.yuki.YukiRPFramework.enums.JobEnum;
 import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
+import fr.yuki.YukiRPFramework.i18n.I18n;
 import fr.yuki.YukiRPFramework.job.customGoal.DeliveryPointGoal;
 import fr.yuki.YukiRPFramework.manager.*;
+import fr.yuki.YukiRPFramework.model.Account;
 import fr.yuki.YukiRPFramework.ui.UIState;
 import fr.yuki.YukiRPFramework.vehicle.storeLayout.StoreLayoutTransform;
 import net.onfirenetwork.onsetjava.Onset;
@@ -62,12 +64,12 @@ public class WearableWorldObject {
         this.toolAnimation.attach(player);
         player.setAnimation(this.wearAnimation);
         this.worldObject.destroy();
+        Account account = WorldManager.getPlayerAccount(player);
 
         // Set the delivery location
         if(deliveryPointGoal != null) {
-            UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS,
-                    "Cet objet doit être livré à un point de localisation");
-            player.callRemoteEvent("Map:AddWaypoint", "Point de livraison", deliveryPointGoal.getWearableWorldObject().getUuid(),
+            UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, I18n.t(account.getLang(), "toast.delivery.need_to_be_delivered"));
+            player.callRemoteEvent("Map:AddWaypoint", I18n.t(account.getLang(), "toast.delivery.delivery_point"), deliveryPointGoal.getWearableWorldObject().getUuid(),
                     deliveryPointGoal.getPosition().getX(), deliveryPointGoal.getPosition().getY(),
                     deliveryPointGoal.getPosition().getZ());
         }
@@ -79,6 +81,7 @@ public class WearableWorldObject {
      */
     public void requestUnwear(Player player, boolean delete) {
         // Put this resource in the chest
+        Account account = WorldManager.getPlayerAccount(player);
         if(!delete) {
             Vehicle nearbyVehicle = VehicleManager.getNearestVehicle(player.getLocation());
             if(nearbyVehicle != null) {
@@ -88,12 +91,12 @@ public class WearableWorldObject {
                         return;
                     }*/
                     if(nearbyVehicle.getPropertyInt("locked") == 1) {
-                        UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Impossible car ce véhicule est verrouillé");
+                        UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "action.vehicle.locked"));
                         return;
                     }
 
                     if(!VehicleManager.storeWorldWearableObject(nearbyVehicle, this)) {
-                        UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Impossible car il n'y a plus de place disponible");
+                        UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.vehicle.no_space_left"));
                         return;
                     }
 
@@ -120,8 +123,8 @@ public class WearableWorldObject {
                 SoundManager.playSound3D("sounds/cash_register.mp3", player.getLocation(), 200, 0.3);
                 delete = true;
                 JobManager.addExp(player, JobEnum.DELIVERY, 15);
-                UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS,
-                        "Vous avez livré le colis pour " + rewardPerDistance + "$ (" + Math.floor(originPosition.distance(player.getLocation()) / 100) + "m)");
+                UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, I18n.t(account.getLang(), "toast.delivery.shipped",
+                        String.valueOf(rewardPerDistance), String.valueOf(Math.floor(originPosition.distance(player.getLocation()) / 100))));
             }
             player.callRemoteEvent("Map:RemoveWaypoint", deliveryPointGoal.getWearableWorldObject().getUuid());
         }

@@ -7,6 +7,7 @@ import fr.yuki.YukiRPFramework.dao.*;
 import fr.yuki.YukiRPFramework.enums.ItemTemplateEnum;
 import fr.yuki.YukiRPFramework.enums.JobEnum;
 import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
+import fr.yuki.YukiRPFramework.i18n.I18n;
 import fr.yuki.YukiRPFramework.inventory.Inventory;
 import fr.yuki.YukiRPFramework.inventory.InventoryItem;
 import fr.yuki.YukiRPFramework.job.*;
@@ -130,7 +131,7 @@ public class JobManager {
                     (jobOutfit.getX(), jobOutfit.getY(), jobOutfit.getZ()-100), 336);
             pickup.setScale(new Vector(4,4,0.3d));
             pickup.setProperty("color", "0030a1", true);
-            Onset.getServer().createText3D(jobOutfit.getName() + " [Utiliser]", 17,
+            Onset.getServer().createText3D(jobOutfit.getName() + " [" + I18n.t(WorldManager.getServerConfig().getServerLanguage(), "ui.common.use") + "]", 17,
                     jobOutfit.getX(), jobOutfit.getY(), jobOutfit.getZ() + 150, 0 , 0 ,0);
         }
     }
@@ -155,11 +156,11 @@ public class JobManager {
                     .filter(x -> x.getAccountId() == account.getId() && x.getJobId().equals(job.getJobType().type))
                     .findFirst().orElse(null);
             if(accountJobWhitelist == null) {
-                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Vous n'avez pas le niveau requis pour cette tenue");
+                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.outfit.level_required"));
                 return true;
             }
             if(accountJobWhitelist.getJobLevel() < jobOutfit.getLevelRequired()) {
-                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Vous n'avez pas le niveau requis pour cette tenue");
+                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.outfit.level_required"));
                 return true;
             }
         } else {
@@ -167,7 +168,7 @@ public class JobManager {
             CharacterJobLevel characterJobLevel = characterJobLevels.stream().filter(x -> x.getJobId().equals(jobOutfit.getJobId())).findFirst().orElse(null);
             if(characterJobLevel == null) return false;
             if(characterJobLevel.getJobLevel().getLevel() < jobOutfit.getLevelRequired()) {
-                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Vous n'avez pas le niveau requis pour cette tenue");
+                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.outfit.level_required"));
                 return true;
             }
         }
@@ -191,7 +192,7 @@ public class JobManager {
         }
         account.setCharacterStyle(characterStyle);
         characterStyle.attachStyleToPlayer(player);
-        UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, "Vous avez changé de tenue");
+        UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, I18n.t(account.getLang(), "toast.outfit.success_change"));
 
         return true;
     }
@@ -202,11 +203,12 @@ public class JobManager {
      */
     public static boolean tryToHarvest(Player player) {
         if(player.getVehicle() != null) return false;
+        Account account = WorldManager.getPlayerAccount(player);
         for(Map.Entry<JobEnum, Job> job : jobs.entrySet()) {
             for(WorldHarvestObject worldHarvestObject : job.getValue().getWorldHarvestObjects()) {
                 if(worldHarvestObject.isNear(player)) {
                     if(CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject() != null) {
-                        UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Impossible de porter cette objet car vous portez déjà un objet");
+                        UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "action.vehicle.wearSomething"));
                         return true;
                     }
 
@@ -229,11 +231,14 @@ public class JobManager {
         JobLevel previousJobLevel = characterJobLevel.getJobLevel();
         characterJobLevel.setExp(characterJobLevel.getExp() + amount);
         account.setJobLevels(characterJobLevels);
-        player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new AddXpBarItemPayload("+" + amount + " XP " + job.type)));
+        player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new AddXpBarItemPayload("+" + amount + " XP " +
+                I18n.t(account.getLang(), "ui.characterJob.jobLevel_" + characterJobLevel.getJobLevel().getTranslateName()))));
         JobLevel nextJobLevel = characterJobLevel.getJobLevel();
         if(previousJobLevel.getLevel() != nextJobLevel.getLevel()) {
             SoundManager.playSound3D("sounds/success_1.mp3", player.getLocation(), 200, 0.3);
-            player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new AddXpBarItemPayload("Vous etes desormais " + nextJobLevel.getName())));
+            String translatedJobName = I18n.t(account.getLang(), "ui.characterJob.jobLevel_" + characterJobLevel.getJobLevel().getTranslateName());
+            player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new AddXpBarItemPayload(
+                    I18n.t(account.getLang(), "toast.xp.level_up", translatedJobName))));
         }
 
         WorldManager.savePlayer(player);
@@ -245,13 +250,14 @@ public class JobManager {
      * @param uuid The object uuid
      */
     public static void handleWearObjectRequest(Player player, String uuid) {
+        Account account = WorldManager.getPlayerAccount(player);
         WearableWorldObject wearableWorldObject = wearableWorldObjects.stream().filter(x -> x.getUuid().equals(uuid)).findFirst().orElse(null);
         if(wearableWorldObject == null) {
-            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Impossible de porter cette objet car il est introuvable");
+            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.wear.not_found"));
             return;
         }
         if(CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject() != null) {
-            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Impossible de porter cette objet car vous portez déjà un objet");
+            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "action.vehicle.wearSomething"));
             return;
         }
         wearableWorldObject.requestWear(player);
@@ -268,8 +274,8 @@ public class JobManager {
             Onset.print("Selling item to the npc price=" + sellListItem.getPrice());
             inventory.removeItem(inventoryItem, 1);
             SoundManager.playSound3D("sounds/cash_register.mp3", player.getLocation(), 200, 0.3);
-            UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, "Vous avez vendu votre " + inventoryItem.getTemplate().getName() +
-                    " pour " + sellListItem.getPrice() + "$");
+            //UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, "Vous avez vendu votre " + inventoryItem.getTemplate().getName() +
+            //        " pour " + sellListItem.getPrice() + "$");
             jobNPCNearby.getNpc().setAnimation(Animation.THUMBSUP);
             InventoryManager.addItemToPlayer(player, ItemTemplateEnum.CASH.id, sellListItem.getPrice());
         }
@@ -278,6 +284,7 @@ public class JobManager {
 
     public static void handleUnwearObject(Player player) {
         if(CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject() == null) return;
+        Account account = WorldManager.getPlayerAccount(player);
 
         // Try to sell it to the nearby npc
         JobNPC jobNPCNearby = getNearbyJobNPC(player);
@@ -289,9 +296,9 @@ public class JobManager {
                 CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject().requestUnwear(player, true);
                 jobNPCNearby.getNpc().setAnimation(Animation.THUMBSUP);
                 SoundManager.playSound3D("sounds/cash_register.mp3", player.getLocation(), 200, 0.3);
-                UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, "Vous avez vendu votre ressource pour " + jobNPCListItem.getPrice() + "$");
+                //UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, "Vous avez vendu votre ressource pour " + jobNPCListItem.getPrice() + "$");
             } else {
-                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Cette personne n'achète pas ce type de ressource");
+                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.npc.no_buy_kind_item"));
             }
             return;
         }
@@ -300,7 +307,7 @@ public class JobManager {
         JobTool jobToolNearby = getNearbyJobTool(player);
         if(jobToolNearby != null) {
             if(!jobToolNearby.getJobToolHandler().hasLevelRequired(player)) {
-                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Vous n'avez pas le niveau requis pour cet outil");
+                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.tool.no_level_required"));
                 return;
             }
 
@@ -311,7 +318,7 @@ public class JobManager {
                 }
             }
             else {
-                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Impossible d'utiliser cet outil avec cette ressource");
+                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.tool.no_kind_item"));
             }
             return;
         }
@@ -325,16 +332,17 @@ public class JobManager {
         if(nearbyJobVehicleRental == null) return false;
         if(player.getVehicle() != null) return false;
 
+        Account account = WorldManager.getPlayerAccount(player);
+
         // Check vehicle around
         Vector spawnPoint = new Vector(nearbyJobVehicleRental.getSpawnX(), nearbyJobVehicleRental.getSpawnY(), nearbyJobVehicleRental.getSpawnZ());
         if(VehicleManager.getNearestVehicle(spawnPoint) != null) {
             if(VehicleManager.getNearestVehicle(spawnPoint).getLocation().distance(spawnPoint) < 600) {
-                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Il y a un véhicule dans la zone d'apparition");
+                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.garage.vehicle_block_spawn"));
                 return true;
             }
         }
 
-        Account account = WorldManager.getPlayerAccount(player);
         Job job = jobs.values().stream().filter(x -> x.getJobType().type.equals(nearbyJobVehicleRental.getJobId())).findFirst().orElse(null);
         if(job == null) return false;
 
@@ -344,11 +352,11 @@ public class JobManager {
                     .filter(x -> x.getAccountId() == account.getId() && x.getJobId().equals(job.getJobType().type))
                     .findFirst().orElse(null);
             if(accountJobWhitelist == null) {
-                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Vous n'avez pas le niveau requis");
+                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.job.not_whitelisted"));
                 return true;
             }
             if(accountJobWhitelist.getJobLevel() < nearbyJobVehicleRental.getLevelRequired()) {
-                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Vous n'avez pas le niveau requis");
+                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.job.not_whitelisted"));
                 return true;
             }
         } else {
@@ -356,7 +364,7 @@ public class JobManager {
             CharacterJobLevel characterJobLevel = characterJobLevels.stream().filter(x -> x.getJobId().equals(nearbyJobVehicleRental.getJobId())).findFirst().orElse(null);
             if(characterJobLevel == null) return false;
             if(characterJobLevel.getJobLevel().getLevel() < nearbyJobVehicleRental.getLevelRequired()) {
-                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Vous n'avez pas le niveau requis");
+                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.job.not_whitelisted"));
                 return true;
             }
         }
@@ -366,8 +374,8 @@ public class JobManager {
         VehicleManager.createVehicle(nearbyJobVehicleRental.getVehicleModelId(),
                 new Vector(nearbyJobVehicleRental.getSpawnX(), nearbyJobVehicleRental.getSpawnY(), nearbyJobVehicleRental.getSpawnZ()),
                 player.getLocationAndHeading().getHeading(), player, null, true);
-        UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, "Vous avez loué un véhicule pour " +
-                nearbyJobVehicleRental.getCost() + "$");
+        UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, I18n.t(account.getLang(), "toast.job_vehicle.success_rental",
+                String.valueOf(nearbyJobVehicleRental.getCost())));
         return true;
     }
 

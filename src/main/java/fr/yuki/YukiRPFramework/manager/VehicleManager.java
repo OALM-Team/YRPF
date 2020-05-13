@@ -4,10 +4,12 @@ import com.google.gson.Gson;
 import fr.yuki.YukiRPFramework.dao.VehicleGarageDAO;
 import fr.yuki.YukiRPFramework.enums.ItemTemplateEnum;
 import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
+import fr.yuki.YukiRPFramework.i18n.I18n;
 import fr.yuki.YukiRPFramework.inventory.Inventory;
 import fr.yuki.YukiRPFramework.inventory.InventoryItem;
 import fr.yuki.YukiRPFramework.job.WearableWorldObject;
 import fr.yuki.YukiRPFramework.job.customGoal.DeliveryPointGoal;
+import fr.yuki.YukiRPFramework.model.Account;
 import fr.yuki.YukiRPFramework.model.VehicleGarage;
 import fr.yuki.YukiRPFramework.net.payload.AddVChestItemPayload;
 import fr.yuki.YukiRPFramework.net.payload.AddVehicleGaragePayload;
@@ -159,16 +161,17 @@ public class VehicleManager {
      * @param vehicle The vehicle
      */
     public static void tryToogleLockVehicle(Player player, Vehicle vehicle) {
+        Account account = WorldManager.getPlayerAccount(player);
         for(InventoryItem keyItem : InventoryManager.getMainInventory(player).getItemsByType(ItemTemplateEnum.VKEY.id)) {
             if(keyItem.getExtraProperties().get("vehicle_uuid").equals(vehicle.getPropertyString("uuid"))) {
                 if(vehicle.getPropertyInt("locked") == 1) {
-                    UIStateManager.sendNotification(player, ToastTypeEnum.WARN,
-                            "Véhicule " + vehicle.getLicensePlate() + " désormais déverrouillé");
+                    UIStateManager.sendNotification(player, ToastTypeEnum.WARN, I18n.t(account.getLang(),
+                            "toast.vehicle.lock_off", vehicle.getLicensePlate()));
                     vehicle.setProperty("locked", 0, true);
                     SoundManager.playSound3D("sounds/carUnlock.mp3", vehicle.getLocation(), 2500, 1);
                 } else {
-                    UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS,
-                            "Véhicule " + vehicle.getLicensePlate() + " désormais verrouillé");
+                    UIStateManager.sendNotification(player, ToastTypeEnum.WARN, I18n.t(account.getLang(),
+                            "toast.vehicle.lock_on", vehicle.getLicensePlate()));
                     vehicle.setProperty("locked", 1, true);
                     SoundManager.playSound3D("sounds/carLock.mp3", vehicle.getLocation(), 2500, 1);
                 }
@@ -201,11 +204,12 @@ public class VehicleManager {
     public static void onPlayerEnterVehicle(Player player, Vehicle vehicle, int seatId) {
         if(seatId == 1) vehicle.setEngineOn(true);
 
+        Account account = WorldManager.getPlayerAccount(player);
         // Show waypoints for items in storage
         for(WearableWorldObject wearableWorldObject : getVehicleWearableObjects(vehicle)) {
             if(wearableWorldObject.getDeliveryPointGoal() == null) continue;
             DeliveryPointGoal deliveryPointGoal = wearableWorldObject.getDeliveryPointGoal();
-            player.callRemoteEvent("Map:AddWaypoint", "Point de livraison", deliveryPointGoal.getWearableWorldObject().getUuid(),
+            player.callRemoteEvent("Map:AddWaypoint", I18n.t(account.getLang(), "toast.delivery.delivery_point"), deliveryPointGoal.getWearableWorldObject().getUuid(),
                     deliveryPointGoal.getPosition().getX(), deliveryPointGoal.getPosition().getY(),
                     deliveryPointGoal.getPosition().getZ());
         }
@@ -272,8 +276,10 @@ public class VehicleManager {
         if(vehicle == null) return false;
         if(vehicle.getModel() == 33 || vehicle.getModel() == 34) return false;
         if(vehicle.getLocation().distance(player.getLocation()) > getInteractionDistance(vehicle)) return false;
+
+        Account account = WorldManager.getPlayerAccount(player);
         if(vehicle.getPropertyInt("locked") == 1) {
-            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Impossible car ce véhicule est verrouillé");
+            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "action.vehicle.locked"));
             return true;
         }
         if(!UIStateManager.handleUIToogle(player, "vchest")) return true;
@@ -289,8 +295,10 @@ public class VehicleManager {
         if(player.getVehicle() != null) return;
         Vehicle vehicle = getNearestVehicle(player.getLocation());
         if(vehicle.getLocation().distance(player.getLocation()) > VehicleManager.getInteractionDistance(vehicle)) return;
+
+        Account account = WorldManager.getPlayerAccount(player);
         if(vehicle.getPropertyInt("locked") == 1) {
-            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Impossible car ce véhicule est verrouillé");
+            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "action.vehicle.locked"));
             return;
         }
         WearableWorldObject wearableWorldObject = getVehicleWearableObjects(vehicle).stream()
@@ -298,7 +306,7 @@ public class VehicleManager {
         if(wearableWorldObject == null) return;
         UIStateManager.handleUIToogle(player, "vchest");
         if(CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject() != null) {
-            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Impossible de porter cette objet car vous portez déjà un objet");
+            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "action.vehicle.wearSomething"));
             return;
         }
 

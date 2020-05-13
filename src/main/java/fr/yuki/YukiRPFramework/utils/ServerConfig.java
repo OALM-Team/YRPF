@@ -15,6 +15,8 @@ public class ServerConfig {
     private String sqlUsername;
     private String sqlPassword;
     private String sqlDb;
+    private String langPath;
+    private String serverLanguage;
 
     public double getDeathRespawnX() {
         return deathRespawnX;
@@ -126,5 +128,21 @@ public class ServerConfig {
 
     public void setSpawnPointH(double spawnPointH) {
         this.spawnPointH = spawnPointH;
+    }
+
+    public String getLangPath() {
+        return langPath;
+    }
+
+    public void setLangPath(String langPath) {
+        this.langPath = langPath;
+    }
+
+    public String getServerLanguage() {
+        return serverLanguage;
+    }
+
+    public void setServerLanguage(String serverLanguage) {
+        this.serverLanguage = serverLanguage;
     }
 }

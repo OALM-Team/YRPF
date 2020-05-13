@@ -5,6 +5,7 @@ import fr.yuki.YukiRPFramework.dao.GarageDAO;
 import fr.yuki.YukiRPFramework.dao.VehicleGarageDAO;
 import fr.yuki.YukiRPFramework.enums.ItemTemplateEnum;
 import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
+import fr.yuki.YukiRPFramework.i18n.I18n;
 import fr.yuki.YukiRPFramework.inventory.Inventory;
 import fr.yuki.YukiRPFramework.model.*;
 import fr.yuki.YukiRPFramework.net.payload.*;
@@ -87,9 +88,10 @@ public class GarageManager {
      * @param garage The garage to store
      */
     public static void storeVehicleInGarage(Player player, Garage garage) {
+        Account account = WorldManager.getPlayerAccount(player);
         Vehicle vehicle = player.getVehicle();
         if(!vehicle.getPropertyString("owner").equals(player.getSteamId())){
-            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Ce véhicule ne vous appartient pas");
+            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.garage.not_owner_vehicle"));
             return;
         }
         // Exit the player from the vehicle
@@ -99,7 +101,7 @@ public class GarageManager {
         VehicleGarage vehicleGarage = vehicleGarages.stream().filter(x -> x.getUuid().equals(vehicle.getPropertyString("uuid")))
                 .findFirst().orElse(null);
         if(vehicleGarage == null || vehicleGarage.isRental()) {
-            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Ce véhicule ne vous appartient pas");
+            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.garage.not_owner_vehicle"));
             return;
         }
         vehicleGarage.setGarageId(garage.getId());
@@ -110,7 +112,7 @@ public class GarageManager {
         // Destroy the vehicle
         vehicle.destroy();
 
-        UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, "Véhicule stocké dans le garage " + garage.getName());
+        UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, I18n.t(account.getLang(), "toast.garage.not_owner_vehicle", garage.getName()));
     }
 
     /**
@@ -133,6 +135,7 @@ public class GarageManager {
      * @param player The player
      */
     public static void handleRequestVehicle(Player player, String vehicleUuid) {
+        Account account = WorldManager.getPlayerAccount(player);
         Garage garage = getNearestGarage(player);
         if(garage == null) {
             UIStateManager.handleUIToogle(player, "garage");
@@ -144,7 +147,7 @@ public class GarageManager {
 
         if(VehicleManager.getNearestVehicle(player.getLocation()) != null) {
             if(VehicleManager.getNearestVehicle(player.getLocation()).getLocation().distance(player.getLocation()) < 400) {
-                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Il y a un véhicule dans la zone d'apparition");
+                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.garage.vehicle_block_spawn"));
                 return;
             }
         }
@@ -191,6 +194,8 @@ public class GarageManager {
     }
 
     public static void handleRequestBuyVehicle(Player player, RequestBuyVehiclePayload payload) {
+        Account account = WorldManager.getPlayerAccount(player);
+
         if(player.getVehicle() != null) {
             UIStateManager.handleUIToogle(player, "vseller");
             return;
@@ -206,7 +211,7 @@ public class GarageManager {
 
         if(VehicleManager.getNearestVehicle(player.getLocation()) != null) {
             if(VehicleManager.getNearestVehicle(player.getLocation()).getLocation().distance(player.getLocation()) < 400) {
-                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Il y a un véhicule dans la zone d'apparition");
+                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.garage.vehicle_block_spawn"));
                 return;
             }
         }
@@ -214,7 +219,7 @@ public class GarageManager {
         // Check price
         Inventory inventory = InventoryManager.getMainInventory(player);
         if(inventory.getCashAmount() < sellListItem.getPrice()) {
-            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Vous n'avez pas assez d'argent sur vous pour ça");
+            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.atm.no_enought_money_on_me"));
             UIStateManager.handleUIToogle(player, "vseller");
             return;
         }
@@ -229,7 +234,7 @@ public class GarageManager {
         createVehicleResult.getVehicleGarage().save();
         createVehicleResult.getVehicle().setColor(new Color(payload.getAWTColor().getRed(), payload.getAWTColor().getGreen(), payload.getAWTColor().getBlue()));
 
-        UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, "Félicitation vous avez acheté " + sellListItem.getName() +
-                " pour " + sellListItem.getPrice() + "$");
+        UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS,
+                I18n.t(account.getLang(), "toast.vseller.success_buy_vehicle", sellListItem.getName(), String.valueOf(sellListItem.getPrice())));
     }
 }

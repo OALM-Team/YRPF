@@ -10,6 +10,7 @@ public class UIState {
     private boolean bigmap = false;
     private boolean death = false;
     private boolean characterJob = false;
+    private boolean seller = false;
 
     public boolean isInventory() {
         return inventory;
@@ -81,5 +82,13 @@ public class UIState {
 
     public void setCharacterJob(boolean characterJob) {
         this.characterJob = characterJob;
+    }
+
+    public boolean isSeller() {
+        return seller;
+    }
+
+    public void setSeller(boolean seller) {
+        this.seller = seller;
     }
 }

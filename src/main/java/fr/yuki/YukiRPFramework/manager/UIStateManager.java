@@ -6,6 +6,7 @@ import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
 import fr.yuki.YukiRPFramework.inventory.Inventory;
 import fr.yuki.YukiRPFramework.model.Account;
 import fr.yuki.YukiRPFramework.net.payload.AddToastPayload;
+import fr.yuki.YukiRPFramework.net.payload.SetLangPayload;
 import fr.yuki.YukiRPFramework.net.payload.SetWindowStatePayload;
 import fr.yuki.YukiRPFramework.ui.UIState;
 import net.onfirenetwork.onsetjava.Onset;
@@ -84,6 +85,14 @@ public class UIStateManager {
                 player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new SetWindowStatePayload
                         ("characterjob", uiState.isCharacterJob())));
                 break;
+
+            case "seller":
+                uiState.setSeller(!uiState.isSeller());
+                r = uiState.isSeller();
+                if(!r) CharacterManager.setCharacterFreeze(player, false);
+                player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new SetWindowStatePayload
+                        ("seller", uiState.isSeller())));
+                break;
         }
         player.setProperty("uiState", new Gson().toJson(uiState), true);
         return r;
@@ -97,6 +106,12 @@ public class UIStateManager {
      */
     public static void sendNotification(Player player, ToastTypeEnum type, String message) {
         player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new AddToastPayload(type.type, message)));
+    }
+
+    public static void setLang(Player player, String lang) {
+        Account account = WorldManager.getPlayerAccount(player);
+        account.setLang(lang);
+        player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new SetLangPayload(account.getLang())));
     }
 
     public static void handleUIReady(Player player) {
@@ -114,6 +129,9 @@ public class UIStateManager {
         if(inventory.getItemByType(ItemTemplateEnum.FISHING_ROD.id) == null) {
             InventoryManager.addItemToPlayer(player, ItemTemplateEnum.FISHING_ROD.id, 1);
         }
+
+        // Set lang to the UI
+        setLang(player, account.getLang());
 
         // Apply style to character if there is one saved
         if(account.getCharacterCreationRequest() == 0) {

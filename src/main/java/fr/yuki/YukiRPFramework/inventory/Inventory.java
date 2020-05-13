@@ -5,8 +5,10 @@ import com.google.gson.reflect.TypeToken;
 import fr.yuki.YukiRPFramework.dao.InventoryDAO;
 import fr.yuki.YukiRPFramework.enums.ItemTemplateEnum;
 import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
+import fr.yuki.YukiRPFramework.i18n.I18n;
 import fr.yuki.YukiRPFramework.manager.UIStateManager;
 import fr.yuki.YukiRPFramework.manager.WorldManager;
+import fr.yuki.YukiRPFramework.model.Account;
 import fr.yuki.YukiRPFramework.net.payload.AddItemInventoryPayload;
 import fr.yuki.YukiRPFramework.net.payload.RemoteItemInventoryPayload;
 import fr.yuki.YukiRPFramework.net.payload.UpdateInventoryWeightPayload;
@@ -44,9 +46,11 @@ public class Inventory {
 
                 // Display the notification
                 if(WorldManager.findPlayerByAccountId(this.getCharacterId()) != null) {
+                    Account account = WorldManager.getPlayerAccount(WorldManager.findPlayerByAccountId(this.getCharacterId()));
                     UIStateManager.sendNotification(WorldManager.findPlayerByAccountId(this.getCharacterId()),
                             ToastTypeEnum.SUCCESS,
-                            "+" + inventoryItem.getAmount() + " " + inventoryItemEntry.getTemplate().getName());
+                            "+" + inventoryItem.getAmount() + " " +
+                                    I18n.t(account.getLang(), "item.name." + inventoryItem.getTemplateId()));
                 }
 
                 return inventoryItemEntry;
@@ -57,9 +61,11 @@ public class Inventory {
 
         // Display the notification
         if(WorldManager.findPlayerByAccountId(this.getCharacterId()) != null) {
+            Account account = WorldManager.getPlayerAccount(WorldManager.findPlayerByAccountId(this.getCharacterId()));
             UIStateManager.sendNotification(WorldManager.findPlayerByAccountId(this.getCharacterId()),
                     ToastTypeEnum.SUCCESS,
-                    "+" + inventoryItem.getAmount() + " " + inventoryItem.getTemplate().getName());
+                    "+" + inventoryItem.getAmount() + " " +
+                            I18n.t(account.getLang(), "item.name." + inventoryItem.getTemplateId()));
         }
 
         return inventoryItem;
@@ -203,9 +209,10 @@ public class Inventory {
 
         // Display the notification
         if(WorldManager.findPlayerByAccountId(this.getCharacterId()) != null) {
+            Account account = WorldManager.getPlayerAccount(WorldManager.findPlayerByAccountId(this.getCharacterId()));
             UIStateManager.sendNotification(WorldManager.findPlayerByAccountId(this.getCharacterId()),
                     ToastTypeEnum.WARN,
-                    "-" + amount + " " + item.getTemplate().getName());
+                    "-" + amount + " " + I18n.t(account.getLang(), "item.name." + item.getTemplateId()));
         }
     }
 

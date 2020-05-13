@@ -114,7 +114,6 @@ public class CharacterManager {
         }
 
         UIStateManager.handleUIToogle(player, "death");
-        UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Vous êtes mort, attendez les secours ou votre mort");
         player.setRespawnTime(WorldManager.getServerConfig().getDeathRespawnDelay());
     }
 
@@ -134,8 +133,8 @@ public class CharacterManager {
                     account.setIsDead(0);
                     CharacterManager.setCharacterFreeze(player, false);
                     Onset.print("Player respawned after death");
-                    UIStateManager.sendNotification(player, ToastTypeEnum.WARN,
-                            "Après un moment a l'hôpital vous êtes sortis du coma, vous avez du mal à vous rappeler des derniers événements");
+                    //UIStateManager.sendNotification(player, ToastTypeEnum.WARN,
+                    //        "Après un moment a l'hôpital vous êtes sortis du coma, vous avez du mal à vous rappeler des derniers événements");
                     player.setLocationAndHeading(new Location(WorldManager.getServerConfig().getDeathRespawnX(),
                             WorldManager.getServerConfig().getDeathRespawnY(),
                             WorldManager.getServerConfig().getDeathRespawnZ(),

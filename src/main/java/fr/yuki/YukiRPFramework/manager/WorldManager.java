@@ -2,12 +2,17 @@ package fr.yuki.YukiRPFramework.manager;
 
 import com.google.gson.Gson;
 import fr.yuki.YukiRPFramework.character.CharacterState;
-import fr.yuki.YukiRPFramework.dao.ATMDAO;
-import fr.yuki.YukiRPFramework.dao.AccountDAO;
-import fr.yuki.YukiRPFramework.dao.GarageDAO;
-import fr.yuki.YukiRPFramework.dao.VehicleSellerDAO;
+import fr.yuki.YukiRPFramework.dao.*;
+import fr.yuki.YukiRPFramework.enums.ItemTemplateEnum;
+import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
+import fr.yuki.YukiRPFramework.i18n.I18n;
+import fr.yuki.YukiRPFramework.inventory.Inventory;
+import fr.yuki.YukiRPFramework.inventory.InventoryItem;
 import fr.yuki.YukiRPFramework.job.DeliveryPointConfig;
 import fr.yuki.YukiRPFramework.model.*;
+import fr.yuki.YukiRPFramework.net.payload.AddSellerItemPayload;
+import fr.yuki.YukiRPFramework.net.payload.AddToastPayload;
+import fr.yuki.YukiRPFramework.net.payload.BuySellItemRequestPayload;
 import fr.yuki.YukiRPFramework.utils.ServerConfig;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Location;
@@ -29,6 +34,7 @@ public class WorldManager {
     private static ArrayList<Garage> garages;
     private static ArrayList<VehicleSeller> vehicleSellers;
     private static ArrayList<GroundItem> groundItems;
+    private static ArrayList<Seller> sellers;
 
     /**
      * Init the world manager
@@ -52,6 +58,12 @@ public class WorldManager {
         vehicleSellers = VehicleSellerDAO.loadVehicleSellers();
         Onset.print("Loaded " + vehicleSellers.size() + " vehicle seller(s) from the database");
         spawnVehicleSellers();
+
+        // Load sellers
+        sellers = SellerDAO.loadSellers();
+        Onset.print("Loaded " + sellers.size() + " seller(s) from the database");
+        spawnSellers();
+
     }
 
     public static void initServerConfig() throws IOException {
@@ -77,7 +89,7 @@ public class WorldManager {
                 pickup.setScale(new Vector(1,1,0.1d));
                 pickup.setProperty("color", "02e630", true);
                 atm.setPickup(pickup);
-                Onset.getServer().createText3D("ATM [Utiliser]", 15, atm.getX(), atm.getY(), atm.getZ() + 150, 0 , 0 ,0);
+                Onset.getServer().createText3D("ATM [" + I18n.t(WorldManager.getServerConfig().getServerLanguage(), "ui.common.use") + "]", 15, atm.getX(), atm.getY(), atm.getZ() + 150, 0 , 0 ,0);
             }
             catch(Exception ex) {
                 Onset.print("Can't spawn the atm: " + ex.toString());
@@ -93,7 +105,7 @@ public class WorldManager {
             Pickup pickup = Onset.getServer().createPickup(new Vector(garage.getX(), garage.getY(), garage.getZ()-100), 336);
             pickup.setScale(new Vector(3,3,0.1d));
             pickup.setProperty("color", "6500bd", true);
-            Onset.getServer().createText3D("Garage [Utiliser]", 20, garage.getX(), garage.getY(), garage.getZ() + 150, 0 , 0 ,0);
+            Onset.getServer().createText3D("Garage [" + I18n.t(WorldManager.getServerConfig().getServerLanguage(), "ui.common.use") + "]", 20, garage.getX(), garage.getY(), garage.getZ() + 150, 0 , 0 ,0);
         }
     }
 
@@ -103,13 +115,25 @@ public class WorldManager {
                     vehicleSeller.getZ()-100), 336);
             pickup.setScale(new Vector(1,1,0.1d));
             pickup.setProperty("color", "ffa600", true);
-            Onset.getServer().createText3D("Vendeur " + vehicleSeller.getName() + " [Utiliser]", 20, vehicleSeller.getX(),
+            Onset.getServer().createText3D("Vendeur " + vehicleSeller.getName() + " [" + I18n.t(WorldManager.getServerConfig().getServerLanguage(), "ui.common.use") + "]", 20, vehicleSeller.getX(),
                     vehicleSeller.getY(), vehicleSeller.getZ() + 150, 0 , 0 ,0);
             NPC npc = Onset.getServer().createNPC(new Location(vehicleSeller.getX(), vehicleSeller.getY(),
                     vehicleSeller.getZ(), vehicleSeller.getH()));
             npc.setRespawnTime(1);
             npc.setHealth(999999);
             npc.setProperty("clothing", vehicleSeller.getNpcClothing(), true);
+        }
+    }
+
+    public static void spawnSellers() {
+        for(Seller seller : sellers) {
+            Onset.getServer().createText3D(seller.getName() + " [" + I18n.t(WorldManager.getServerConfig().getServerLanguage(), "ui.common.use") + "]", 20, seller.getX(),
+                    seller.getY(), seller.getZ() + 150, 0 , 0 ,0);
+            NPC npc = Onset.getServer().createNPC(new Location(seller.getX(), seller.getY(),
+                    seller.getZ(), seller.getH()));
+            npc.setRespawnTime(1);
+            npc.setHealth(999999);
+            npc.setProperty("clothing", seller.getNpcClothing(), true);
         }
     }
 
@@ -169,7 +193,8 @@ public class WorldManager {
             if(JobManager.requestVehicleRental(player)) return;
         if(player.getVehicle() == null)
             if(JobManager.handleSellJobNpcInventoryItem(player)) return;
-        if(player.getVehicle() == null) JobManager.handleJobOutfitRequest(player);
+        if(player.getVehicle() == null) if(JobManager.handleJobOutfitRequest(player)) return;
+        if(player.getVehicle() == null) if(handleSellerInteract(player)) return;
     }
 
     /**
@@ -207,6 +232,80 @@ public class WorldManager {
         if(groundItem == null) return false;
         groundItem.pickByPlayer(player);
         return true;
+    }
+
+    public static boolean handleSellerInteract(Player player) {
+        for(Seller seller : sellers) {
+            if(seller.isNear(player)) {
+                openSeller(player, seller);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static Seller getNearbySeller(Player player) {
+        for(Seller seller : sellers) {
+            if(seller.isNear(player)) {
+                return seller;
+            }
+        }
+        return null;
+    }
+
+    public static void openSeller(Player player, Seller seller) {
+        if(!UIStateManager.handleUIToogle(player, "seller")) {
+            CharacterManager.setCharacterFreeze(player, false);
+            return;
+        }
+
+        CharacterManager.setCharacterFreeze(player, true);
+        for(SellerItem sellerItem : seller.decodeItems()) {
+            ItemTemplate itemTemplate = InventoryManager.getItemTemplates().get(sellerItem.getId());
+            player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new AddSellerItemPayload
+                    (String.valueOf(sellerItem.getId()), itemTemplate.getName(), sellerItem.getPrice())));
+        }
+    }
+
+    public static void handleBuySellItemSeller(Player player, BuySellItemRequestPayload payload) {
+        Seller seller = getNearbySeller(player);
+        if(seller == null) return;
+        SellerItem sellerItem = seller.decodeItems().stream().filter(x -> x.getId() == Integer.parseInt(payload.getId()))
+                .findFirst().orElse(null);
+        if(sellerItem == null) return;
+        if(payload.getQuantity() <= 0) return;
+
+        ItemTemplate itemTemplate = InventoryManager.getItemTemplates().get(sellerItem.getId());
+        Inventory inventory = InventoryManager.getMainInventory(player);
+        if(sellerItem.getPrice() > 0) {
+            // Buy
+            int totalPrice = sellerItem.getPrice() * payload.getQuantity();
+            if(inventory.getCashAmount() < totalPrice) {
+                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR,
+                        "Vous n'avez pas assez d'argent sur vous pour x" + payload.getQuantity() + " " + itemTemplate.getName());
+                return;
+            }
+            if(InventoryManager.addItemToPlayer(player, String.valueOf(itemTemplate.getId()), payload.getQuantity()) == null) {
+                return;
+            }
+            inventory.removeItem(inventory.getItemByType(ItemTemplateEnum.CASH.id), totalPrice);
+            UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS,
+                    "Vous avez acheté x" + payload.getQuantity() + " " + itemTemplate.getName());
+        } else {
+            // Sell
+            InventoryItem inventoryItem = inventory.getItemByType(payload.getId());
+            if(inventoryItem.getAmount() < payload.getQuantity()) {
+                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR,
+                        "Vous n'avez pas x" + payload.getQuantity() + " " + itemTemplate.getName() + " pour vendre");
+                return;
+            }
+            int totalPrice = (-(sellerItem.getPrice())) * payload.getQuantity();
+            inventory.removeItem(inventoryItem, payload.getQuantity());
+            InventoryManager.addItemToPlayer(player, ItemTemplateEnum.CASH.id, totalPrice);
+            UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS,
+                    "Vous avez vendu x" + payload.getQuantity() + " " + itemTemplate.getName());
+        }
+        WorldManager.savePlayer(player);
     }
 
     /**

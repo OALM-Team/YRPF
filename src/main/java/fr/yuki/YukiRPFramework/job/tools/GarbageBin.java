@@ -5,6 +5,7 @@ import fr.yuki.YukiRPFramework.character.CharacterToolAnimation;
 import fr.yuki.YukiRPFramework.enums.ItemTemplateEnum;
 import fr.yuki.YukiRPFramework.enums.JobEnum;
 import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
+import fr.yuki.YukiRPFramework.i18n.I18n;
 import fr.yuki.YukiRPFramework.job.WearableWorldObject;
 import fr.yuki.YukiRPFramework.manager.*;
 import fr.yuki.YukiRPFramework.model.JobTool;

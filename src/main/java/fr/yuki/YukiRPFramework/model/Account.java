@@ -27,6 +27,7 @@ public class Account {
     private String characterName;
     private String jobLevels;
     private int isDead;
+    private String lang;
 
     public int getId() {
         return id;
@@ -180,5 +181,13 @@ public class Account {
 
     public void setAdminLevel(int adminLevel) {
         this.adminLevel = adminLevel;
+    }
+
+    public String getLang() {
+        return lang;
+    }
+
+    public void setLang(String lang) {
+        this.lang = lang;
     }
 }

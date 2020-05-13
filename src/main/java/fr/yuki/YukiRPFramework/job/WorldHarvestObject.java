@@ -2,11 +2,10 @@ package fr.yuki.YukiRPFramework.job;
 
 import fr.yuki.YukiRPFramework.character.CharacterLoopAnimation;
 import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
+import fr.yuki.YukiRPFramework.i18n.I18n;
 import fr.yuki.YukiRPFramework.job.harvest.HarvestableObject;
-import fr.yuki.YukiRPFramework.manager.CharacterManager;
-import fr.yuki.YukiRPFramework.manager.JobManager;
-import fr.yuki.YukiRPFramework.manager.ModdingManager;
-import fr.yuki.YukiRPFramework.manager.UIStateManager;
+import fr.yuki.YukiRPFramework.manager.*;
+import fr.yuki.YukiRPFramework.model.Account;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.entity.Player;
 import net.onfirenetwork.onsetjava.entity.WorldObject;
@@ -51,14 +50,15 @@ public class WorldHarvestObject {
      * @param player The player
      */
     public void harvest(Player player) {
+        Account account = WorldManager.getPlayerAccount(player);
         if(!this.harvestableObject.checkRequirements(player)) {
             UIStateManager.sendNotification(player, ToastTypeEnum.ERROR,
-                    "Toutes les conditions ne sont pas respectées pour récolter cette ressource");
+                    I18n.t(account.getLang(), "toast.job.requirement_unrespected"));
             return;
         }
         if(!this.available) {
             UIStateManager.sendNotification(player, ToastTypeEnum.ERROR,
-                    "Cette ressource est occupée par un autre joueur");
+                    I18n.t(account.getLang(), "toast.job.already_used"));
             return;
         }
         Onset.print("Harvest " + this.harvestableObject.getName() + " with a duration of " + this.harvestableObject.getBaseHarvestTime() + "ms");
@@ -70,8 +70,8 @@ public class WorldHarvestObject {
             characterLoopAnimation.stop();
             CharacterManager.setCharacterFreeze(player, false);
 
-            UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS,
-                    "Vous avez récolté " + this.harvestableObject.getName() + " en " + (this.harvestableObject.getBaseHarvestTime() / 1000) + "s");
+            //UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS,
+            //        "Vous avez récolté " + this.harvestableObject.getName() + " en " + (this.harvestableObject.getBaseHarvestTime() / 1000) + "s");
 
             JobManager.addExp(player, job.getJobType(), this.harvestableObject.getXp());
             this.harvestableObject.onHarvestDone(player, this);

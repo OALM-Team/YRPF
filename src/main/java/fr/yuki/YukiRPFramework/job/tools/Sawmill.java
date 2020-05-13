@@ -5,6 +5,7 @@ import fr.yuki.YukiRPFramework.character.CharacterState;
 import fr.yuki.YukiRPFramework.character.CharacterToolAnimation;
 import fr.yuki.YukiRPFramework.enums.JobEnum;
 import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
+import fr.yuki.YukiRPFramework.i18n.I18n;
 import fr.yuki.YukiRPFramework.job.WearableWorldObject;
 import fr.yuki.YukiRPFramework.manager.*;
 import fr.yuki.YukiRPFramework.model.Account;
@@ -36,8 +37,9 @@ public class Sawmill implements JobToolHandler {
 
     @Override
     public boolean onUnwear(Player player, WearableWorldObject wearableWorldObject) {
+        Account account = WorldManager.getPlayerAccount(player);
         if(!this.isAvailable) {
-            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Cette outil est déjà en cours d'utilisation");
+            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.tool.already_used"));
             return false;
         }
         this.isAvailable = false;

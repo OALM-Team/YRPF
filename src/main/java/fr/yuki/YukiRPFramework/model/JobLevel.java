@@ -7,6 +7,10 @@ public class JobLevel {
     private int level;
     private int expFloor;
 
+    public String getTranslateName() {
+        return name.toLowerCase().replaceAll(" ", "_");
+    }
+
     public int getId() {
         return id;
     }

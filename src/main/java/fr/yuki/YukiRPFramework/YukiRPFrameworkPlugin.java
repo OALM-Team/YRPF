@@ -60,6 +60,7 @@ public class YukiRPFrameworkPlugin {
             Onset.registerCommand("goto", new GotoCommand());
             Onset.registerCommand("bring", new BringCommand());
             Onset.registerCommand("flip", new FlipCommand());
+            Onset.registerCommand("lang", new SetLangCommand());
 
             // Register remote events
             Onset.registerRemoteEvent("GlobalUI:ToogleWindow");

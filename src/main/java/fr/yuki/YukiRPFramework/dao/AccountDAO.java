@@ -102,7 +102,7 @@ public class AccountDAO {
     public static void updateAccount(Account account, Player player) throws SQLException {
         PreparedStatement preparedStatement = Database.getConnection()
                 .prepareStatement("UPDATE tbl_account SET is_banned=?, bank_money=?, save_x=?, save_y=?, save_z=?, save_h=?, character_creation_request=?," +
-                        "character_style=?, character_name=?, job_levels=?, is_dead=?, admin_level=? WHERE id_account=?");
+                        "character_style=?, character_name=?, job_levels=?, is_dead=?, admin_level=?, lang=? WHERE id_account=?");
         preparedStatement.setInt(1, account.getIsBanned());
         preparedStatement.setInt(2, account.getBankMoney());
         if(player == null) {
@@ -123,7 +123,8 @@ public class AccountDAO {
         preparedStatement.setString(10, account.getJobLevels());
         preparedStatement.setInt(11, account.getIsDead());
         preparedStatement.setInt(12, account.getAdminLevel());
-        preparedStatement.setDouble(13, account.getId());
+        preparedStatement.setString(13, account.getLang());
+        preparedStatement.setDouble(14, account.getId());
         preparedStatement.execute();
     }
 }

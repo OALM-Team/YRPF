@@ -74,4 +74,14 @@ public class Sawmill implements JobToolHandler {
         if(characterJobLevel.getJobLevel().getLevel() < 2) return false;
         return true;
     }
+
+    @Override
+    public boolean onUse(Player player) {
+        return false;
+    }
+
+    @Override
+    public boolean canBeUse() {
+        return false;
+    }
 }

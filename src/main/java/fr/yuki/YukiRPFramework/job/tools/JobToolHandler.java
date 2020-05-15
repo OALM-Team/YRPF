@@ -7,4 +7,6 @@ public interface JobToolHandler {
     boolean canInteract(Player player);
     boolean onUnwear(Player player, WearableWorldObject wearableWorldObject);
     boolean hasLevelRequired(Player player);
+    boolean onUse(Player player);
+    boolean canBeUse();
 }

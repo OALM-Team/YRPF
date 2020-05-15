@@ -11,6 +11,8 @@ public class UIState {
     private boolean death = false;
     private boolean characterJob = false;
     private boolean seller = false;
+    private boolean statewindow = false;
+    private boolean growboxmenu = false;
 
     public boolean isInventory() {
         return inventory;
@@ -90,5 +92,21 @@ public class UIState {
 
     public void setSeller(boolean seller) {
         this.seller = seller;
+    }
+
+    public boolean isStatewindow() {
+        return statewindow;
+    }
+
+    public void setStatewindow(boolean statewindow) {
+        this.statewindow = statewindow;
+    }
+
+    public boolean isGrowboxmenu() {
+        return growboxmenu;
+    }
+
+    public void setGrowboxmenu(boolean growboxmenu) {
+        this.growboxmenu = growboxmenu;
     }
 }

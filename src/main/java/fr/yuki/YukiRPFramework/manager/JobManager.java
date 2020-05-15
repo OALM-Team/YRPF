@@ -66,6 +66,7 @@ public class JobManager {
         jobs.put(JobEnum.MINER, new MinerJob());
         jobs.put(JobEnum.FISHER, new FisherJob());
         jobs.put(JobEnum.POLICE, new PoliceJob());
+        jobs.put(JobEnum.WEED, new WeedJob());
 
         spawnJobOutfitsPoint();
         spawnVehicleRentalSpawns();
@@ -394,6 +395,12 @@ public class JobManager {
         for(CharacterJobLevel characterJobLevel : characterJobLevels) {
             player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new AddCharacterJobPayload(characterJobLevel)));
         }
+    }
+
+    public static void handleUseJobTool(Player player, String uuid) {
+        JobTool jobTool = jobTools.stream().filter(x -> x.getUuid().equals(uuid)).findFirst().orElse(null);
+        if(jobTool == null) return;
+        jobTool.getJobToolHandler().onUse(player);
     }
 
     public static JobVehicleRental getNearbyVehicleRental(Player player) {

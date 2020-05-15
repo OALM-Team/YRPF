@@ -1,5 +1,6 @@
 package fr.yuki.YukiRPFramework.character;
 
+import fr.yuki.YukiRPFramework.job.ObjectPlacementInstance;
 import fr.yuki.YukiRPFramework.job.WearableWorldObject;
 import net.onfirenetwork.onsetjava.entity.Player;
 
@@ -7,6 +8,8 @@ public class CharacterState {
     private WearableWorldObject wearableWorldObject;
     private boolean isDead = false;
     private boolean firstSpawn = true;
+    private ObjectPlacementInstance currentObjectPlacementInstance = null;
+
     public CharacterState() {}
 
     public WearableWorldObject getWearableWorldObject() {
@@ -36,5 +39,13 @@ public class CharacterState {
 
     public void setFirstSpawn(boolean firstSpawn) {
         this.firstSpawn = firstSpawn;
+    }
+
+    public ObjectPlacementInstance getCurrentObjectPlacementInstance() {
+        return currentObjectPlacementInstance;
+    }
+
+    public void setCurrentObjectPlacementInstance(ObjectPlacementInstance currentObjectPlacementInstance) {
+        this.currentObjectPlacementInstance = currentObjectPlacementInstance;
     }
 }

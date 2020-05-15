@@ -8,7 +8,11 @@ public enum  ItemTemplateEnum {
     MINER_PICKAXE_1("5"),
     BANANAS("6"),
     FISHING_ROD("7"),
-    SALMON("8");
+    SALMON("8"),
+    WEED_SEED("9"),
+    TICKET_DELIVERY_GROW_BOX("10"),
+    POT("11"),
+    WATER("12");
 
     public final String id;
 

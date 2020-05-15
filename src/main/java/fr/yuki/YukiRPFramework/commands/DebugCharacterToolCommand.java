@@ -18,6 +18,7 @@ public class DebugCharacterToolCommand implements CommandExecutor {
                         new Vector(Double.parseDouble(args[7]), Double.parseDouble(args[8]), Double.parseDouble(args[9])),
                         args[10]);
         characterToolAnimation.attach(player);
+        player.setAnimation(args[11]);
         Onset.delay(10000, () -> {
             characterToolAnimation.unAttach();
         });

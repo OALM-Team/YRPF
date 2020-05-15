@@ -45,4 +45,14 @@ public class GarbageBin implements JobToolHandler {
     public boolean hasLevelRequired(Player player) {
         return true;
     }
+
+    @Override
+    public boolean onUse(Player player) {
+        return true;
+    }
+
+    @Override
+    public boolean canBeUse() {
+        return false;
+    }
 }

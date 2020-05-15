@@ -2,6 +2,7 @@ package fr.yuki.YukiRPFramework.model;
 
 import fr.yuki.YukiRPFramework.job.Job;
 import fr.yuki.YukiRPFramework.job.tools.GarbageBin;
+import fr.yuki.YukiRPFramework.job.tools.GrowBox;
 import fr.yuki.YukiRPFramework.job.tools.JobToolHandler;
 import fr.yuki.YukiRPFramework.job.tools.Sawmill;
 import fr.yuki.YukiRPFramework.manager.ModdingManager;
@@ -10,7 +11,10 @@ import net.onfirenetwork.onsetjava.data.Vector;
 import net.onfirenetwork.onsetjava.entity.Player;
 import net.onfirenetwork.onsetjava.entity.WorldObject;
 
+import java.util.UUID;
+
 public class JobTool {
+    private String uuid;
     private int id;
     private int modelId;
     private String name;
@@ -29,6 +33,10 @@ public class JobTool {
     private double sz;
     private WorldObject worldObject;
     private JobToolHandler jobToolHandler;
+
+    public JobTool() {
+        this.uuid = UUID.randomUUID().toString();
+    }
 
     public int getModelId() {
         return modelId;
@@ -68,13 +76,17 @@ public class JobTool {
 
     public void setJobToolType(String jobToolType) {
         this.jobToolType = jobToolType;
-        switch (this.jobToolType) {
+        switch (this.jobToolType.toLowerCase()) {
             case "sawmill":
                 this.jobToolHandler = new Sawmill(this);
                 break;
 
             case "garbage_bin":
                 this.jobToolHandler = new GarbageBin(this);
+                break;
+
+            case "growbox":
+                this.jobToolHandler = new GrowBox(this);
                 break;
         }
     }
@@ -177,6 +189,16 @@ public class JobTool {
         this.worldObject.setRotation(new Vector(this.rx, this.ry, this.rz));
         this.worldObject.setScale(new Vector(this.sx, this.sy, this.sz));
         Onset.getServer().createText3D(this.name + " [Utiliser]", 20, this.x, this.y, this.z + 200, 0 , 0 ,0);
+        if(this.jobToolHandler != null) {
+            if(this.jobToolHandler.canBeUse()) {
+                this.setUsable();
+            }
+        }
+    }
+
+    public void setUsable() {
+        this.getWorldObject().setProperty("isJobTool", 1, true);
+        this.getWorldObject().setProperty("uuid", this.getUuid(), true);
     }
 
     public JobToolHandler getJobToolHandler() {
@@ -193,5 +215,13 @@ public class JobTool {
 
     public void setReward(int reward) {
         this.reward = reward;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 }

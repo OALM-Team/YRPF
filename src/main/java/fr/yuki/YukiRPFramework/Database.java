@@ -17,7 +17,7 @@ public class Database {
     public static void init() {
         try {
             ServerConfig serverConfig = WorldManager.getServerConfig();
-            connection = DriverManager.getConnection("jdbc:mysql://" + serverConfig.getSqlHost() + "/" + serverConfig.getSqlDb(),
+            connection = DriverManager.getConnection("jdbc:mysql://" + serverConfig.getSqlHost() + "/" + serverConfig.getSqlDb() + "?autoReconnect=true",
                     serverConfig.getSqlUsername(), serverConfig.getSqlPassword());
             Onset.print("Connected to the database with success");
         } catch (Exception e) {

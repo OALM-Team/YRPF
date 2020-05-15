@@ -9,6 +9,7 @@ import fr.yuki.YukiRPFramework.i18n.I18n;
 import fr.yuki.YukiRPFramework.inventory.Inventory;
 import fr.yuki.YukiRPFramework.inventory.InventoryItem;
 import fr.yuki.YukiRPFramework.job.DeliveryPointConfig;
+import fr.yuki.YukiRPFramework.job.ObjectPlacementInstance;
 import fr.yuki.YukiRPFramework.model.*;
 import fr.yuki.YukiRPFramework.net.payload.AddSellerItemPayload;
 import fr.yuki.YukiRPFramework.net.payload.AddToastPayload;
@@ -309,6 +310,45 @@ public class WorldManager {
         }
         WorldManager.savePlayer(player);
     }
+
+    public static void handleObjectRequestPlacement(Player player) {
+        UIStateManager.handleUIToogle(player, "statewindow");
+    }
+
+    public static void handleObjectEditPlacementCancel(Player player) {
+        CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
+        if(state == null) return;
+        if(state.getCurrentObjectPlacementInstance() == null) {
+            Onset.print("Can't cancel placement, there is instance for the player in the state");
+            return;
+        }
+
+        UIStateManager.handleUIToogle(player, "statewindow");
+        Account account = WorldManager.getPlayerAccount(player);
+        ObjectPlacementInstance objectPlacementInstance = state.getCurrentObjectPlacementInstance();
+        objectPlacementInstance.destroy();
+        state.setCurrentObjectPlacementInstance(null);
+        Onset.print("Cancel placement of the object instance modelId="+objectPlacementInstance.getModelId()
+                + " uuid=" + objectPlacementInstance.getUuid());
+        UIStateManager.sendNotification(player, ToastTypeEnum.WARN, I18n.t(account.getLang(), "toast.placement.cancel_placement"));
+    }
+
+    public static void handleObjectPlacementDone(Player player, Vector position, Vector rotation) {
+        CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
+        if(state == null) return;
+        if(state.getCurrentObjectPlacementInstance() == null) {
+            Onset.print("Can't cancel placement, there is instance for the player in the state");
+            return;
+        }
+
+        UIStateManager.handleUIToogle(player, "statewindow");
+        Account account = WorldManager.getPlayerAccount(player);
+        ObjectPlacementInstance objectPlacementInstance = state.getCurrentObjectPlacementInstance();
+        objectPlacementInstance.destroy();
+        state.setCurrentObjectPlacementInstance(null);
+        objectPlacementInstance.onPlacementDone(player, position, rotation);
+    }
+
 
     /**
      * Get the account for the player

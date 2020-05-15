@@ -61,6 +61,7 @@ public class YukiRPFrameworkPlugin {
             Onset.registerCommand("bring", new BringCommand());
             Onset.registerCommand("flip", new FlipCommand());
             Onset.registerCommand("lang", new SetLangCommand());
+            Onset.registerCommand("dop", new DebugObjectPlacementCommand());
 
             // Register remote events
             Onset.registerRemoteEvent("GlobalUI:ToogleWindow");
@@ -80,6 +81,11 @@ public class YukiRPFrameworkPlugin {
             Onset.registerRemoteEvent("Character:RequestWearFromVehicleChest");
             Onset.registerRemoteEvent("Inventory:ThrowItem");
             Onset.registerRemoteEvent("Seller:BuySellItem");
+            Onset.registerRemoteEvent("Object:EditPlacementCancel");
+            Onset.registerRemoteEvent("Object:EditPlacement");
+            Onset.registerRemoteEvent("Object:EditPlacementDone");
+            Onset.registerRemoteEvent("Job:UseJobTool");
+            Onset.registerRemoteEvent("Growbox:FillWaterPot");
         } catch (Exception ex) {
             ex.printStackTrace();
             Onset.print("Can't start the plugin because : " + ex.toString());
@@ -175,7 +181,8 @@ public class YukiRPFrameworkPlugin {
                     break;
 
                 case "Inventory:UseItem":
-
+                    ItemManager.handleItemUse(evt.getPlayer(), new Gson().fromJson((evt.getArgs()[0]).toString(),
+                            RequestUseItemPayload.class));
                     break;
 
                 case "GlobalUI:ToogleWindow":
@@ -240,6 +247,31 @@ public class YukiRPFrameworkPlugin {
                 case "Seller:BuySellItem":
                     WorldManager.handleBuySellItemSeller(evt.getPlayer(), new Gson().fromJson((evt.getArgs()[0]).toString(),
                             BuySellItemRequestPayload.class));
+                    break;
+
+                case "Object:EditPlacement":
+                    WorldManager.handleObjectRequestPlacement(evt.getPlayer());
+                    break;
+
+                case "Object:EditPlacementCancel":
+                    WorldManager.handleObjectEditPlacementCancel(evt.getPlayer());
+                    break;
+
+                case "Object:EditPlacementDone":
+                    WorldManager.handleObjectPlacementDone(evt.getPlayer(),
+                            new Vector(Double.parseDouble((evt.getArgs()[0]).toString()),
+                                    Double.parseDouble((evt.getArgs()[1]).toString()), Double.parseDouble((evt.getArgs()[2]).toString())),
+                            new Vector(Double.parseDouble((evt.getArgs()[3]).toString()),
+                                    Double.parseDouble((evt.getArgs()[4]).toString()), Double.parseDouble((evt.getArgs()[5]).toString())));
+                    break;
+
+                case "Job:UseJobTool":
+                    JobManager.handleUseJobTool(evt.getPlayer(), (evt.getArgs()[0]).toString());
+                    break;
+
+                case "Growbox:FillWaterPot":
+                    GrowboxManager.handleGrowboxFillWaterPot(evt.getPlayer(), new Gson().fromJson((evt.getArgs()[0]).toString(),
+                            GrowboxFillWaterPotPayload.class));
                     break;
             }
         }

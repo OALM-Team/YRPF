@@ -93,6 +93,20 @@ public class UIStateManager {
                 player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new SetWindowStatePayload
                         ("seller", uiState.isSeller())));
                 break;
+
+            case "statewindow":
+                uiState.setStatewindow(!uiState.isStatewindow());
+                r = uiState.isStatewindow();
+                player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new SetWindowStatePayload
+                        ("statewindow", uiState.isStatewindow())));
+                break;
+
+            case "growboxmenu":
+                uiState.setGrowboxmenu(!uiState.isGrowboxmenu());
+                r = uiState.isGrowboxmenu();
+                player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new SetWindowStatePayload
+                        ("growboxmenu", uiState.isGrowboxmenu())));
+                break;
         }
         player.setProperty("uiState", new Gson().toJson(uiState), true);
         return r;

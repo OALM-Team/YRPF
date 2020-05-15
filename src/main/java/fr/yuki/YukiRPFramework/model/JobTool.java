@@ -1,10 +1,7 @@
 package fr.yuki.YukiRPFramework.model;
 
 import fr.yuki.YukiRPFramework.job.Job;
-import fr.yuki.YukiRPFramework.job.tools.GarbageBin;
-import fr.yuki.YukiRPFramework.job.tools.GrowBox;
-import fr.yuki.YukiRPFramework.job.tools.JobToolHandler;
-import fr.yuki.YukiRPFramework.job.tools.Sawmill;
+import fr.yuki.YukiRPFramework.job.tools.*;
 import fr.yuki.YukiRPFramework.manager.ModdingManager;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Vector;
@@ -87,6 +84,10 @@ public class JobTool {
 
             case "growbox":
                 this.jobToolHandler = new GrowBox(this);
+                break;
+
+            case "generator":
+                this.jobToolHandler = new Generator(this);
                 break;
         }
     }

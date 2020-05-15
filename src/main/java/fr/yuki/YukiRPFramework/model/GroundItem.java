@@ -44,7 +44,12 @@ public class GroundItem {
         this.isAvailable = false;
         CharacterManager.setCharacterFreeze(player, true);
         player.setAnimation(Animation.PICKUP_LOWER);
-        InventoryManager.getMainInventory(player).addItem(inventoryItem);
+        if(InventoryManager.getMainInventory(player).addItem(inventoryItem) == null)  {
+            Onset.delay(1000, () -> {
+                CharacterManager.setCharacterFreeze(player, false);
+            });
+            return;
+        }
         WorldManager.getGroundItems().remove(this);
         InventoryManager.getMainInventory(player).save();
         Onset.delay(1000, () -> {

@@ -44,6 +44,7 @@ public class YukiRPFrameworkPlugin {
             JobManager.init();
             AccountManager.init();
             MapManager.init();
+            GrowboxManager.init();
 
             // Register commands
             Onset.registerCommand("item", new ItemCommand());
@@ -86,6 +87,9 @@ public class YukiRPFrameworkPlugin {
             Onset.registerRemoteEvent("Object:EditPlacementDone");
             Onset.registerRemoteEvent("Job:UseJobTool");
             Onset.registerRemoteEvent("Growbox:FillWaterPot");
+            Onset.registerRemoteEvent("Growbox:FillSeedPot");
+            Onset.registerRemoteEvent("Growbox:HarvestPot");
+            Onset.registerRemoteEvent("Growbox:TakePot");
         } catch (Exception ex) {
             ex.printStackTrace();
             Onset.print("Can't start the plugin because : " + ex.toString());
@@ -166,6 +170,7 @@ public class YukiRPFrameworkPlugin {
     @EventHandler
     public void onQuit(PlayerQuitEvent evt) {
         Onset.print("Player quit steamId=" + evt.getPlayer().getSteamId());
+        WorldManager.handleObjectEditPlacementCancel(evt.getPlayer());
         CharacterManager.getCharacterStates().remove(evt.getPlayer().getSteamId());
         WorldManager.savePlayer(evt.getPlayer());
     }
@@ -271,6 +276,21 @@ public class YukiRPFrameworkPlugin {
 
                 case "Growbox:FillWaterPot":
                     GrowboxManager.handleGrowboxFillWaterPot(evt.getPlayer(), new Gson().fromJson((evt.getArgs()[0]).toString(),
+                            GrowboxFillWaterPotPayload.class));
+                    break;
+
+                case "Growbox:FillSeedPot":
+                    GrowboxManager.handleGrowboxFillSeedPot(evt.getPlayer(), new Gson().fromJson((evt.getArgs()[0]).toString(),
+                            GrowboxFillWaterPotPayload.class));
+                    break;
+
+                case "Growbox:HarvestPot":
+                    GrowboxManager.handleGrowboxHarvestRequest(evt.getPlayer(), new Gson().fromJson((evt.getArgs()[0]).toString(),
+                            GrowboxFillWaterPotPayload.class));
+                    break;
+
+                case "Growbox:TakePot":
+                    GrowboxManager.handleGrowboxTakePotRequest(evt.getPlayer(), new Gson().fromJson((evt.getArgs()[0]).toString(),
                             GrowboxFillWaterPotPayload.class));
                     break;
             }

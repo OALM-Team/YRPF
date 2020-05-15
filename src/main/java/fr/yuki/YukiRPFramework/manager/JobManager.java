@@ -67,6 +67,7 @@ public class JobManager {
         jobs.put(JobEnum.FISHER, new FisherJob());
         jobs.put(JobEnum.POLICE, new PoliceJob());
         jobs.put(JobEnum.WEED, new WeedJob());
+        jobs.put(JobEnum.EMS, new EMSJob());
 
         spawnJobOutfitsPoint();
         spawnVehicleRentalSpawns();

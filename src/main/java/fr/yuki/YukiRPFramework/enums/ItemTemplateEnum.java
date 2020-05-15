@@ -1,6 +1,6 @@
 package fr.yuki.YukiRPFramework.enums;
 
-public enum  ItemTemplateEnum {
+public enum ItemTemplateEnum {
     APPLE("1"),
     CASH("2"),
     VKEY("3"),
@@ -12,7 +12,10 @@ public enum  ItemTemplateEnum {
     WEED_SEED("9"),
     TICKET_DELIVERY_GROW_BOX("10"),
     POT("11"),
-    WATER("12");
+    WATER("12"),
+    WEED("13"),
+    TICKET_DELIVERY_GENERATOR("14"),
+    JERRICAN_FUEL("15");
 
     public final String id;
 

@@ -1,7 +1,7 @@
 <component name="libraryTable">
   <library name="OnsetJava-API-0.1">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/libs/OnsetJava-API-0.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../OnsetJava/OnsetJava-API/target/OnsetJava-API-0.1.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

@@ -7,7 +7,8 @@ public enum JobEnum {
     FISHER("FISHER"),
     POLICE("POLICE"),
     WEED("WEED"),
-    GARBAGE("GARBAGE");
+    GARBAGE("GARBAGE"),
+    EMS("EMS");
 
     public final String type;
     private JobEnum(String type) {

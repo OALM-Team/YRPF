@@ -3,16 +3,15 @@ package fr.yuki.YukiRPFramework.job.tools;
 import com.google.gson.Gson;
 import fr.yuki.YukiRPFramework.character.CharacterState;
 import fr.yuki.YukiRPFramework.enums.ItemTemplateEnum;
+import fr.yuki.YukiRPFramework.enums.JobEnum;
 import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
 import fr.yuki.YukiRPFramework.i18n.I18n;
 import fr.yuki.YukiRPFramework.inventory.Inventory;
 import fr.yuki.YukiRPFramework.inventory.InventoryItem;
 import fr.yuki.YukiRPFramework.job.WearableWorldObject;
 import fr.yuki.YukiRPFramework.job.tools.growbox.Pot;
-import fr.yuki.YukiRPFramework.manager.CharacterManager;
-import fr.yuki.YukiRPFramework.manager.InventoryManager;
-import fr.yuki.YukiRPFramework.manager.UIStateManager;
-import fr.yuki.YukiRPFramework.manager.WorldManager;
+import fr.yuki.YukiRPFramework.manager.*;
+import fr.yuki.YukiRPFramework.modding.LoopSound3D;
 import fr.yuki.YukiRPFramework.model.Account;
 import fr.yuki.YukiRPFramework.model.JobTool;
 import fr.yuki.YukiRPFramework.net.payload.AddGrowboxMenuItemPayload;
@@ -30,10 +29,14 @@ public class GrowBox implements JobToolHandler {
     private JobTool jobTool;
     private ArrayList<Pot> pots;
     private ArrayList<StoreLayoutTransform> layoutTransforms;
+    private LoopSound3D loopSound3D;
 
     public GrowBox(JobTool jobTool) {
         this.jobTool = jobTool;
         this.pots = new ArrayList<>();
+        this.loopSound3D = new LoopSound3D("sounds/white_noise.mp3",
+                new Vector(this.jobTool.getX(), this.jobTool.getY(), this.jobTool.getZ()), 1000, 0.10,
+                1000*60);
 
         this.layoutTransforms = new ArrayList<>();
         this.layoutTransforms.add(new StoreLayoutTransform(0, new Vector(0, 0, 0), new Vector(0, 0, 0), new Vector(1.50, 1.50, 2.40)));
@@ -84,13 +87,16 @@ public class GrowBox implements JobToolHandler {
             return true;
         }
         CharacterManager.setCharacterFreeze(player, true);
+        this.handlePotsRequest(player);
+        return true;
+    }
+
+    public void handlePotsRequest(Player player) {
         player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new SetGrowboxPayload(this.jobTool.getUuid())));
         for(Pot pot : this.pots) {
             player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new AddGrowboxMenuItemPayload(pot.getUuid(),
-                    554, pot.getWater(), pot.getState())));
+                    554, pot.getWater(), pot.getState(), pot.isSeed())));
         }
-
-        return true;
     }
 
     @Override
@@ -129,10 +135,85 @@ public class GrowBox implements JobToolHandler {
         pot.setWater(100);
         inventory.removeItem(waterItem, 1);
         player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new AddGrowboxMenuItemPayload(pot.getUuid(),
-                554, pot.getWater(), pot.getState())));
+                554, pot.getWater(), pot.getState(), pot.isSeed())));
+    }
+
+    public void fillPotSeed(Player player, String potId) {
+        Account account = WorldManager.getPlayerAccount(player);
+        Pot pot = this.pots.stream().filter(x -> x.getUuid().equals(potId)).findFirst().orElse(null);
+        if(pot == null) {
+            return;
+        }
+        Inventory inventory = InventoryManager.getMainInventory(player);
+        InventoryItem seedItem = inventory.getItemByType(ItemTemplateEnum.WEED_SEED.id);
+        if(seedItem == null) {
+            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.growbox.no_seed"));
+            return;
+        }
+        if(pot.isSeed()) return;
+        pot.setSeed(true);
+        pot.spawnSeed();
+        inventory.removeItem(seedItem, 1);
+        player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new AddGrowboxMenuItemPayload(pot.getUuid(),
+                554, pot.getWater(), pot.getState(), pot.isSeed())));
+        JobManager.addExp(player, JobEnum.WEED, 15);
+    }
+
+    public void harvestPot(Player player, String potId) {
+        Account account = WorldManager.getPlayerAccount(player);
+        Pot pot = this.pots.stream().filter(x -> x.getUuid().equals(potId)).findFirst().orElse(null);
+        if(pot == null) {
+            return;
+        }
+        if(pot.getState() < 100) return;
+        if(InventoryManager.addItemToPlayer(player, ItemTemplateEnum.WEED.id, 1) == null) {
+            return;
+        }
+        pot.removeSeed();
+
+        player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new AddGrowboxMenuItemPayload(pot.getUuid(),
+                554, pot.getWater(), pot.getState(), pot.isSeed())));
+    }
+
+    public void takePot(Player player, String potId) {
+        Account account = WorldManager.getPlayerAccount(player);
+        Pot pot = this.pots.stream().filter(x -> x.getUuid().equals(potId)).findFirst().orElse(null);
+        if(pot == null) {
+            return;
+        }
+        if(InventoryManager.addItemToPlayer(player, ItemTemplateEnum.POT.id, 1) == null) {
+            return;
+        }
+        pot.destroyWorldObject();
+        this.pots.remove(pot);
+        CharacterManager.setCharacterFreeze(player, false);
+        UIStateManager.handleUIToogle(player, "growboxmenu");
+    }
+
+    public void tickGrow() {
+        Generator generator = GrowboxManager.getGeneratorNearby(new Vector(this.jobTool.getX(), this.jobTool.getY(), this.jobTool.getZ()),
+                1500);
+        if(generator == null) {
+            if(this.loopSound3D.isActive()) this.loopSound3D.stop();
+            return;
+        } else {
+            if(generator.isOn()) {
+                if(!this.loopSound3D.isActive()) this.loopSound3D.start();
+            } else {
+                if(this.loopSound3D.isActive()) this.loopSound3D.stop();
+                return;
+            }
+        }
+        for(Pot pot : this.pots) {
+            pot.grow();
+        }
     }
 
     public JobTool getJobTool() {
         return jobTool;
+    }
+
+    public LoopSound3D getLoopSound3D() {
+        return loopSound3D;
     }
 }

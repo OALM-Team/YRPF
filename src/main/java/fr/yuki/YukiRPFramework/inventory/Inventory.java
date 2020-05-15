@@ -145,7 +145,7 @@ public class Inventory {
      * @return The max weight
      */
     public float getMaxWeight() {
-        return 30;
+        return 40;
     }
 
     /**

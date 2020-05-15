@@ -14,6 +14,8 @@ import fr.yuki.YukiRPFramework.model.*;
 import fr.yuki.YukiRPFramework.net.payload.AddSellerItemPayload;
 import fr.yuki.YukiRPFramework.net.payload.AddToastPayload;
 import fr.yuki.YukiRPFramework.net.payload.BuySellItemRequestPayload;
+import fr.yuki.YukiRPFramework.net.payload.SetWindowStatePayload;
+import fr.yuki.YukiRPFramework.ui.UIState;
 import fr.yuki.YukiRPFramework.utils.ServerConfig;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Location;
@@ -319,7 +321,6 @@ public class WorldManager {
         CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
         if(state == null) return;
         if(state.getCurrentObjectPlacementInstance() == null) {
-            Onset.print("Can't cancel placement, there is instance for the player in the state");
             return;
         }
 
@@ -341,7 +342,14 @@ public class WorldManager {
             return;
         }
 
-        UIStateManager.handleUIToogle(player, "statewindow");
+        // Remove interface
+        UIState uiState = new Gson().fromJson(player.getProperty("uiState").toString(), UIState.class);
+        uiState.setStatewindow(false);
+        player.setProperty("uiState", new Gson().toJson(uiState), true);
+        player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new SetWindowStatePayload
+                ("statewindow", uiState.isStatewindow())));
+
+        //UIStateManager.handleUIToogle(player, "statewindow");
         Account account = WorldManager.getPlayerAccount(player);
         ObjectPlacementInstance objectPlacementInstance = state.getCurrentObjectPlacementInstance();
         objectPlacementInstance.destroy();

@@ -6,12 +6,14 @@ public class AddGrowboxMenuItemPayload {
     private int itemId;
     private int water;
     private int state;
+    private boolean seed;
 
-    public AddGrowboxMenuItemPayload(String id, int itemId, int water, int state) {
+    public AddGrowboxMenuItemPayload(String id, int itemId, int water, int state, boolean seed) {
         this.id = id;
         this.itemId = itemId;
         this.water = water;
         this.state = state;
+        this.seed = seed;
         this.type = "ADD_GROWBOXMENU_ITEM";
     }
 
@@ -29,5 +31,9 @@ public class AddGrowboxMenuItemPayload {
 
     public int getState() {
         return state;
+    }
+
+    public boolean isSeed() {
+        return seed;
     }
 }

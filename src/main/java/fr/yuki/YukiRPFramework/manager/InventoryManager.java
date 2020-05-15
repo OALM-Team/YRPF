@@ -97,7 +97,7 @@ public class InventoryManager {
      */
     public static boolean checkInventoryWeight(Player player, InventoryItem inventoryItem) {
         Inventory inventory = getInventoriesForAccount(player.getPropertyInt("accountId")).get(0);
-        if(inventory.getCurrentWeight() + inventoryItem.getTemplate().getWeight() > inventory.getMaxWeight()) {
+        if(inventory.getCurrentWeight() + (inventoryItem.getTemplate().getWeight() * inventoryItem.getAmount()) > inventory.getMaxWeight()) {
             return false;
         }
         return true;

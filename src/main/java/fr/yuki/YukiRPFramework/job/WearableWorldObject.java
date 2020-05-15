@@ -119,7 +119,6 @@ public class WearableWorldObject {
         // Delivery reward
         if(deliveryPointGoal != null) {
             if(deliveryPointGoal.isNear(player)) {
-                JobManager.getWearableWorldObjects().remove(this);
                 ArrayList<CharacterJobLevel> characterJobLevels = account.decodeCharacterJob();
                 CharacterJobLevel characterJobLevel = characterJobLevels.stream().filter(x -> x.getJobId().equals(JobEnum.DELIVERY.type)).findFirst().orElse(null);
 

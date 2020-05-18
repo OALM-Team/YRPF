@@ -19,8 +19,8 @@ This server is written in Java and need the OnsetJavaPlugin (https://github.com/
 - Run your server and have fun :)
 
 ## Contribute
-We are at a early stage of the Framework and the Backend is not open sourced right now, so i will not accept PR right now, but it will be available soon.
-But you can help to translate for other language : https://poeditor.com/join/project/FT7CELbHb6
+You can help us to translate the framework for other language : https://poeditor.com/join/project/FT7CELbHb6
+You can also make a PR for adding new features or fixing bugs
 
 ## Authors
 Yuki https://github.com/nightwolf93

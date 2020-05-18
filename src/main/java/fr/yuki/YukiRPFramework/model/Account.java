@@ -28,6 +28,8 @@ public class Account {
     private String jobLevels;
     private int isDead;
     private String lang;
+    private int foodState;
+    private int drinkState;
 
     public int getId() {
         return id;
@@ -115,6 +117,22 @@ public class Account {
 
     public void setSaveH(double saveH) {
         this.saveH = saveH;
+    }
+
+    public int getFoodState() {
+        return foodState;
+    }
+
+    public void setFoodState(int foodState) {
+        this.foodState = foodState;
+    }
+
+    public int getDrinkState() {
+        return drinkState;
+    }
+
+    public void setDrinkState(int drinkState) {
+        this.drinkState = drinkState;
     }
 
     public int getCharacterCreationRequest() {

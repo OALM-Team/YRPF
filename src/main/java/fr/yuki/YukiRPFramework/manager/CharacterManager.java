@@ -1,13 +1,17 @@
 package fr.yuki.YukiRPFramework.manager;
 
+import com.google.gson.Gson;
 import fr.yuki.YukiRPFramework.character.CharacterState;
 import fr.yuki.YukiRPFramework.character.CharacterStyle;
 import fr.yuki.YukiRPFramework.dao.AccountDAO;
 import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
 import fr.yuki.YukiRPFramework.model.Account;
+import fr.yuki.YukiRPFramework.net.payload.AddToastPayload;
+import fr.yuki.YukiRPFramework.net.payload.SetFoodPayload;
 import fr.yuki.YukiRPFramework.net.payload.StyleSavePartPayload;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Location;
+import net.onfirenetwork.onsetjava.data.Vector;
 import net.onfirenetwork.onsetjava.entity.Player;
 
 import java.sql.SQLException;
@@ -19,6 +23,50 @@ public class CharacterManager {
 
     public static void init() {
         characterStates = new HashMap<String, CharacterState>();
+
+        // Decrease food
+        Onset.timer(60000 * 2, () -> {
+            for(Player player : Onset.getPlayers()) {
+                if(WorldManager.getPlayerAccount(player) == null) continue;
+                applyFoodChange(player, -1);
+            }
+        });
+
+        // Decrease drink
+        Onset.timer(40000 * 2, () -> {
+            for(Player player : Onset.getPlayers()) {
+                if(WorldManager.getPlayerAccount(player) == null) continue;
+                applyDrinkChange(player, -1);
+            }
+        });
+    }
+
+    public static void applyFoodChange(Player player, int value) {
+        Account account = WorldManager.getPlayerAccount(player);
+        if(account == null) return;
+        CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
+        if(state.isDead()) return;
+        account.setFoodState(account.getFoodState() + value);
+        if(account.getFoodState() < 0) account.setFoodState(0);
+        if(account.getFoodState() > 100) account.setFoodState(100);
+        refreshFood(player);
+        if(account.getFoodState() <= 0) {
+            player.setHealth(player.getHealth() - 1);
+        }
+    }
+
+    public static void applyDrinkChange(Player player, int value) {
+        Account account = WorldManager.getPlayerAccount(player);
+        if(account == null) return;
+        CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
+        if(state.isDead()) return;
+        account.setDrinkState(account.getDrinkState() + value);
+        if(account.getDrinkState() < 0) account.setDrinkState(0);
+        if(account.getDrinkState() > 100) account.setDrinkState(100);
+        refreshFood(player);
+        if(account.getDrinkState() <= 0) {
+            player.setHealth(player.getHealth() - 1);
+        }
     }
 
     public static CharacterState getCharacterStateByPlayer(Player player) {
@@ -112,7 +160,7 @@ public class CharacterManager {
         } catch (Exception ex) {
             Onset.print("Can't save account: " + ex.toString());
         }
-
+        player.setSpawnLocation(new Vector(account.getSaveX(), account.getSaveY(), account.getSaveZ()), 0);
         UIStateManager.handleUIToogle(player, "death");
         player.setRespawnTime(WorldManager.getServerConfig().getDeathRespawnDelay());
     }
@@ -135,9 +183,9 @@ public class CharacterManager {
                     Onset.print("Player respawned after death");
                     //UIStateManager.sendNotification(player, ToastTypeEnum.WARN,
                     //        "Après un moment a l'hôpital vous êtes sortis du coma, vous avez du mal à vous rappeler des derniers événements");
-                    player.setLocationAndHeading(new Location(WorldManager.getServerConfig().getDeathRespawnX(),
+                    teleportWithLevelLoading(player, new Location(WorldManager.getServerConfig().getDeathRespawnX(),
                             WorldManager.getServerConfig().getDeathRespawnY(),
-                            WorldManager.getServerConfig().getDeathRespawnZ(),
+                            WorldManager.getServerConfig().getDeathRespawnZ() + 50,
                             WorldManager.getServerConfig().getDeathRespawnH()));
                     characterState.setDead(false);
                     WorldManager.savePlayer(player);
@@ -147,11 +195,29 @@ public class CharacterManager {
         }
     }
 
+    public static void refreshFood(Player player) {
+        Account account = WorldManager.getPlayerAccount(player);
+        if(account == null) return;
+
+        player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new SetFoodPayload(account.getFoodState(),
+                account.getDrinkState())));
+    }
+
     public static void setCharacterStyle(Player player) {
         Account account = WorldManager.getPlayerAccount(player);
         account.decodeCharacterStyle().attachStyleToPlayer(player);
         player.setProperty("characterName", account.getCharacterName(), true);
         player.setName(account.getCharacterName());
+    }
+
+    public static void teleportWithLevelLoading(Player player, Location location) {
+        player.setLocationAndHeading(location);
+        player.callRemoteEvent("Game:TriggerLoadLevel");
+        Onset.delay(150, () -> {
+            player.callRemoteEvent("Game:TriggerLoadLevel");
+            player.setLocationAndHeading(location);
+            player.callRemoteEvent("Game:TriggerLoadLevel");
+        });
     }
 
     public static HashMap<String, CharacterState> getCharacterStates() {

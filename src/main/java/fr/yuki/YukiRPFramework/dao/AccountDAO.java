@@ -41,6 +41,8 @@ public class AccountDAO {
             account.setIsDead(resultSet.getInt("is_dead"));
             account.setLang(resultSet.getString("lang"));
             account.setAdminLevel(resultSet.getInt("admin_level"));
+            account.setFoodState(resultSet.getInt("food_state"));
+            account.setDrinkState(resultSet.getInt("drink_state"));
             account.setCreatedAt(resultSet.getDate("created_at"));
             account.setUpdatedAt(resultSet.getDate("updated_at"));
         }
@@ -62,6 +64,8 @@ public class AccountDAO {
         account.setIsDead(0);
         account.setAdminLevel(0);
         account.setLang("fr");
+        account.setFoodState(100);
+        account.setDrinkState(100);
         account.setSaveX(serverConfig.getSpawnPointX());
         account.setSaveY(serverConfig.getSpawnPointY());
         account.setSaveZ(serverConfig.getSpawnPointZ());
@@ -102,7 +106,8 @@ public class AccountDAO {
     public static void updateAccount(Account account, Player player) throws SQLException {
         PreparedStatement preparedStatement = Database.getConnection()
                 .prepareStatement("UPDATE tbl_account SET is_banned=?, bank_money=?, save_x=?, save_y=?, save_z=?, save_h=?, character_creation_request=?," +
-                        "character_style=?, character_name=?, job_levels=?, is_dead=?, admin_level=?, lang=? WHERE id_account=?");
+                        "character_style=?, character_name=?, job_levels=?, is_dead=?, admin_level=?, lang=?," +
+                        "food_state=?, drink_state=? WHERE id_account=?");
         preparedStatement.setInt(1, account.getIsBanned());
         preparedStatement.setInt(2, account.getBankMoney());
         if(player == null) {
@@ -124,7 +129,9 @@ public class AccountDAO {
         preparedStatement.setInt(11, account.getIsDead());
         preparedStatement.setInt(12, account.getAdminLevel());
         preparedStatement.setString(13, account.getLang());
-        preparedStatement.setDouble(14, account.getId());
+        preparedStatement.setInt(14, account.getFoodState());
+        preparedStatement.setInt(15, account.getDrinkState());
+        preparedStatement.setDouble(16, account.getId());
         preparedStatement.execute();
     }
 }

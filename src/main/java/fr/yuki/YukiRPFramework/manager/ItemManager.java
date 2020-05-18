@@ -31,6 +31,11 @@ public class ItemManager {
         CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
         if(state.isCuffed()) return;
 
+        if(inventoryItem.getTemplate().getFoodValue() != 0 || inventoryItem.getTemplate().getDrinkValue() != 0) {
+            useFood(player, inventoryItem);
+            return;
+        }
+
         switch (inventoryItem.getTemplateId()) {
             case "11": // Temp need to use a enum
                 usePot(player, inventoryItem);
@@ -51,7 +56,30 @@ public class ItemManager {
             case "16": // Cuff
                 useCuff(player, inventoryItem);
                 break;
+
+            case "17": // Defibrilator
+                useDefibrilator(player, inventoryItem);
+                break;
+
+            case "18": // Light saber
+                useLightSaber(player, inventoryItem);
+                break;
         }
+    }
+
+    private static void useFood(Player player, InventoryItem inventoryItem) {
+        CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
+        Account account = WorldManager.getPlayerAccount(player);
+        if(!state.canInteract()) {
+            return;
+        }
+        if(state.getWearableWorldObject() != null) { // Can't use the item because the player wear something already
+            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "action.vehicle.wearSomething"));
+            return;
+        }
+        CharacterManager.applyFoodChange(player, inventoryItem.getTemplate().getFoodValue());
+        CharacterManager.applyDrinkChange(player, inventoryItem.getTemplate().getDrinkValue());
+        player.setAnimation(Animation.DRINKING);
     }
 
     private static void useCuff(Player player, InventoryItem inventoryItem) {
@@ -146,5 +174,34 @@ public class ItemManager {
                 characterLoopAnimation.stop();
             });
         }
+    }
+
+    private static void useDefibrilator(Player player, InventoryItem inventoryItem) {
+        if(player.getVehicle() != null) return;
+        Player nearestPlayer = WorldManager.getNearestPlayer(player);
+        if(nearestPlayer == null) return;
+        if(nearestPlayer.getLocation().distance(player.getLocation()) > 200) return;
+        WorldManager.revive(player, nearestPlayer);
+        Inventory inventory = InventoryManager.getMainInventory(player);
+        inventory.removeItem(inventoryItem, 1);
+    }
+
+    private static void useLightSaber(Player player, InventoryItem inventoryItem) {
+        if(player.getVehicle() != null) return;
+        Account account = WorldManager.getPlayerAccount(player);
+        CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
+        if(state.getWearableWorldObject() != null) { // Can't use the item because the player wear something already
+            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "action.vehicle.wearSomething"));
+            return;
+        }
+
+        // Put the object in the hand
+        CharacterToolAnimation characterToolAnimation = new CharacterToolAnimation(50009, new Vector(-7, 7, 0),
+                new Vector(90,90, 0), new Vector(0.05,0.05,0.05), "hand_r");
+        WearableWorldObject wearableWorldObject = new WearableWorldObject(50009, true,
+                Animation.STOP, characterToolAnimation, player.getLocation());
+        JobManager.getWearableWorldObjects().add(wearableWorldObject);
+        JobManager.handleWearObjectRequest(player, wearableWorldObject.getUuid());
+        SoundManager.playSound3D("sounds/ls_sound.mp3", player.getLocation(), 700, 0.3);
     }
 }

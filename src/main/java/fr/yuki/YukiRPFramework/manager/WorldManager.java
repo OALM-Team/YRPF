@@ -194,6 +194,7 @@ public class WorldManager {
         if(GarageManager.handleVSellerInteract(player)) return;
         if(player.getVehicle() == null)
             if(handlePickupGroundItem(player)) return;
+        if(FuelManager.interactFuelPoint(player)) return;
         if(JobManager.tryToHarvest(player)) return;
         if(player.getVehicle() == null) {
             if(VehicleManager.handleVehicleChestStorageRequest(player)) return;

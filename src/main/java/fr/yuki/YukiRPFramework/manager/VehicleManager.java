@@ -100,6 +100,7 @@ public class VehicleManager {
 
             vehicle.setProperty("owner", player.getSteamId(), true);
             vehicle.setProperty("locked", 0, true);
+            vehicle.setProperty("fuel", 50, true);
 
             // Create the key for the player
             createKeyForVehicle(vehicle, player);
@@ -201,7 +202,11 @@ public class VehicleManager {
     }
 
     public static void onPlayerEnterVehicle(Player player, Vehicle vehicle, int seatId) {
-        if(seatId == 1) vehicle.setEngineOn(true);
+        if(seatId == 1) {
+            if(vehicle.getPropertyInt("fuel") > 0) {
+                vehicle.setEngineOn(true);
+            }
+        }
 
         Account account = WorldManager.getPlayerAccount(player);
         // Show waypoints for items in storage

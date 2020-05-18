@@ -10,6 +10,7 @@ import fr.yuki.YukiRPFramework.net.payload.SetLangPayload;
 import fr.yuki.YukiRPFramework.net.payload.SetWindowStatePayload;
 import fr.yuki.YukiRPFramework.ui.UIState;
 import net.onfirenetwork.onsetjava.Onset;
+import net.onfirenetwork.onsetjava.data.Location;
 import net.onfirenetwork.onsetjava.entity.Player;
 
 public class UIStateManager {
@@ -146,10 +147,39 @@ public class UIStateManager {
 
         // Set lang to the UI
         setLang(player, account.getLang());
+        CharacterManager.refreshFood(player);
 
         // Apply style to character if there is one saved
         if(account.getCharacterCreationRequest() == 0) {
             CharacterManager.setCharacterStyle(player);
+
+            if(account.getIsDead() == 0) {
+                player.setRagdoll(false);
+                CharacterManager.teleportWithLevelLoading(player, new Location(account.getSaveX(),
+                        account.getSaveY(),
+                        account.getSaveZ() + 50,
+                        account.getSaveH()));
+            }
+            else {
+                CharacterManager.teleportWithLevelLoading(player, new Location(account.getSaveX(),
+                        account.getSaveY(),
+                        account.getSaveZ() + 50,
+                        account.getSaveH()));
+                CharacterManager.setCharacterFreeze(player, true);
+                Onset.delay(1500, () -> {
+                    player.setRagdoll(true);
+                    CharacterManager.setCharacterStyle(player);
+                    player.setHealth(0);
+
+                    // Apply interface
+                    UIState uiState = new Gson().fromJson(player.getProperty("uiState").toString(), UIState.class);
+                    uiState.setDeath(true);
+                    player.setProperty("uiState", new Gson().toJson(uiState), true);
+                    player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new SetWindowStatePayload
+                            ("death", uiState.isDeath())));
+                    WorldManager.savePlayer(player);
+                });
+            }
         } else if(account.getCharacterCreationRequest() == 1) { // Request character creation if no style set
             UIStateManager.handleUIToogle(player, "customCharacter");
         }

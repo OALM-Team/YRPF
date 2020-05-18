@@ -45,6 +45,7 @@ public class YukiRPFrameworkPlugin {
             AccountManager.init();
             MapManager.init();
             GrowboxManager.init();
+            FuelManager.init();
 
             // Register commands
             Onset.registerCommand("item", new ItemCommand());
@@ -66,6 +67,7 @@ public class YukiRPFrameworkPlugin {
             Onset.registerCommand("setwhitelist", new SetWhitelistCommand());
             Onset.registerCommand("cuff", new CuffCommand());
             Onset.registerCommand("revive", new ReviveCommand());
+            Onset.registerCommand("nitro", new NitroCommand());
 
             // Register remote events
             Onset.registerRemoteEvent("GlobalUI:ToogleWindow");
@@ -119,6 +121,8 @@ public class YukiRPFrameworkPlugin {
                 evt.getPlayer().setLocation(new Vector(serverConfig.getSpawnPointX(),
                         serverConfig.getSpawnPointY(), serverConfig.getSpawnPointZ()));
                 evt.getPlayer().setHeading(serverConfig.getSpawnPointH());
+                CharacterManager.teleportWithLevelLoading(evt.getPlayer(), new Location(serverConfig.getSpawnPointX(),
+                        serverConfig.getSpawnPointY(), serverConfig.getSpawnPointZ(), serverConfig.getSpawnPointH()));
 
                 // Create the default inventory for character
                 Inventory inventory = InventoryDAO.createInventory();
@@ -146,8 +150,11 @@ public class YukiRPFrameworkPlugin {
                 evt.getPlayer().setProperty("uiState", new Gson().toJson(new UIState()), true);
 
                 evt.getPlayer().setSpawnLocation(new Vector(account.getSaveX(), account.getSaveY(), account.getSaveZ()), 0);
-                evt.getPlayer().setLocation(new Vector(account.getSaveX(), account.getSaveY(), account.getSaveZ()));
-
+               // evt.getPlayer().setLocation(new Vector(account.getSaveX(), account.getSaveY(), account.getSaveZ()));
+                CharacterManager.teleportWithLevelLoading(evt.getPlayer(), new Location(account.getSaveX(),
+                        account.getSaveY(),
+                        account.getSaveZ() + 50,
+                        account.getSaveH()));
                 Onset.broadcast("<span color=\"#ffee00\">" + account.getCharacterName() + " est de retour !</>");
             }
 

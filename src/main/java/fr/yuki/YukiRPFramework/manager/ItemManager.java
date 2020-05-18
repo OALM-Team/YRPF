@@ -28,6 +28,9 @@ public class ItemManager {
         if(inventoryItem == null) return;
         if(inventoryItem.getAmount() <= 0) return;
 
+        CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
+        if(state.isCuffed()) return;
+
         switch (inventoryItem.getTemplateId()) {
             case "11": // Temp need to use a enum
                 usePot(player, inventoryItem);
@@ -44,10 +47,26 @@ public class ItemManager {
             case "15": // Jerrican fuel
                 useJerricanFuel(player, inventoryItem);
                 break;
+
+            case "16": // Cuff
+                useCuff(player, inventoryItem);
+                break;
         }
     }
 
+    private static void useCuff(Player player, InventoryItem inventoryItem) {
+        if(player.getVehicle() != null) return;
+        Player nearestPlayer = WorldManager.getNearestPlayer(player);
+        if(nearestPlayer == null) return;
+        if(nearestPlayer.getLocation().distance(player.getLocation()) > 200) return;
+        WorldManager.cuffPlayer(nearestPlayer);
+
+        Inventory inventory = InventoryManager.getMainInventory(player);
+        inventory.removeItem(inventoryItem, 1);
+    }
+
     private static void usePot(Player player, InventoryItem inventoryItem) {
+        if(player.getVehicle() != null) return;
         Account account = WorldManager.getPlayerAccount(player);
         CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
         if(state.getWearableWorldObject() != null) { // Can't use the item because the player wear something already
@@ -69,6 +88,7 @@ public class ItemManager {
     }
 
     private static void useDeliveryTicketGrowbox(Player player, InventoryItem inventoryItem) {
+        if(player.getVehicle() != null) return;
         CharacterState characterState = CharacterManager.getCharacterStateByPlayer(player);
         if(characterState.getCurrentObjectPlacementInstance() != null) {
             return;
@@ -82,6 +102,7 @@ public class ItemManager {
     }
 
     private static void useDeliveryTicketGenerator(Player player, InventoryItem inventoryItem) {
+        if(player.getVehicle() != null) return;
         CharacterState characterState = CharacterManager.getCharacterStateByPlayer(player);
         if(characterState.getCurrentObjectPlacementInstance() != null) {
             return;
@@ -95,6 +116,7 @@ public class ItemManager {
     }
 
     private static void useJerricanFuel(Player player, InventoryItem inventoryItem) {
+        if(player.getVehicle() != null) return;
         Account account = WorldManager.getPlayerAccount(player);
         CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
         if(state.getWearableWorldObject() != null) { // Can't use the item because the player wear something already

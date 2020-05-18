@@ -122,6 +122,7 @@ public class VehicleManager {
     public static InventoryItem createKeyForVehicle(Vehicle vehicle, Player player) {
         String vehicleUUID = vehicle.getPropertyString("uuid");
         InventoryItem keyItem = InventoryManager.addItemToPlayer(player, ItemTemplateEnum.VKEY.id, 1);
+        if(keyItem == null) return null;
         keyItem.getExtraProperties().put("vehicle_uuid", vehicleUUID);
         InventoryManager.getMainInventory(player).save();
         return keyItem;

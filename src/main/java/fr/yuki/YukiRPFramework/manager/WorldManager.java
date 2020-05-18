@@ -1,6 +1,8 @@
 package fr.yuki.YukiRPFramework.manager;
 
 import com.google.gson.Gson;
+import fr.yuki.YukiRPFramework.character.CharacterJobLevel;
+import fr.yuki.YukiRPFramework.character.CharacterLoopAnimation;
 import fr.yuki.YukiRPFramework.character.CharacterState;
 import fr.yuki.YukiRPFramework.dao.*;
 import fr.yuki.YukiRPFramework.enums.ItemTemplateEnum;
@@ -9,6 +11,7 @@ import fr.yuki.YukiRPFramework.i18n.I18n;
 import fr.yuki.YukiRPFramework.inventory.Inventory;
 import fr.yuki.YukiRPFramework.inventory.InventoryItem;
 import fr.yuki.YukiRPFramework.job.DeliveryPointConfig;
+import fr.yuki.YukiRPFramework.job.Job;
 import fr.yuki.YukiRPFramework.job.ObjectPlacementInstance;
 import fr.yuki.YukiRPFramework.model.*;
 import fr.yuki.YukiRPFramework.net.payload.AddSellerItemPayload;
@@ -24,6 +27,7 @@ import net.onfirenetwork.onsetjava.entity.NPC;
 import net.onfirenetwork.onsetjava.entity.Pickup;
 import net.onfirenetwork.onsetjava.entity.Player;
 import net.onfirenetwork.onsetjava.entity.Vehicle;
+import net.onfirenetwork.onsetjava.enums.Animation;
 
 import java.io.*;
 import java.sql.SQLException;
@@ -177,6 +181,9 @@ public class WorldManager {
             return;
         }
 
+        CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
+        if(!state.canInteract()) return;
+
         // Check weared object
         if(CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject() != null && player.getVehicle() == null) {
             JobManager.handleUnwearObject(player);
@@ -257,6 +264,36 @@ public class WorldManager {
     }
 
     public static void openSeller(Player player, Seller seller) {
+        // Check job
+        if(!seller.getJobRequired().equals("")) {
+            Account account = WorldManager.getPlayerAccount(player);
+            Job job = JobManager.getJobs().values().stream().filter(x -> x.getJobType().type.equals(seller.getJobRequired())).findFirst().orElse(null);
+            if(job == null) return;
+
+            // Check level and whitelist level
+            if(job.isWhitelisted()) {
+                AccountJobWhitelist accountJobWhitelist = AccountManager.getAccountJobWhitelists().stream()
+                        .filter(x -> x.getAccountId() == account.getId() && x.getJobId().equals(job.getJobType().type))
+                        .findFirst().orElse(null);
+                if(accountJobWhitelist == null) {
+                    UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.job.not_whitelisted"));
+                    return;
+                }
+                if(accountJobWhitelist.getJobLevel() < seller.getJobLevelRequired()) {
+                    UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.job.not_whitelisted"));
+                    return;
+                }
+            } else {
+                ArrayList<CharacterJobLevel> characterJobLevels = account.decodeCharacterJob();
+                CharacterJobLevel characterJobLevel = characterJobLevels.stream().filter(x -> x.getJobId().equals(seller.getJobRequired())).findFirst().orElse(null);
+                if(characterJobLevel == null) return;
+                if(characterJobLevel.getJobLevel().getLevel() < seller.getJobLevelRequired()) {
+                    UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.job.not_whitelisted"));
+                    return;
+                }
+            }
+        }
+
         if(!UIStateManager.handleUIToogle(player, "seller")) {
             CharacterManager.setCharacterFreeze(player, false);
             return;
@@ -282,7 +319,7 @@ public class WorldManager {
 
         ItemTemplate itemTemplate = InventoryManager.getItemTemplates().get(sellerItem.getId());
         Inventory inventory = InventoryManager.getMainInventory(player);
-        if(sellerItem.getPrice() > 0) {
+        if(sellerItem.getPrice() >= 0) {
             // Buy
             int totalPrice = sellerItem.getPrice() * payload.getQuantity();
             if(inventory.getCashAmount() < totalPrice) {
@@ -357,6 +394,61 @@ public class WorldManager {
         objectPlacementInstance.onPlacementDone(player, position, rotation);
     }
 
+    public static void cuffPlayer(Player player) {
+        if(player.getVehicle() != null) return;
+        CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
+
+        if(state.isCuffed()) {
+            state.setCuffed(false);
+            player.setAnimation(Animation.STOP);
+            player.setProperty("cuffed", 0, true);
+            SoundManager.playSound3D("sounds/hand_cuff.mp3", player.getLocation(), 500, 0.2);
+        } else {
+            if(!state.canInteract()) {
+                return;
+            }
+            SoundManager.playSound3D("sounds/hand_cuff.mp3", player.getLocation(), 500, 0.2);
+            state.setCuffed(true);
+            player.setAnimation(Animation.CUFF);
+            player.setProperty("cuffed", 1, true);
+        }
+    }
+
+    public static void revive(Player player, Player target) {
+        CharacterState targetState = CharacterManager.getCharacterStateByPlayer(target);
+        if(!targetState.isDead()) return;
+        CharacterLoopAnimation characterLoopAnimation = new CharacterLoopAnimation(player, Animation.REVIVE,
+                5000, 2, "sounds/defibrilator.mp3");
+        characterLoopAnimation.start();
+        CharacterManager.setCharacterFreeze(player, true);
+        CharacterManager.setCharacterFreeze(target, true);
+        Onset.delay(10000, () -> {
+
+            targetState.setDead(false);
+            Account account = WorldManager.getPlayerAccount(target);
+            account.setIsDead(0);
+            Location location = target.getLocationAndHeading();
+            account.setSaveX(location.getX());
+            account.setSaveY(location.getY());
+            account.setSaveZ(location.getZ());
+            account.setSaveH(location.getHeading());
+            target.setRespawnTime(100);
+
+            target.setRagdoll(false);
+            target.setHealth(100);
+            CharacterManager.setCharacterStyle(target);
+            WorldManager.savePlayer(target);
+            UIStateManager.handleUIToogle(target, "death");
+
+            characterLoopAnimation.stop();
+            Onset.delay(500, () -> {
+                player.setAnimation(Animation.STOP);
+                target.setAnimation(Animation.PUSHUP_END);
+                CharacterManager.setCharacterFreeze(player, false);
+                CharacterManager.setCharacterFreeze(target, false);
+            });
+        });
+    }
 
     /**
      * Get the account for the player
@@ -389,5 +481,18 @@ public class WorldManager {
 
     public static ArrayList<GroundItem> getGroundItems() {
         return groundItems;
+    }
+
+    public static Player getNearestPlayer(Player player) {
+        Player search = null;
+        double currentDistance = 99999;
+        for(Player p : Onset.getPlayers()) {
+            if(p.getId() == player.getId()) continue;;
+            if(p.getLocation().distance(player.getLocation()) < currentDistance) {
+                search = p;
+                currentDistance = p.getLocation().distance(player.getLocation());
+            }
+        }
+        return search;
     }
 }

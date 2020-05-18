@@ -70,6 +70,19 @@ public class GrowboxManager {
         return null;
     }
 
+    public static Generator getGeneratorOnNearby(Vector position, int distance) {
+        for(JobTool jobTool : JobManager.getJobTools().stream().filter(x -> x.getJobToolType().toLowerCase().equals("generator"))
+                .collect(Collectors.toList())) {
+            Generator generator = (Generator)jobTool.getJobToolHandler();
+            if(generator.isOn()) {
+                if(new Vector(jobTool.getX(), jobTool.getY(), jobTool.getZ()).distance(position) <= distance) {
+                    return generator;
+                }
+            }
+        }
+        return null;
+    }
+
     public static void handleGrowboxFillWaterPot(Player player, GrowboxFillWaterPotPayload payload) {
         JobTool jobTool = JobManager.getJobTools().stream().filter
                 (x -> x.getUuid().equals(payload.getGrowboxId())).findFirst().orElse(null);

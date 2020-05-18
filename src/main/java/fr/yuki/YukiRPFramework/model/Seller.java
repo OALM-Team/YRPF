@@ -17,6 +17,8 @@ public class Seller {
     private double h;
     private int npcClothing;
     private String itemList;
+    private String jobRequired;
+    private int jobLevelRequired;
     private NPC npc;
 
     public ArrayList<SellerItem> decodeItems() {
@@ -94,6 +96,22 @@ public class Seller {
 
     public void setNpc(NPC npc) {
         this.npc = npc;
+    }
+
+    public String getJobRequired() {
+        return jobRequired;
+    }
+
+    public void setJobRequired(String jobRequired) {
+        this.jobRequired = jobRequired;
+    }
+
+    public int getJobLevelRequired() {
+        return jobLevelRequired;
+    }
+
+    public void setJobLevelRequired(int jobLevelRequired) {
+        this.jobLevelRequired = jobLevelRequired;
     }
 
     public boolean isNear(Player player) {

@@ -28,6 +28,8 @@ public class SellerDAO {
             seller.setH(resultSet.getDouble("h"));
             seller.setNpcClothing(resultSet.getInt("npc_clothing"));
             seller.setItemList(resultSet.getString("item_list"));
+            seller.setJobRequired(resultSet.getString("job_required"));
+            seller.setJobLevelRequired(resultSet.getInt("job_level_required"));
 
             sellers.add(seller);
         }

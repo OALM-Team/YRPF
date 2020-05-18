@@ -63,6 +63,9 @@ public class YukiRPFrameworkPlugin {
             Onset.registerCommand("flip", new FlipCommand());
             Onset.registerCommand("lang", new SetLangCommand());
             Onset.registerCommand("dop", new DebugObjectPlacementCommand());
+            Onset.registerCommand("setwhitelist", new SetWhitelistCommand());
+            Onset.registerCommand("cuff", new CuffCommand());
+            Onset.registerCommand("revive", new ReviveCommand());
 
             // Register remote events
             Onset.registerRemoteEvent("GlobalUI:ToogleWindow");

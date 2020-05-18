@@ -9,6 +9,7 @@ public class CharacterState {
     private boolean isDead = false;
     private boolean firstSpawn = true;
     private ObjectPlacementInstance currentObjectPlacementInstance = null;
+    private boolean cuffed = false;
 
     public CharacterState() {}
 
@@ -47,5 +48,20 @@ public class CharacterState {
 
     public void setCurrentObjectPlacementInstance(ObjectPlacementInstance currentObjectPlacementInstance) {
         this.currentObjectPlacementInstance = currentObjectPlacementInstance;
+    }
+
+    public boolean isCuffed() {
+        return cuffed;
+    }
+
+    public void setCuffed(boolean cuffed) {
+        this.cuffed = cuffed;
+    }
+
+    public boolean canInteract() {
+        if(this.isDead) return false;
+        if(this.cuffed) return false;
+        if(this.getCurrentObjectPlacementInstance() != null) return false;
+        return true;
     }
 }

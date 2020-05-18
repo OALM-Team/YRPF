@@ -2,6 +2,7 @@ package fr.yuki.YukiRPFramework.manager;
 
 import com.google.gson.Gson;
 import fr.yuki.YukiRPFramework.character.CharacterJobLevel;
+import fr.yuki.YukiRPFramework.character.CharacterState;
 import fr.yuki.YukiRPFramework.character.CharacterStyle;
 import fr.yuki.YukiRPFramework.dao.*;
 import fr.yuki.YukiRPFramework.enums.ItemTemplateEnum;
@@ -205,6 +206,10 @@ public class JobManager {
      */
     public static boolean tryToHarvest(Player player) {
         if(player.getVehicle() != null) return false;
+
+        CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
+        if(!state.canInteract()) return false;
+
         Account account = WorldManager.getPlayerAccount(player);
         for(Map.Entry<JobEnum, Job> job : jobs.entrySet()) {
             for(WorldHarvestObject worldHarvestObject : job.getValue().getWorldHarvestObjects()) {

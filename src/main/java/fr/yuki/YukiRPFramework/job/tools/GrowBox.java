@@ -191,18 +191,13 @@ public class GrowBox implements JobToolHandler {
     }
 
     public void tickGrow() {
-        Generator generator = GrowboxManager.getGeneratorNearby(new Vector(this.jobTool.getX(), this.jobTool.getY(), this.jobTool.getZ()),
+        Generator generator = GrowboxManager.getGeneratorOnNearby(new Vector(this.jobTool.getX(), this.jobTool.getY(), this.jobTool.getZ()),
                 1500);
         if(generator == null) {
             if(this.loopSound3D.isActive()) this.loopSound3D.stop();
             return;
         } else {
-            if(generator.isOn()) {
-                if(!this.loopSound3D.isActive()) this.loopSound3D.start();
-            } else {
-                if(this.loopSound3D.isActive()) this.loopSound3D.stop();
-                return;
-            }
+            if(!this.loopSound3D.isActive()) this.loopSound3D.start();
         }
         for(Pot pot : this.pots) {
             pot.grow();

@@ -13,6 +13,8 @@ public class UIState {
     private boolean seller = false;
     private boolean statewindow = false;
     private boolean growboxmenu = false;
+    private boolean phone = false;
+    private boolean houseBuy = false;
 
     public boolean isInventory() {
         return inventory;
@@ -108,5 +110,21 @@ public class UIState {
 
     public void setGrowboxmenu(boolean growboxmenu) {
         this.growboxmenu = growboxmenu;
+    }
+
+    public boolean isPhone() {
+        return phone;
+    }
+
+    public void setPhone(boolean phone) {
+        this.phone = phone;
+    }
+
+    public boolean isHouseBuy() {
+        return houseBuy;
+    }
+
+    public void setHouseBuy(boolean houseBuy) {
+        this.houseBuy = houseBuy;
     }
 }

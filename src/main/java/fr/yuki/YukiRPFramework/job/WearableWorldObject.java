@@ -124,7 +124,7 @@ public class WearableWorldObject {
 
                 int rewardPerDistance = (int)Math.floor((originPosition.distance(player.getLocation()) / 1000) * characterJobLevel.getJobLevel().getLevel());
                 InventoryManager.addItemToPlayer(player, ItemTemplateEnum.CASH.id, rewardPerDistance);
-                SoundManager.playSound3D("sounds/cash_register.mp3", player.getLocation(), 200, 0.3);
+                SoundManager.playSound3D("sounds/cash_register.mp3", player.getLocation(), 200, 1);
                 delete = true;
                 JobManager.addExp(player, JobEnum.DELIVERY, 15);
                 UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, I18n.t(account.getLang(), "toast.delivery.shipped",

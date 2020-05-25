@@ -15,7 +15,10 @@ public enum ItemTemplateEnum {
     WATER("12"),
     WEED("13"),
     TICKET_DELIVERY_GENERATOR("14"),
-    JERRICAN_FUEL("15");
+    JERRICAN_FUEL("15"),
+    CUFF("16"),
+    DEFIBRILATOR("17"),
+    LIGHTSABER("18");
 
     public final String id;
 

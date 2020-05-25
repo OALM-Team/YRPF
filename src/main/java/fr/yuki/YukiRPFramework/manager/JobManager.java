@@ -242,7 +242,7 @@ public class JobManager {
                 I18n.t(account.getLang(), "ui.characterJob.jobLevel_" + characterJobLevel.getJobLevel().getTranslateName()))));
         JobLevel nextJobLevel = characterJobLevel.getJobLevel();
         if(previousJobLevel.getLevel() != nextJobLevel.getLevel()) {
-            SoundManager.playSound3D("sounds/success_1.mp3", player.getLocation(), 200, 0.3);
+            SoundManager.playSound3D("sounds/success_1.mp3", player.getLocation(), 200, 1);
             String translatedJobName = I18n.t(account.getLang(), "ui.characterJob.jobLevel_" + characterJobLevel.getJobLevel().getTranslateName());
             player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new AddXpBarItemPayload(
                     I18n.t(account.getLang(), "toast.xp.level_up", translatedJobName))));
@@ -280,7 +280,7 @@ public class JobManager {
             if(inventoryItem == null) continue;
             Onset.print("Selling item to the npc price=" + sellListItem.getPrice());
             inventory.removeItem(inventoryItem, 1);
-            SoundManager.playSound3D("sounds/cash_register.mp3", player.getLocation(), 200, 0.3);
+            SoundManager.playSound3D("sounds/cash_register.mp3", player.getLocation(), 200, 0.8);
             //UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, "Vous avez vendu votre " + inventoryItem.getTemplate().getName() +
             //        " pour " + sellListItem.getPrice() + "$");
             jobNPCNearby.getNpc().setAnimation(Animation.THUMBSUP);
@@ -302,7 +302,7 @@ public class JobManager {
                 InventoryManager.addItemToPlayer(player, ItemTemplateEnum.CASH.id, jobNPCListItem.getPrice());
                 CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject().requestUnwear(player, true);
                 jobNPCNearby.getNpc().setAnimation(Animation.THUMBSUP);
-                SoundManager.playSound3D("sounds/cash_register.mp3", player.getLocation(), 200, 0.3);
+                SoundManager.playSound3D("sounds/cash_register.mp3", player.getLocation(), 200, 1);
                 //UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, "Vous avez vendu votre ressource pour " + jobNPCListItem.getPrice() + "$");
             } else {
                 UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.npc.no_buy_kind_item"));

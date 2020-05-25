@@ -352,6 +352,16 @@ public class WorldManager {
     }
 
     public static void handleObjectRequestPlacement(Player player) {
+        House house = HouseManager.getHouseAtLocation(player.getLocation());
+        Account account = WorldManager.getPlayerAccount(player);
+        if(house == null) {
+            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.house.need_to_be_inside"));
+            return;
+        }
+        if(house.getAccountId() != account.getId()) {
+            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.house.need_to_be_inside"));
+            return;
+        }
         UIStateManager.handleUIToogle(player, "statewindow");
     }
 
@@ -361,9 +371,9 @@ public class WorldManager {
         if(state.getCurrentObjectPlacementInstance() == null) {
             return;
         }
-
-        UIStateManager.handleUIToogle(player, "statewindow");
         Account account = WorldManager.getPlayerAccount(player);
+
+        if(state.getUiState().isStatewindow()) UIStateManager.handleUIToogle(player, "statewindow");
         ObjectPlacementInstance objectPlacementInstance = state.getCurrentObjectPlacementInstance();
         objectPlacementInstance.destroy();
         state.setCurrentObjectPlacementInstance(null);
@@ -379,16 +389,19 @@ public class WorldManager {
             Onset.print("Can't cancel placement, there is instance for the player in the state");
             return;
         }
+        House house = HouseManager.getHouseAtLocation(position);
+        Account account = WorldManager.getPlayerAccount(player);
+        if(house == null) {
+            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.house.need_to_be_inside"));
+            return;
+        }
+        if(house.getAccountId() != account.getId()) {
+            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.house.need_to_be_inside"));
+            return;
+        }
 
         // Remove interface
-        UIState uiState = new Gson().fromJson(player.getProperty("uiState").toString(), UIState.class);
-        uiState.setStatewindow(false);
-        player.setProperty("uiState", new Gson().toJson(uiState), true);
-        player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new SetWindowStatePayload
-                ("statewindow", uiState.isStatewindow())));
-
-        //UIStateManager.handleUIToogle(player, "statewindow");
-        Account account = WorldManager.getPlayerAccount(player);
+        if(state.getUiState().isStatewindow()) UIStateManager.handleUIToogle(player, "statewindow");
         ObjectPlacementInstance objectPlacementInstance = state.getCurrentObjectPlacementInstance();
         objectPlacementInstance.destroy();
         state.setCurrentObjectPlacementInstance(null);
@@ -403,12 +416,12 @@ public class WorldManager {
             state.setCuffed(false);
             player.setAnimation(Animation.STOP);
             player.setProperty("cuffed", 0, true);
-            SoundManager.playSound3D("sounds/hand_cuff.mp3", player.getLocation(), 500, 0.2);
+            SoundManager.playSound3D("sounds/hand_cuff.mp3", player.getLocation(), 500, 1);
         } else {
             if(!state.canInteract()) {
                 return;
             }
-            SoundManager.playSound3D("sounds/hand_cuff.mp3", player.getLocation(), 500, 0.2);
+            SoundManager.playSound3D("sounds/hand_cuff.mp3", player.getLocation(), 500, 1);
             state.setCuffed(true);
             player.setAnimation(Animation.CUFF);
             player.setProperty("cuffed", 1, true);
@@ -458,6 +471,14 @@ public class WorldManager {
      */
     public static Account getPlayerAccount(Player player) {
         return accounts.get(player.getPropertyInt("accountId"));
+    }
+
+    public static Player getPlayerByPhoneNumber(String phoneNumber) {
+        for(Player player : Onset.getPlayers()) {
+            Account account = getPlayerAccount(player);
+            if(account.getPhoneNumber().equals(phoneNumber)) return player;
+        }
+        return null;
     }
 
     public static ArrayList<ATM> getAtms() {

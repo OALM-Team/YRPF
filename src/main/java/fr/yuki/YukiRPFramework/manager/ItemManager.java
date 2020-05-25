@@ -202,6 +202,6 @@ public class ItemManager {
                 Animation.STOP, characterToolAnimation, player.getLocation());
         JobManager.getWearableWorldObjects().add(wearableWorldObject);
         JobManager.handleWearObjectRequest(player, wearableWorldObject.getUuid());
-        SoundManager.playSound3D("sounds/ls_sound.mp3", player.getLocation(), 700, 0.3);
+        SoundManager.playSound3D("sounds/ls_sound.mp3", player.getLocation(), 700, 1);
     }
 }

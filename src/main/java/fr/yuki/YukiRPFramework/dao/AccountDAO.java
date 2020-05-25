@@ -43,6 +43,7 @@ public class AccountDAO {
             account.setAdminLevel(resultSet.getInt("admin_level"));
             account.setFoodState(resultSet.getInt("food_state"));
             account.setDrinkState(resultSet.getInt("drink_state"));
+            account.setPhoneNumber(resultSet.getString("phone_number"));
             account.setCreatedAt(resultSet.getDate("created_at"));
             account.setUpdatedAt(resultSet.getDate("updated_at"));
         }
@@ -66,6 +67,7 @@ public class AccountDAO {
         account.setLang("fr");
         account.setFoodState(100);
         account.setDrinkState(100);
+        account.setPhoneNumber("");
         account.setSaveX(serverConfig.getSpawnPointX());
         account.setSaveY(serverConfig.getSpawnPointY());
         account.setSaveZ(serverConfig.getSpawnPointZ());
@@ -107,7 +109,7 @@ public class AccountDAO {
         PreparedStatement preparedStatement = Database.getConnection()
                 .prepareStatement("UPDATE tbl_account SET is_banned=?, bank_money=?, save_x=?, save_y=?, save_z=?, save_h=?, character_creation_request=?," +
                         "character_style=?, character_name=?, job_levels=?, is_dead=?, admin_level=?, lang=?," +
-                        "food_state=?, drink_state=? WHERE id_account=?");
+                        "food_state=?, drink_state=?, phone_number=? WHERE id_account=?");
         preparedStatement.setInt(1, account.getIsBanned());
         preparedStatement.setInt(2, account.getBankMoney());
         if(player == null) {
@@ -131,7 +133,8 @@ public class AccountDAO {
         preparedStatement.setString(13, account.getLang());
         preparedStatement.setInt(14, account.getFoodState());
         preparedStatement.setInt(15, account.getDrinkState());
-        preparedStatement.setDouble(16, account.getId());
+        preparedStatement.setString(16, account.getPhoneNumber());
+        preparedStatement.setDouble(17, account.getId());
         preparedStatement.execute();
     }
 }

@@ -30,6 +30,7 @@ public class Account {
     private String lang;
     private int foodState;
     private int drinkState;
+    private String phoneNumber;
 
     public int getId() {
         return id;
@@ -207,5 +208,13 @@ public class Account {
 
     public void setLang(String lang) {
         this.lang = lang;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 }

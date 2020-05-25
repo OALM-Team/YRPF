@@ -46,7 +46,7 @@ public class Sawmill implements JobToolHandler {
         WorldObject worldObject = Onset.getServer().createObject(new Vector(0,0,0), wearableWorldObject.getModelId());
         if(ModdingManager.isCustomModelId(wearableWorldObject.getModelId()))
             ModdingManager.assignCustomModel(worldObject, wearableWorldObject.getModelId());
-        SoundManager.playSound3D("sounds/saw_mill_cut.mp3", player.getLocation(), 1000, 0.2);
+        SoundManager.playSound3D("sounds/saw_mill_cut.mp3", player.getLocation(), 1000, 0.8);
         JobManager.addExp(player, JobEnum.LUMBERJACK, 20);
         worldObject.attach(this.jobTool.getWorldObject(), new Vector(0, 0,160), new Vector(0, 0, 0), "");
         Onset.delay(8000, () -> {

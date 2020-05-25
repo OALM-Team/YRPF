@@ -1,6 +1,7 @@
 package fr.yuki.YukiRPFramework.manager;
 
 import com.google.gson.Gson;
+import fr.yuki.YukiRPFramework.character.CharacterState;
 import fr.yuki.YukiRPFramework.enums.ItemTemplateEnum;
 import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
 import fr.yuki.YukiRPFramework.inventory.Inventory;
@@ -21,7 +22,8 @@ public class UIStateManager {
      */
     public static boolean handleUIToogle(Player player, String windowType) {
         Onset.print("Toogle UI type="+windowType);
-        UIState uiState = new Gson().fromJson(player.getProperty("uiState").toString(), UIState.class);
+        CharacterState characterState = CharacterManager.getCharacterStateByPlayer(player);
+        UIState uiState = characterState.getUiState();
         boolean r = false;
         switch (windowType) {
             case "inventory":
@@ -108,8 +110,22 @@ public class UIStateManager {
                 player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new SetWindowStatePayload
                         ("growboxmenu", uiState.isGrowboxmenu())));
                 break;
+
+            case "phone":
+                uiState.setPhone(!uiState.isPhone());
+                r = uiState.isPhone();
+                player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new SetWindowStatePayload
+                        ("phone", uiState.isPhone())));
+                break;
+
+            case "houseBuy":
+                uiState.setHouseBuy(!uiState.isHouseBuy());
+                r = uiState.isHouseBuy();
+                player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new SetWindowStatePayload
+                        ("houseBuy", uiState.isHouseBuy())));
+                break;
+
         }
-        player.setProperty("uiState", new Gson().toJson(uiState), true);
         return r;
     }
 

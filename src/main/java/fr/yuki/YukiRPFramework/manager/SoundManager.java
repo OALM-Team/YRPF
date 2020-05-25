@@ -12,7 +12,7 @@ public class SoundManager {
 
     public static void init() {
         createAmbiantSound("hammerhead_station", "sounds/ambiant_1.mp3",
-                new Vector(127357, 78077, 1568), 6000, 0.05);
+                new Vector(127357, 78077, 1568), 6000, 0.3);
     }
 
     /**

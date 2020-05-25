@@ -26,7 +26,7 @@ public class CharacterLoopAnimation {
     public void start() {
         this.isActive = true;
         if(!loopSound.equals("")) {
-            SoundManager.playSound3D(this.loopSound, this.player.getLocation(), 1500, 0.3);
+            SoundManager.playSound3D(this.loopSound, this.player.getLocation(), 1500, 1);
         }
 
         // Attach the tool
@@ -42,7 +42,7 @@ public class CharacterLoopAnimation {
                 this.player.setAnimation(this.animation);
 
                 if(!loopSound.equals("") && currentI != loopAmount) {
-                    SoundManager.playSound3D(this.loopSound, this.player.getLocation(), 1500, 0.3);
+                    SoundManager.playSound3D(this.loopSound, this.player.getLocation(), 1500, 1);
                 }
             });
         }

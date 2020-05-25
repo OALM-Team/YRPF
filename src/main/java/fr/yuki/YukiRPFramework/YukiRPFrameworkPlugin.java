@@ -6,10 +6,12 @@ import fr.yuki.YukiRPFramework.commands.*;
 import fr.yuki.YukiRPFramework.dao.AccountDAO;
 import fr.yuki.YukiRPFramework.dao.InventoryDAO;
 import fr.yuki.YukiRPFramework.enums.ItemTemplateEnum;
+import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
 import fr.yuki.YukiRPFramework.i18n.I18n;
 import fr.yuki.YukiRPFramework.inventory.Inventory;
 import fr.yuki.YukiRPFramework.manager.*;
 import fr.yuki.YukiRPFramework.model.Account;
+import fr.yuki.YukiRPFramework.model.House;
 import fr.yuki.YukiRPFramework.net.payload.*;
 import fr.yuki.YukiRPFramework.ui.UIState;
 import fr.yuki.YukiRPFramework.utils.ServerConfig;
@@ -46,6 +48,8 @@ public class YukiRPFrameworkPlugin {
             MapManager.init();
             GrowboxManager.init();
             FuelManager.init();
+            PhoneManager.init();
+            HouseManager.init();
 
             // Register commands
             Onset.registerCommand("item", new ItemCommand());
@@ -68,6 +72,7 @@ public class YukiRPFrameworkPlugin {
             Onset.registerCommand("cuff", new CuffCommand());
             Onset.registerCommand("revive", new ReviveCommand());
             Onset.registerCommand("nitro", new NitroCommand());
+            Onset.registerCommand("chouse", new CreateHouseCommand());
 
             // Register remote events
             Onset.registerRemoteEvent("GlobalUI:ToogleWindow");
@@ -95,6 +100,13 @@ public class YukiRPFrameworkPlugin {
             Onset.registerRemoteEvent("Growbox:FillSeedPot");
             Onset.registerRemoteEvent("Growbox:HarvestPot");
             Onset.registerRemoteEvent("Growbox:TakePot");
+            Onset.registerRemoteEvent("Phone:AddContact");
+            Onset.registerRemoteEvent("Phone:RequestContacts");
+            Onset.registerRemoteEvent("Phone:RequestSendMessage");
+            Onset.registerRemoteEvent("Phone:RequestConversation");
+            Onset.registerRemoteEvent("Phone:RequestConversationsList");
+            Onset.registerRemoteEvent("House:RequestHouseMenu");
+            Onset.registerRemoteEvent("House:RequestBuy");
         } catch (Exception ex) {
             ex.printStackTrace();
             Onset.print("Can't start the plugin because : " + ex.toString());
@@ -134,7 +146,6 @@ public class YukiRPFrameworkPlugin {
 
                 // Set properties for the player
                 evt.getPlayer().setProperty("accountId", account.getId(), true);
-                evt.getPlayer().setProperty("uiState", new Gson().toJson(new UIState()), true);
 
                 // Start money
                 InventoryManager.addItemToPlayer(evt.getPlayer(), ItemTemplateEnum.CASH.id, 15000);
@@ -147,7 +158,6 @@ public class YukiRPFrameworkPlugin {
 
                 // Set properties for the player
                 evt.getPlayer().setProperty("accountId", account.getId(), true);
-                evt.getPlayer().setProperty("uiState", new Gson().toJson(new UIState()), true);
 
                 evt.getPlayer().setSpawnLocation(new Vector(account.getSaveX(), account.getSaveY(), account.getSaveZ()), 0);
                // evt.getPlayer().setLocation(new Vector(account.getSaveX(), account.getSaveY(), account.getSaveZ()));
@@ -166,6 +176,13 @@ public class YukiRPFrameworkPlugin {
             JobManager.initCharacterJobs(evt.getPlayer());
             if(CharacterManager.getCharacterStateByPlayer(evt.getPlayer()) == null)
                 CharacterManager.getCharacterStates().put(evt.getPlayer().getSteamId(), new CharacterState());
+
+            // Generate a phone number for the player
+            if(account.getPhoneNumber().trim().equals("")) {
+                account.setPhoneNumber(PhoneManager.generateRandomPhoneNumber());
+                AccountDAO.updateAccount(account, null);
+                Onset.print("Phone number generated : " + account.getPhoneNumber());
+            }
 
             // If the player is dead
             if(account.getIsDead() == 1) {
@@ -303,6 +320,36 @@ public class YukiRPFrameworkPlugin {
                     GrowboxManager.handleGrowboxTakePotRequest(evt.getPlayer(), new Gson().fromJson((evt.getArgs()[0]).toString(),
                             GrowboxFillWaterPotPayload.class));
                     break;
+
+                case "Phone:RequestContacts":
+                    PhoneManager.handleRequestPhoneContacts(evt.getPlayer());
+                    break;
+
+                case "Phone:AddContact":
+                    PhoneManager.handleAddPhoneContact(evt.getPlayer(), new Gson().fromJson((evt.getArgs()[0]).toString(),
+                            PhoneAddContactPayload.class));
+                    break;
+
+                case "Phone:RequestSendMessage":
+                    PhoneManager.handleRequestSendMessage(evt.getPlayer(), new Gson().fromJson((evt.getArgs()[0]).toString(),
+                            RequestPhoneSendMessagePayload.class));
+                    break;
+
+                case "Phone:RequestConversation":
+                    PhoneManager.handleRequestConversation(evt.getPlayer(), (evt.getArgs()[0]).toString());
+                    break;
+
+                case "Phone:RequestConversationsList":
+                    PhoneManager.handleRequestConversationsList(evt.getPlayer());
+                    break;
+
+                case "House:RequestHouseMenu":
+                    HouseManager.handleHouseMenu(evt.getPlayer());
+                    break;
+
+                case "House:RequestBuy":
+                    HouseManager.handleBuyHouseRequest(evt.getPlayer());
+                    break;
             }
         }
         catch (Exception ex) {
@@ -326,11 +373,20 @@ public class YukiRPFrameworkPlugin {
 
     @EventHandler
     public void onPlayerInteractDoor(PlayerInteractDoorEvent evt) {
+        House house = HouseManager.getHouseAtLocation(evt.getDoor().getLocation());
+        if(house != null) {
+            Account account = WorldManager.getPlayerAccount(evt.getPlayer());
+            if(house.getAccountId() != account.getId()) {
+                UIStateManager.sendNotification(evt.getPlayer(), ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.house.dont_own_it"));
+                return;
+            }
+        }
         if(VehicleManager.getNearestVehicle(evt.getPlayer().getLocation()) != null) {
             if(VehicleManager.getNearestVehicle(evt.getPlayer().getLocation())
                     .getLocation().distance(evt.getPlayer().getLocation()) < VehicleManager.getInteractionDistance(VehicleManager.getNearestVehicle(evt.getPlayer().getLocation()))) {
                 return;
             } else {
+
                 evt.getDoor().setOpen(evt.getDoor().isOpen() ? false : true);
             }
         } else {

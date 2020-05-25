@@ -2,6 +2,8 @@ package fr.yuki.YukiRPFramework.character;
 
 import fr.yuki.YukiRPFramework.job.ObjectPlacementInstance;
 import fr.yuki.YukiRPFramework.job.WearableWorldObject;
+import fr.yuki.YukiRPFramework.modding.Line3D;
+import fr.yuki.YukiRPFramework.ui.UIState;
 import net.onfirenetwork.onsetjava.entity.Player;
 
 public class CharacterState {
@@ -10,8 +12,12 @@ public class CharacterState {
     private boolean firstSpawn = true;
     private ObjectPlacementInstance currentObjectPlacementInstance = null;
     private boolean cuffed = false;
+    private UIState uiState = null;
+    private Line3D currentDisplayedLine3D = null;
 
-    public CharacterState() {}
+    public CharacterState() {
+        this.uiState = new UIState();
+    }
 
     public WearableWorldObject getWearableWorldObject() {
         return wearableWorldObject;
@@ -63,5 +69,17 @@ public class CharacterState {
         if(this.cuffed) return false;
         if(this.getCurrentObjectPlacementInstance() != null) return false;
         return true;
+    }
+
+    public UIState getUiState() {
+        return uiState;
+    }
+
+    public Line3D getCurrentDisplayedLine3D() {
+        return currentDisplayedLine3D;
+    }
+
+    public void setCurrentDisplayedLine3D(Line3D currentDisplayedLine3D) {
+        this.currentDisplayedLine3D = currentDisplayedLine3D;
     }
 }

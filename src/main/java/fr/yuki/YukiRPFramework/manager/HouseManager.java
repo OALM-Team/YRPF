@@ -2,12 +2,14 @@ package fr.yuki.YukiRPFramework.manager;
 
 import com.google.gson.Gson;
 import fr.yuki.YukiRPFramework.dao.HouseDAO;
+import fr.yuki.YukiRPFramework.dao.HouseItemDAO;
 import fr.yuki.YukiRPFramework.enums.ItemTemplateEnum;
 import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
 import fr.yuki.YukiRPFramework.i18n.I18n;
 import fr.yuki.YukiRPFramework.inventory.Inventory;
 import fr.yuki.YukiRPFramework.model.Account;
 import fr.yuki.YukiRPFramework.model.House;
+import fr.yuki.YukiRPFramework.model.HouseItemObject;
 import fr.yuki.YukiRPFramework.net.payload.AddPhoneMessagePayload;
 import fr.yuki.YukiRPFramework.net.payload.SetHouseInfosPayload;
 import net.onfirenetwork.onsetjava.Onset;
@@ -24,14 +26,25 @@ public class HouseManager {
     public static void init() throws SQLException {
         houses = HouseDAO.loadHouses();
         Onset.print("Loaded " + houses.size() + " house(s) from the database");
+        spawnHouseItems();
+    }
+
+    public static void spawnHouseItems() throws SQLException {
+        for(HouseItemObject houseItemObject : HouseItemDAO.loadHouseItems()) {
+            House house = getHouseAtLocation(houseItemObject.getPosition());
+            if(house == null) return;
+            houseItemObject.setHouse(house);
+            house.getHouseItemObjects().add(houseItemObject);
+            houseItemObject.spawn();
+        }
     }
 
     public static House getHouseAtLocation(Vector position) {
         return houses.stream().filter(x -> x.getLine3D().isInside(position)).findFirst().orElse(null);
     }
 
-    public static void handleHouseMenu(Player player) {
-        House house = getHouseAtLocation(player.getLocation());
+    public static void handleHouseMenu(Player player, Vector origin) {
+        House house = getHouseAtLocation(origin);
         if(house == null) return;
         Account account = WorldManager.getPlayerAccount(player);
         if(house.getAccountId() != -1) {
@@ -46,7 +59,8 @@ public class HouseManager {
     }
 
     public static void handleBuyHouseRequest(Player player) throws SQLException {
-        House house = getHouseAtLocation(player.getLocation());
+        Door nearestDoor = WorldManager.getNearestDoor(player.getLocation());
+        House house = getHouseAtLocation(nearestDoor.getLocation());
         if(house == null) return;
         Account account = WorldManager.getPlayerAccount(player);
         if(house.getAccountId() != -1) {

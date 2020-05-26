@@ -107,6 +107,7 @@ public class YukiRPFrameworkPlugin {
             Onset.registerRemoteEvent("Phone:RequestConversationsList");
             Onset.registerRemoteEvent("House:RequestHouseMenu");
             Onset.registerRemoteEvent("House:RequestBuy");
+            Onset.registerRemoteEvent("Object:EditExistingPlacement");
         } catch (Exception ex) {
             ex.printStackTrace();
             Onset.print("Can't start the plugin because : " + ex.toString());
@@ -198,6 +199,12 @@ public class YukiRPFrameworkPlugin {
     public void onQuit(PlayerQuitEvent evt) {
         Onset.print("Player quit steamId=" + evt.getPlayer().getSteamId());
         WorldManager.handleObjectEditPlacementCancel(evt.getPlayer());
+        Account account = WorldManager.getPlayerAccount(evt.getPlayer());
+        Location location = evt.getPlayer().getLocationAndHeading();
+        account.setSaveX(location.getX());
+        account.setSaveY(location.getY());
+        account.setSaveZ(location.getZ());
+        account.setSaveH(location.getHeading());
         CharacterManager.getCharacterStates().remove(evt.getPlayer().getSteamId());
         WorldManager.savePlayer(evt.getPlayer());
     }
@@ -344,11 +351,15 @@ public class YukiRPFrameworkPlugin {
                     break;
 
                 case "House:RequestHouseMenu":
-                    HouseManager.handleHouseMenu(evt.getPlayer());
+                    HouseManager.handleHouseMenu(evt.getPlayer(), evt.getPlayer().getLocation());
                     break;
 
                 case "House:RequestBuy":
                     HouseManager.handleBuyHouseRequest(evt.getPlayer());
+                    break;
+
+                case "Object:EditExistingPlacement":
+                    WorldManager.handleEditExistingPlacement(evt.getPlayer(), Integer.parseInt((evt.getArgs()[0]).toString()));
                     break;
             }
         }
@@ -376,7 +387,11 @@ public class YukiRPFrameworkPlugin {
         House house = HouseManager.getHouseAtLocation(evt.getDoor().getLocation());
         if(house != null) {
             Account account = WorldManager.getPlayerAccount(evt.getPlayer());
-            if(house.getAccountId() != account.getId()) {
+            if(house.getAccountId() == -1) {
+                HouseManager.handleHouseMenu(evt.getPlayer(), evt.getDoor().getLocation());
+                return;
+            }
+            if(house.getAccountId() != account.getId() && house.isLocked()) {
                 UIStateManager.sendNotification(evt.getPlayer(), ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.house.dont_own_it"));
                 return;
             }

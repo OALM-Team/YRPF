@@ -2,6 +2,8 @@ package fr.yuki.YukiRPFramework.model;
 
 import fr.yuki.YukiRPFramework.modding.Line3D;
 
+import java.util.ArrayList;
+
 public class House {
     private int id;
     private int accountId;
@@ -13,6 +15,9 @@ public class House {
     private double ex;
     private double ey;
     private double ez;
+    private boolean locked = true;
+
+    private ArrayList<HouseItemObject> houseItemObjects = new ArrayList<>();
 
     public int getId() {
         return id;
@@ -96,5 +101,21 @@ public class House {
 
     public Line3D getLine3D() {
        return new Line3D(this.sx, this.sy, this.sz, this.ex, this.ey, this.ez, 5);
+    }
+
+    public boolean isLocked() {
+        return locked;
+    }
+
+    public void setLocked(boolean locked) {
+        this.locked = locked;
+    }
+
+    public ArrayList<HouseItemObject> getHouseItemObjects() {
+        return houseItemObjects;
+    }
+
+    public void setHouseItemObjects(ArrayList<HouseItemObject> houseItemObjects) {
+        this.houseItemObjects = houseItemObjects;
     }
 }

@@ -80,6 +80,9 @@ public class ItemManager {
         CharacterManager.applyFoodChange(player, inventoryItem.getTemplate().getFoodValue());
         CharacterManager.applyDrinkChange(player, inventoryItem.getTemplate().getDrinkValue());
         player.setAnimation(Animation.DRINKING);
+
+        Inventory inventory = InventoryManager.getMainInventory(player);
+        inventory.removeItem(inventoryItem, 1);
     }
 
     private static void useCuff(Player player, InventoryItem inventoryItem) {

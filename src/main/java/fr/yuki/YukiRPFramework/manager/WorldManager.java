@@ -13,6 +13,7 @@ import fr.yuki.YukiRPFramework.inventory.InventoryItem;
 import fr.yuki.YukiRPFramework.job.DeliveryPointConfig;
 import fr.yuki.YukiRPFramework.job.Job;
 import fr.yuki.YukiRPFramework.job.ObjectPlacementInstance;
+import fr.yuki.YukiRPFramework.job.placementObject.GenericPlacementInstance;
 import fr.yuki.YukiRPFramework.model.*;
 import fr.yuki.YukiRPFramework.net.payload.AddSellerItemPayload;
 import fr.yuki.YukiRPFramework.net.payload.AddToastPayload;
@@ -23,10 +24,7 @@ import fr.yuki.YukiRPFramework.utils.ServerConfig;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Location;
 import net.onfirenetwork.onsetjava.data.Vector;
-import net.onfirenetwork.onsetjava.entity.NPC;
-import net.onfirenetwork.onsetjava.entity.Pickup;
-import net.onfirenetwork.onsetjava.entity.Player;
-import net.onfirenetwork.onsetjava.entity.Vehicle;
+import net.onfirenetwork.onsetjava.entity.*;
 import net.onfirenetwork.onsetjava.enums.Animation;
 
 import java.io.*;
@@ -352,16 +350,6 @@ public class WorldManager {
     }
 
     public static void handleObjectRequestPlacement(Player player) {
-        House house = HouseManager.getHouseAtLocation(player.getLocation());
-        Account account = WorldManager.getPlayerAccount(player);
-        if(house == null) {
-            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.house.need_to_be_inside"));
-            return;
-        }
-        if(house.getAccountId() != account.getId()) {
-            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.house.need_to_be_inside"));
-            return;
-        }
         UIStateManager.handleUIToogle(player, "statewindow");
     }
 
@@ -392,10 +380,12 @@ public class WorldManager {
         House house = HouseManager.getHouseAtLocation(position);
         Account account = WorldManager.getPlayerAccount(player);
         if(house == null) {
+            handleObjectEditPlacementCancel(player);
             UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.house.need_to_be_inside"));
             return;
         }
         if(house.getAccountId() != account.getId()) {
+            handleObjectEditPlacementCancel(player);
             UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.house.need_to_be_inside"));
             return;
         }
@@ -406,6 +396,28 @@ public class WorldManager {
         objectPlacementInstance.destroy();
         state.setCurrentObjectPlacementInstance(null);
         objectPlacementInstance.onPlacementDone(player, position, rotation);
+    }
+
+    public static void handleEditExistingPlacement(Player player, int houseItemId) throws SQLException {
+        CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
+        if(state == null) return;
+        if(state.getCurrentObjectPlacementInstance() != null) {
+            return;
+        }
+        House house = HouseManager.getHouseAtLocation(player.getLocation());
+        if(house == null) return;
+        HouseItemObject houseItemObject = house.getHouseItemObjects().stream()
+                .filter(x -> x.getId() == houseItemId).findFirst().orElse(null);
+        if(houseItemObject == null) return;
+
+        houseItemObject.destroy();
+        HouseItemDAO.deleteHouseItem(houseItemObject);
+
+        ObjectPlacementInstance objectPlacementInstance = new GenericPlacementInstance(houseItemObject.getPosition(),
+                houseItemObject.getModelId(), 0);
+        state.setCurrentObjectPlacementInstance(objectPlacementInstance);
+        objectPlacementInstance.spawn();
+        objectPlacementInstance.setEditableBy(player);
     }
 
     public static void cuffPlayer(Player player) {
@@ -513,6 +525,18 @@ public class WorldManager {
             if(p.getLocation().distance(player.getLocation()) < currentDistance) {
                 search = p;
                 currentDistance = p.getLocation().distance(player.getLocation());
+            }
+        }
+        return search;
+    }
+
+    public static Door getNearestDoor(Vector position) {
+        Door search = null;
+        double currentDistance = 99999;
+        for(Door d : Onset.getDoors()) {
+            if(d.getLocation().distance(position) < currentDistance) {
+                search = d;
+                currentDistance = d.getLocation().distance(position);
             }
         }
         return search;

@@ -2,6 +2,7 @@ package fr.yuki.YukiRPFramework.commands;
 
 import fr.yuki.YukiRPFramework.character.CharacterState;
 import fr.yuki.YukiRPFramework.job.ObjectPlacementInstance;
+import fr.yuki.YukiRPFramework.job.placementObject.GenericPlacementInstance;
 import fr.yuki.YukiRPFramework.job.placementObject.GrowBoxPlacementInstance;
 import fr.yuki.YukiRPFramework.manager.CharacterManager;
 import fr.yuki.YukiRPFramework.manager.WorldManager;
@@ -13,7 +14,7 @@ public class DebugObjectPlacementCommand implements CommandExecutor {
     public boolean onCommand(Player player, String s, String[] args) {
         if(WorldManager.getPlayerAccount(player).getAdminLevel() == 0) return false;
         CharacterState characterState = CharacterManager.getCharacterStateByPlayer(player);
-        ObjectPlacementInstance objectPlacementInstance = new GrowBoxPlacementInstance(50007, player.getLocation());
+        ObjectPlacementInstance objectPlacementInstance = new GenericPlacementInstance(player.getLocation(), Integer.parseInt(args[0]), 0);
         characterState.setCurrentObjectPlacementInstance(objectPlacementInstance);
         objectPlacementInstance.spawn();
         objectPlacementInstance.setEditableBy(player);

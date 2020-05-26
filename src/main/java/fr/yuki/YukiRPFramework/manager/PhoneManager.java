@@ -122,22 +122,22 @@ public class PhoneManager {
         // Make unique conversation
         for(PhoneMessage phoneMessage : phoneMessages) {
             if(phoneMessage.getFromNumber().equals(account.getPhoneNumber())) {
-                if(!uniqueConversation.containsKey(phoneMessage.getFromNumber())) {
-                    uniqueConversation.put(phoneMessage.getFromNumber(), new ArrayList<>());
-                    uniqueConversation.get(phoneMessage.getFromNumber()).add(phoneMessage);
-                }
-                else {
-                    uniqueConversation.get(phoneMessage.getFromNumber()).add(phoneMessage);
-                }
-            }
-
-            if(phoneMessage.getToNumber().equals(account.getPhoneNumber())) {
                 if(!uniqueConversation.containsKey(phoneMessage.getToNumber())) {
                     uniqueConversation.put(phoneMessage.getToNumber(), new ArrayList<>());
                     uniqueConversation.get(phoneMessage.getToNumber()).add(phoneMessage);
                 }
                 else {
                     uniqueConversation.get(phoneMessage.getToNumber()).add(phoneMessage);
+                }
+            }
+
+            if(phoneMessage.getToNumber().equals(account.getPhoneNumber())) {
+                if(!uniqueConversation.containsKey(phoneMessage.getFromNumber())) {
+                    uniqueConversation.put(phoneMessage.getFromNumber(), new ArrayList<>());
+                    uniqueConversation.get(phoneMessage.getFromNumber()).add(phoneMessage);
+                }
+                else {
+                    uniqueConversation.get(phoneMessage.getFromNumber()).add(phoneMessage);
                 }
             }
         }

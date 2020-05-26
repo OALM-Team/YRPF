@@ -10,14 +10,17 @@ import fr.yuki.YukiRPFramework.inventory.InventoryItem;
 import fr.yuki.YukiRPFramework.job.WearableWorldObject;
 import fr.yuki.YukiRPFramework.job.customGoal.DeliveryPointGoal;
 import fr.yuki.YukiRPFramework.model.Account;
+import fr.yuki.YukiRPFramework.model.House;
 import fr.yuki.YukiRPFramework.model.VehicleGarage;
 import fr.yuki.YukiRPFramework.net.payload.AddVChestItemPayload;
 import fr.yuki.YukiRPFramework.net.payload.AddVehicleGaragePayload;
+import fr.yuki.YukiRPFramework.ui.UIState;
 import fr.yuki.YukiRPFramework.utils.Basic;
 import fr.yuki.YukiRPFramework.vehicle.storeLayout.*;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Color;
 import net.onfirenetwork.onsetjava.data.Vector;
+import net.onfirenetwork.onsetjava.entity.Door;
 import net.onfirenetwork.onsetjava.entity.Player;
 import net.onfirenetwork.onsetjava.entity.Vehicle;
 import net.onfirenetwork.onsetjava.plugin.event.EventHandler;
@@ -148,6 +151,29 @@ public class VehicleManager {
      */
     public static void handleVehicleLockRequest(Player player) {
         Onset.print("Request lock toogle from player="+player.getSteamId());
+
+        Account account = WorldManager.getPlayerAccount(player);
+        Door nearestDoor = WorldManager.getNearestDoor(player.getLocation());
+        if(nearestDoor.getLocation().distance(player.getLocation()) < 200) {
+            House house = HouseManager.getHouseAtLocation(nearestDoor.getLocation());
+            if(house != null) {
+                if(house.getAccountId() == account.getId()) {
+                    if(house.isLocked()) {
+                        house.setLocked(false);
+                        UIStateManager.sendNotification(player, ToastTypeEnum.WARN, I18n.t(account.getLang(), "toast.house.doors_unlocked"));
+                    } else {
+                        house.setLocked(true);
+                        for(Door door : house.getLine3D().getDoorsInside()) {
+                            door.close();
+                        }
+                        UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, I18n.t(account.getLang(), "toast.house.doors_locked"));
+                    }
+                    SoundManager.playSound3D("sounds/lock_door.mp3", nearestDoor.getLocation(), 500, 0.8);
+                    return;
+                }
+            }
+        }
+
         for(Vehicle vehicle : Onset.getServer().getVehicles()) {
             if(vehicle.getLocation().distance(player.getLocation()) < 1500) {
                 tryToogleLockVehicle(player, vehicle);

@@ -31,7 +31,7 @@ public class ATMManager {
      */
     public static void openATM(Player player, ATM atm) {
         if(UIStateManager.handleUIToogle(player, "atm")) {
-            SoundManager.playSound3D("sounds/atm_sound_in.mp3", player.getLocation(), 200, 0.8);
+            SoundManager.playSound3D("sounds/atm_sound_in.mp3", player.getLocation(), 200, 0.4);
         }
     }
 

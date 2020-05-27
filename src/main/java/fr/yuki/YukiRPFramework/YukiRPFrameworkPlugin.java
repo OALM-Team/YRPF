@@ -13,17 +13,14 @@ import fr.yuki.YukiRPFramework.manager.*;
 import fr.yuki.YukiRPFramework.model.Account;
 import fr.yuki.YukiRPFramework.model.House;
 import fr.yuki.YukiRPFramework.net.payload.*;
-import fr.yuki.YukiRPFramework.ui.UIState;
 import fr.yuki.YukiRPFramework.utils.ServerConfig;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Location;
 import net.onfirenetwork.onsetjava.data.Vector;
 import net.onfirenetwork.onsetjava.plugin.Plugin;
-import net.onfirenetwork.onsetjava.plugin.event.Event;
 import net.onfirenetwork.onsetjava.plugin.event.EventHandler;
 import net.onfirenetwork.onsetjava.plugin.event.player.*;
 
-import javax.swing.*;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
@@ -72,6 +69,7 @@ public class YukiRPFrameworkPlugin {
             Onset.registerCommand("cuff", new CuffCommand());
             Onset.registerCommand("revive", new ReviveCommand());
             Onset.registerCommand("nitro", new NitroCommand());
+            Onset.registerCommand("dhouse", new DebugHouseCommand());
             Onset.registerCommand("chouse", new CreateHouseCommand());
 
             // Register remote events
@@ -108,6 +106,7 @@ public class YukiRPFrameworkPlugin {
             Onset.registerRemoteEvent("House:RequestHouseMenu");
             Onset.registerRemoteEvent("House:RequestBuy");
             Onset.registerRemoteEvent("Object:EditExistingPlacement");
+            Onset.registerRemoteEvent("Phone:RequestBuyItemShop");
         } catch (Exception ex) {
             ex.printStackTrace();
             Onset.print("Can't start the plugin because : " + ex.toString());
@@ -361,6 +360,10 @@ public class YukiRPFrameworkPlugin {
                 case "Object:EditExistingPlacement":
                     WorldManager.handleEditExistingPlacement(evt.getPlayer(), Integer.parseInt((evt.getArgs()[0]).toString()));
                     break;
+
+                case "Phone:RequestBuyItemShop":
+                    HouseManager.handleRequestBuyItemShop(evt.getPlayer(), Integer.parseInt((evt.getArgs()[0]).toString()));
+                    break;
             }
         }
         catch (Exception ex) {
@@ -392,6 +395,7 @@ public class YukiRPFrameworkPlugin {
                 return;
             }
             if(house.getAccountId() != account.getId() && house.isLocked()) {
+                SoundManager.playSound3D("sounds/toctoc.mp3", evt.getPlayer().getLocation(), 800, 0.5);
                 UIStateManager.sendNotification(evt.getPlayer(), ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.house.dont_own_it"));
                 return;
             }

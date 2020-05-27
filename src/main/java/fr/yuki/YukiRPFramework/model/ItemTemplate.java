@@ -11,6 +11,7 @@ public class ItemTemplate {
     private double modelScale;
     private int foodValue;
     private int drinkValue;
+    private int weaponId;
 
     public int getId() {
         return id;
@@ -90,5 +91,13 @@ public class ItemTemplate {
 
     public void setDrinkValue(int drinkValue) {
         this.drinkValue = drinkValue;
+    }
+
+    public int getWeaponId() {
+        return weaponId;
+    }
+
+    public void setWeaponId(int weaponId) {
+        this.weaponId = weaponId;
     }
 }

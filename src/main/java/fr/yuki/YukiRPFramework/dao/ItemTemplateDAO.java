@@ -25,6 +25,7 @@ public class ItemTemplateDAO {
             itemTemplate.setModelScale(resultSet.getDouble("model_scale"));
             itemTemplate.setFoodValue(resultSet.getInt("food_value"));
             itemTemplate.setDrinkValue(resultSet.getInt("drink_value"));
+            itemTemplate.setWeaponId(resultSet.getInt("id_weapon"));
             itemTemplateHashMap.put(itemTemplate.getId(), itemTemplate);
         }
         return itemTemplateHashMap;

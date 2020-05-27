@@ -1,5 +1,8 @@
 package fr.yuki.YukiRPFramework.model;
 
+import fr.yuki.YukiRPFramework.house.itembehavior.ATMBehavior;
+import fr.yuki.YukiRPFramework.house.itembehavior.ItemBehavior;
+import fr.yuki.YukiRPFramework.house.itembehavior.RadioBehavior;
 import fr.yuki.YukiRPFramework.manager.ModdingManager;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Vector;
@@ -17,16 +20,37 @@ public class HouseItemObject {
     private double rz;
     private WorldObject worldObject;
     private House house;
+    private ItemBehavior itemBehavior;
 
     public void spawn() {
         this.worldObject = Onset.getServer().createObject(this.getPosition(), this.getModelId());
         if(ModdingManager.isCustomModelId(this.getModelId())) ModdingManager.assignCustomModel(this.worldObject, this.getModelId());
         this.worldObject.setRotation(this.getRotation());
         this.worldObject.setProperty("houseItemId", this.id, true);
+
+        if(this.functionId != -1) {
+            switch (this.functionId) {
+                case 1: // Radio
+                    this.itemBehavior = new RadioBehavior(this);
+                    break;
+
+                case 2: // ATTM
+                    this.itemBehavior = new ATMBehavior(this);
+                    break;
+            }
+
+            if(this.itemBehavior != null) {
+                this.itemBehavior.onSpawn();
+            }
+        }
     }
 
     public void destroy() {
         this.worldObject.destroy();
+
+        if(this.itemBehavior != null) {
+            this.itemBehavior.onDestroy();
+        }
     }
 
     public int getId() {

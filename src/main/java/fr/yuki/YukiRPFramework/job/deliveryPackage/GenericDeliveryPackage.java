@@ -4,6 +4,7 @@ import fr.yuki.YukiRPFramework.dao.HouseItemDAO;
 import fr.yuki.YukiRPFramework.manager.HouseManager;
 import fr.yuki.YukiRPFramework.model.House;
 import fr.yuki.YukiRPFramework.model.HouseItemObject;
+import fr.yuki.YukiRPFramework.model.ItemShopObject;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Vector;
 import net.onfirenetwork.onsetjava.entity.Player;
@@ -25,20 +26,23 @@ public class GenericDeliveryPackage extends DeliveryPackage {
 
     @Override
     public int getModelId() {
-        return this.modelId;
+        return 505;
     }
 
     @Override
     public int getTimeForDelivery() {
-        return 5;
+        return 10000;
     }
 
     @Override
     public void onDelivered() {
+        ItemShopObject itemShopObject = HouseManager.getItemShopObjects().stream()
+                .filter(x -> x.getModelId() == this.modelId).findFirst().orElse(null);
+
         HouseItemObject houseItemObject = new HouseItemObject();
         houseItemObject.setId(-1);
         houseItemObject.setModelId(this.modelId);
-        houseItemObject.setFunctionId(-1);
+        houseItemObject.setFunctionId(itemShopObject == null ? -1 : itemShopObject.getFunctionId());
         houseItemObject.setX(this.position.getX());
         houseItemObject.setY(this.position.getY());
         houseItemObject.setZ(this.position.getZ());

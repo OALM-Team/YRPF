@@ -405,7 +405,9 @@ public class WorldManager {
             return;
         }
         House house = HouseManager.getHouseAtLocation(player.getLocation());
+        Account account = WorldManager.getPlayerAccount(player);
         if(house == null) return;
+        if(house.getAccountId() != account.getId()) return;
         HouseItemObject houseItemObject = house.getHouseItemObjects().stream()
                 .filter(x -> x.getId() == houseItemId).findFirst().orElse(null);
         if(houseItemObject == null) return;

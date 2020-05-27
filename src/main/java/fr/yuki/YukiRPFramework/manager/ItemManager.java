@@ -27,12 +27,23 @@ public class ItemManager {
         InventoryItem inventoryItem = inventory.getItem(payload.getId());
         if(inventoryItem == null) return;
         if(inventoryItem.getAmount() <= 0) return;
+        Account account = WorldManager.getPlayerAccount(player);
 
         CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
         if(state.isCuffed()) return;
 
         if(inventoryItem.getTemplate().getFoodValue() != 0 || inventoryItem.getTemplate().getDrinkValue() != 0) {
             useFood(player, inventoryItem);
+            return;
+        }
+
+        if(inventoryItem.getTemplate().getWeaponId() != -1) {
+            if(WeaponManager.requestEquipWeapon(player, inventoryItem.getTemplate().getWeaponId())) {
+                inventory.removeItem(inventoryItem, 1);
+            }
+            else {
+                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.weapon.no_slot_available"));
+            }
             return;
         }
 
@@ -63,6 +74,10 @@ public class ItemManager {
 
             case "18": // Light saber
                 useLightSaber(player, inventoryItem);
+                break;
+
+            case "20": // Ammo
+                useAmmo(player, inventoryItem);
                 break;
         }
     }
@@ -206,5 +221,12 @@ public class ItemManager {
         JobManager.getWearableWorldObjects().add(wearableWorldObject);
         JobManager.handleWearObjectRequest(player, wearableWorldObject.getUuid());
         SoundManager.playSound3D("sounds/ls_sound.mp3", player.getLocation(), 700, 1);
+    }
+
+    private static void useAmmo(Player player, InventoryItem inventoryItem) {
+        if(WeaponManager.fillWeaponWithAmmo(player, 30)) {
+            Inventory inventory = InventoryManager.getMainInventory(player);
+            inventory.removeItem(inventoryItem, 1);
+        }
     }
 }

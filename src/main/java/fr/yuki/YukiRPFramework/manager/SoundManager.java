@@ -47,4 +47,8 @@ public class SoundManager {
         ambiantSounds.put(name, worldObject);
         return worldObject;
     }
+
+    public static HashMap<String, WorldObject> getAmbiantSounds() {
+        return ambiantSounds;
+    }
 }

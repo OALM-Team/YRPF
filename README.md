@@ -8,11 +8,12 @@ This server is written in Java and need the OnsetJavaPlugin (https://github.com/
 ### Install the plugin on your Onset Server  
 - The plugin has only been tested on Windows and Ubuntu 18
 - Install openjdk 11.0.7 on your server
-- Uncompress this zip in your Onset Server directory https://www.dropbox.com/s/lgjdy6y55zxmw99/release.zip?dl=0
+- Uncompress the release.zip in your Onset Server directory https://github.com/OALM-Team/YRPF/releases
 - The zip contains the Java Plugin, Support Java libraries for Onset and the YRPF server config directory
 - Add "OnsetJavaPlugin" to your server_config of Onset in the plugins node
 - Add the "java" package to your server_config of Onset in the packages node
 - Configure the server_config.json of YRPF in the "yrpf" directory
+- Uncompress the YRPF_DB.zip https://github.com/OALM-Team/YRPF/releases
 - Import the database from the sql file
 - Install the front of the YRPF Framework (https://github.com/OALM-Team/YRPF-Client)
 - Add the "yrpf" package to your server_config of Onset in the packages node

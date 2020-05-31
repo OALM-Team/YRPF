@@ -7,6 +7,7 @@ import fr.yuki.YukiRPFramework.manager.WorldManager;
 import fr.yuki.YukiRPFramework.modding.Line3D;
 import fr.yuki.YukiRPFramework.model.Account;
 import fr.yuki.YukiRPFramework.model.House;
+import net.onfirenetwork.onsetjava.data.Vector;
 import net.onfirenetwork.onsetjava.entity.Door;
 import net.onfirenetwork.onsetjava.entity.Player;
 import net.onfirenetwork.onsetjava.plugin.CommandExecutor;
@@ -15,9 +16,13 @@ public class DebugHouseCommand implements CommandExecutor {
     @Override
     public boolean onCommand(Player player, String s, String[] args) {
         if(WorldManager.getPlayerAccount(player).getAdminLevel() == 0) return false;
-        Line3D line3D = new Line3D(Double.parseDouble(args[0]), Double.parseDouble(args[1]), Double.parseDouble(args[2]),
-                Double.parseDouble(args[3]), Double.parseDouble(args[4]), Double.parseDouble(args[5]), Integer.parseInt(args[6]));
+
         CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
+        Vector firstLoc = state.getLastLocationsRequest().get(state.getLastLocationsRequest().size() - 1);
+        Vector secondLoc = state.getLastLocationsRequest().get(state.getLastLocationsRequest().size() - 2);
+
+        Line3D line3D = new Line3D(firstLoc.getX(), firstLoc.getY(), firstLoc.getZ(),
+                secondLoc.getX(), secondLoc.getY(), secondLoc.getZ(), 5);
         if(state.getCurrentDisplayedLine3D() != null) {
             state.getCurrentDisplayedLine3D().hide(player);
         }

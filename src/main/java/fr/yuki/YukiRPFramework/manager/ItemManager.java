@@ -1,5 +1,7 @@
 package fr.yuki.YukiRPFramework.manager;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import fr.yuki.YukiRPFramework.character.CharacterLoopAnimation;
 import fr.yuki.YukiRPFramework.character.CharacterState;
 import fr.yuki.YukiRPFramework.character.CharacterToolAnimation;
@@ -13,15 +15,51 @@ import fr.yuki.YukiRPFramework.job.placementObject.GeneratorPlacementInstance;
 import fr.yuki.YukiRPFramework.job.placementObject.GrowBoxPlacementInstance;
 import fr.yuki.YukiRPFramework.job.tools.Generator;
 import fr.yuki.YukiRPFramework.model.Account;
+import fr.yuki.YukiRPFramework.model.Bag;
+import fr.yuki.YukiRPFramework.model.ItemShopObject;
+import fr.yuki.YukiRPFramework.model.Mask;
 import fr.yuki.YukiRPFramework.net.payload.RequestThrowItemPayload;
 import fr.yuki.YukiRPFramework.net.payload.RequestUseItemPayload;
 import fr.yuki.YukiRPFramework.ui.UIState;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Vector;
 import net.onfirenetwork.onsetjava.entity.Player;
+import net.onfirenetwork.onsetjava.entity.Vehicle;
 import net.onfirenetwork.onsetjava.enums.Animation;
 
+import java.io.File;
+import java.io.FileReader;
+import java.util.ArrayList;
+
 public class ItemManager {
+    public static ArrayList<Mask> masks = new ArrayList<>();
+    public static ArrayList<Bag> bags = new ArrayList<>();
+
+    public static void init() {
+        loadMasks();
+        loadBags();
+    }
+
+    private static void loadMasks() {
+        try {
+            new File("yrpf").mkdir();
+            masks = new Gson().fromJson(new FileReader("yrpf/masks.json"),  new TypeToken<ArrayList<Mask>>(){}.getType());
+            Onset.print("Loaded " + masks.size() + " mask(s) from the cache");
+        } catch (Exception e) {
+            Onset.print("Can't load mask cache: " + e.toString());
+        }
+    }
+
+    private static void loadBags() {
+        try {
+            new File("yrpf").mkdir();
+            bags = new Gson().fromJson(new FileReader("yrpf/bags.json"),  new TypeToken<ArrayList<Bag>>(){}.getType());
+            Onset.print("Loaded " + bags.size() + " bag(s) from the cache");
+        } catch (Exception e) {
+            Onset.print("Can't load bags cache: " + e.toString());
+        }
+    }
+
     public static void handleItemUse(Player player, RequestUseItemPayload payload) {
         Inventory inventory = InventoryManager.getMainInventory(player);
         InventoryItem inventoryItem = inventory.getItem(payload.getId());
@@ -32,11 +70,13 @@ public class ItemManager {
         CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
         if(state.isCuffed()) return;
 
+        // Check food item
         if(inventoryItem.getTemplate().getFoodValue() != 0 || inventoryItem.getTemplate().getDrinkValue() != 0) {
             useFood(player, inventoryItem);
             return;
         }
 
+        // Check weapon items
         if(inventoryItem.getTemplate().getWeaponId() != -1) {
             if(WeaponManager.requestEquipWeapon(player, inventoryItem.getTemplate().getWeaponId())) {
                 inventory.removeItem(inventoryItem, 1);
@@ -47,6 +87,40 @@ public class ItemManager {
             return;
         }
 
+        // Check mask item
+        if(inventoryItem.getTemplate().getMaskId() != -1) {
+            Mask mask = masks.stream().filter(x -> x.getModelId() == inventoryItem.getTemplate().getMaskId())
+                    .findFirst().orElse(null);
+            if(mask == null) {
+                Onset.print("Can't find the mask in the masks.json id: " + mask.getModelId());
+                return;
+            }
+            if(state.getCurrentMask() != null) {
+                state.unattachMask();
+                return;
+            }
+            state.attachMask(mask, player);
+            return;
+        }
+
+        // Check bag item
+        if(inventoryItem.getTemplate().getBagId() != -1) {
+            Bag bag = bags.stream().filter(x -> x.getModelId() == inventoryItem.getTemplate().getBagId())
+                    .findFirst().orElse(null);
+            if(bag == null) {
+                Onset.print("Can't find the bag in the bags.json id: " + inventoryItem.getTemplate().getBagId());
+                return;
+            }
+            if(state.getCurrentBag() != null) {
+                state.unattachBag();
+                return;
+            }
+            state.attachBag(bag, player);
+            inventory.removeItem(inventoryItem, 1);
+            return;
+        }
+
+        // Check custom actions per item
         switch (inventoryItem.getTemplateId()) {
             case "11": // Temp need to use a enum
                 usePot(player, inventoryItem);
@@ -78,6 +152,10 @@ public class ItemManager {
 
             case "20": // Ammo
                 useAmmo(player, inventoryItem);
+                break;
+
+            case "28": // RepairKit
+                useRepairKit(player, inventoryItem);
                 break;
         }
     }
@@ -191,6 +269,15 @@ public class ItemManager {
                 CharacterManager.setCharacterFreeze(player, false);
                 characterLoopAnimation.stop();
             });
+            return;
+        }
+
+        Vehicle vehicleNearby = VehicleManager.getNearestVehicle(player.getLocation());
+        if(vehicleNearby != null) {
+            if(vehicleNearby.getLocation().distance(player.getLocation()) < 300) {
+                FuelManager.interactFuelPoint(player, true);
+                return;
+            }
         }
     }
 
@@ -224,9 +311,35 @@ public class ItemManager {
     }
 
     private static void useAmmo(Player player, InventoryItem inventoryItem) {
-        if(WeaponManager.fillWeaponWithAmmo(player, 30)) {
+        if(WeaponManager.fillWeaponWithAmmo(player)) {
             Inventory inventory = InventoryManager.getMainInventory(player);
             inventory.removeItem(inventoryItem, 1);
         }
+    }
+
+    private static void useRepairKit(Player player, InventoryItem inventoryItem) {
+        if(player.getVehicle() != null) return;
+        CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
+        if(!state.canInteract()) return;
+        Vehicle vehicle = VehicleManager.getNearestVehicle(player.getLocation());
+        if(vehicle == null) return;
+        if(vehicle.getLocation().distance(player.getLocation()) > 500) return;
+        Inventory inventory = InventoryManager.getMainInventory(player);
+        inventory.removeItem(inventoryItem, 1);
+
+        vehicle.setHood(80);
+        CharacterLoopAnimation characterLoopAnimation = new CharacterLoopAnimation(player, Animation.COMBINE,
+                5000, 2, "sounds/car_repair_1.mp3");
+        characterLoopAnimation.start();
+        CharacterManager.setCharacterFreeze(player, true);
+        vehicle.setEngineOn(false);
+        Onset.delay(15000, () -> {
+            CharacterManager.setCharacterFreeze(player, false);
+            vehicle.setHealth(5000);
+            for(int i = 0; i < 8; i++) {
+                vehicle.setDamage(i + 1, 0);
+            }
+            vehicle.setHood(0);
+        });
     }
 }

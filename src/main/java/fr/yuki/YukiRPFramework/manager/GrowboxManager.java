@@ -114,4 +114,12 @@ public class GrowboxManager {
         GrowBox growBox = (GrowBox)jobTool.getJobToolHandler();
         growBox.takePot(player, payload.getPotId());
     }
+
+    public static void handleGrowboxDestroy(Player player, String growboxId) {
+        JobTool jobTool = JobManager.getJobTools().stream().filter
+                (x -> x.getUuid().equals(growboxId)).findFirst().orElse(null);
+        if(jobTool == null) return;
+        GrowBox growBox = (GrowBox)jobTool.getJobToolHandler();
+        growBox.destroy(player);
+    }
 }

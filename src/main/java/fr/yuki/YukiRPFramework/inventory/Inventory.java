@@ -210,6 +210,7 @@ public class Inventory {
         // Display the notification
         if(WorldManager.findPlayerByAccountId(this.getCharacterId()) != null) {
             Account account = WorldManager.getPlayerAccount(WorldManager.findPlayerByAccountId(this.getCharacterId()));
+            WorldManager.findPlayerByAccountId(this.getCharacterId()).callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new UpdateInventoryWeightPayload(this.getCurrentWeight(), this.getMaxWeight())));
             UIStateManager.sendNotification(WorldManager.findPlayerByAccountId(this.getCharacterId()),
                     ToastTypeEnum.WARN,
                     "-" + amount + " " + I18n.t(account.getLang(), "item.name." + item.getTemplateId()));

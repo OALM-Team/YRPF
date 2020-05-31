@@ -31,6 +31,7 @@ public class Account {
     private int foodState;
     private int drinkState;
     private String phoneNumber;
+    private String weapons;
 
     public int getId() {
         return id;
@@ -216,5 +217,13 @@ public class Account {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public String getWeapons() {
+        return weapons;
+    }
+
+    public void setWeapons(String weapons) {
+        this.weapons = weapons;
     }
 }

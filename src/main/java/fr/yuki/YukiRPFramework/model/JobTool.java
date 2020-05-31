@@ -2,10 +2,12 @@ package fr.yuki.YukiRPFramework.model;
 
 import fr.yuki.YukiRPFramework.job.Job;
 import fr.yuki.YukiRPFramework.job.tools.*;
+import fr.yuki.YukiRPFramework.manager.JobManager;
 import fr.yuki.YukiRPFramework.manager.ModdingManager;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Vector;
 import net.onfirenetwork.onsetjava.entity.Player;
+import net.onfirenetwork.onsetjava.entity.Text3D;
 import net.onfirenetwork.onsetjava.entity.WorldObject;
 
 import java.util.UUID;
@@ -30,6 +32,7 @@ public class JobTool {
     private double sz;
     private WorldObject worldObject;
     private JobToolHandler jobToolHandler;
+    private Text3D text3d;
 
     public JobTool() {
         this.uuid = UUID.randomUUID().toString();
@@ -189,7 +192,7 @@ public class JobTool {
         if(ModdingManager.isCustomModelId(this.modelId)) ModdingManager.assignCustomModel(this.worldObject, this.modelId);
         this.worldObject.setRotation(new Vector(this.rx, this.ry, this.rz));
         this.worldObject.setScale(new Vector(this.sx, this.sy, this.sz));
-        Onset.getServer().createText3D(this.name + " [Utiliser]", 20, this.x, this.y, this.z + 200, 0 , 0 ,0);
+        this.text3d = Onset.getServer().createText3D(this.name + " [Utiliser]", 20, this.x, this.y, this.z + 200, 0 , 0 ,0);
         if(this.jobToolHandler != null) {
             if(this.jobToolHandler.canBeUse()) {
                 this.setUsable();
@@ -224,5 +227,11 @@ public class JobTool {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public void destroy() {
+        this.worldObject.destroy();
+        this.text3d.destroy();
+        JobManager.getJobTools().remove(this);
     }
 }

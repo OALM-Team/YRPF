@@ -192,7 +192,7 @@ public class WorldManager {
         if(GarageManager.handleVSellerInteract(player)) return;
         if(player.getVehicle() == null)
             if(handlePickupGroundItem(player)) return;
-        if(FuelManager.interactFuelPoint(player)) return;
+        if(FuelManager.interactFuelPoint(player, false)) return;
         if(JobManager.tryToHarvest(player)) return;
         if(player.getVehicle() == null) {
             if(VehicleManager.handleVehicleChestStorageRequest(player)) return;
@@ -222,15 +222,19 @@ public class WorldManager {
     public static GroundItem getNearestGroundItem(Vector position) {
         GroundItem nearestGroundItem = null;
         for(GroundItem groundItem : groundItems) {
-            if(nearestGroundItem == null) {
-                if(groundItem.getPosition().distance(position) < 150) {
-                    nearestGroundItem = groundItem;
+            try {
+                if(nearestGroundItem == null) {
+                    if(groundItem.getPosition().distance(position) < 150) {
+                        nearestGroundItem = groundItem;
+                    }
                 }
-            }
-            else {
-                if(groundItem.getPosition().distance(position) < nearestGroundItem.getPosition().distance(position)) {
-                    nearestGroundItem = groundItem;
+                else {
+                    if(groundItem.getPosition().distance(position) < nearestGroundItem.getPosition().distance(position)) {
+                        nearestGroundItem = groundItem;
+                    }
                 }
+            }catch (Exception ex) {
+                continue;
             }
         }
         return nearestGroundItem;
@@ -239,6 +243,8 @@ public class WorldManager {
     public static boolean handlePickupGroundItem(Player player) {
         GroundItem groundItem = getNearestGroundItem(player.getLocation());
         if(groundItem == null) return false;
+        CharacterState characterState = CharacterManager.getCharacterStateByPlayer(player);
+        if(!characterState.canInteract()) return false;
         groundItem.pickByPlayer(player);
         return true;
     }
@@ -384,7 +390,7 @@ public class WorldManager {
             UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.house.need_to_be_inside"));
             return;
         }
-        if(house.getAccountId() != account.getId()) {
+        if(!HouseManager.canBuildInHouse(player, house)) {
             handleObjectEditPlacementCancel(player);
             UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.house.need_to_be_inside"));
             return;
@@ -407,7 +413,10 @@ public class WorldManager {
         House house = HouseManager.getHouseAtLocation(player.getLocation());
         Account account = WorldManager.getPlayerAccount(player);
         if(house == null) return;
-        if(house.getAccountId() != account.getId()) return;
+        if(!HouseManager.canBuildInHouse(player, house))
+        {
+            return;
+        }
         HouseItemObject houseItemObject = house.getHouseItemObjects().stream()
                 .filter(x -> x.getId() == houseItemId).findFirst().orElse(null);
         if(houseItemObject == null) return;
@@ -523,10 +532,14 @@ public class WorldManager {
         Player search = null;
         double currentDistance = 99999;
         for(Player p : Onset.getPlayers()) {
-            if(p.getId() == player.getId()) continue;;
-            if(p.getLocation().distance(player.getLocation()) < currentDistance) {
-                search = p;
-                currentDistance = p.getLocation().distance(player.getLocation());
+            try {
+                if(p.getId() == player.getId()) continue;;
+                if(p.getLocation().distance(player.getLocation()) < currentDistance) {
+                    search = p;
+                    currentDistance = p.getLocation().distance(player.getLocation());
+                }
+            }catch (Exception ex) {
+                continue;
             }
         }
         return search;
@@ -536,9 +549,13 @@ public class WorldManager {
         Door search = null;
         double currentDistance = 99999;
         for(Door d : Onset.getDoors()) {
-            if(d.getLocation().distance(position) < currentDistance) {
-                search = d;
-                currentDistance = d.getLocation().distance(position);
+            try {
+                if(d.getLocation().distance(position) < currentDistance) {
+                    search = d;
+                    currentDistance = d.getLocation().distance(position);
+                }
+            }catch (Exception ex) {
+                continue;
             }
         }
         return search;

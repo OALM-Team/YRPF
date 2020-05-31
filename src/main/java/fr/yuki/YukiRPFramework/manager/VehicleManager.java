@@ -86,7 +86,8 @@ public class VehicleManager {
                 vehicleGarage.setGarageId(-1);
                 vehicleGarage.setGarageLastId(WorldManager.getGarages().get(0).getId());
                 vehicleGarage.setModelId(modelId);
-                vehicleGarage.setDamage(0);
+                vehicleGarage.setDamage("[0,0,0,0,0,0,0,0]");
+                vehicleGarage.setHealth(5000);
                 vehicleGarage.setRental(isRental);
                 vehicleGarage.setLicencePlate(vehicle.getLicensePlate());
                 vehicleGarage.setColor("#" + Integer.toHexString(vehicle.getColor().getRed()) + Integer.toHexString(vehicle.getColor().getGreen()) + Integer.toHexString(vehicle.getColor().getBlue()));
@@ -157,7 +158,7 @@ public class VehicleManager {
         if(nearestDoor.getLocation().distance(player.getLocation()) < 200) {
             House house = HouseManager.getHouseAtLocation(nearestDoor.getLocation());
             if(house != null) {
-                if(house.getAccountId() == account.getId()) {
+                if(HouseManager.canBuildInHouse(player, house)) {
                     if(house.isLocked()) {
                         house.setLocked(false);
                         UIStateManager.sendNotification(player, ToastTypeEnum.WARN, I18n.t(account.getLang(), "toast.house.doors_unlocked"));
@@ -259,13 +260,17 @@ public class VehicleManager {
     public static Vehicle getNearestVehicle(Vector position) {
         Vehicle nearestVehicle = null;
         for(Vehicle vehicle : Onset.getVehicles()) {
-            if(nearestVehicle == null) {
-                nearestVehicle = vehicle;
-            }
-            else {
-                if(vehicle.getLocation().distance(position) < nearestVehicle.getLocation().distance(position)) {
+            try {
+                if(nearestVehicle == null) {
                     nearestVehicle = vehicle;
                 }
+                else {
+                    if(vehicle.getLocation().distance(position) < nearestVehicle.getLocation().distance(position)) {
+                        nearestVehicle = vehicle;
+                    }
+                }
+            }catch (Exception ex) {
+                continue;
             }
         }
         return nearestVehicle;

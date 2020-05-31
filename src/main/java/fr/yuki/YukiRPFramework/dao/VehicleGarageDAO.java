@@ -11,18 +11,19 @@ public class VehicleGarageDAO {
     public static VehicleGarage createVehicleGarage(VehicleGarage vehicleGarage) throws SQLException {
         PreparedStatement preparedStatement = Database.getConnection()
                 .prepareStatement("INSERT INTO tbl_vehicle_garage " +
-                        "(id_garage, id_last_garage, id_model, damage, licence_plate, color, created_at, updated_at, uuid, owner) VALUES " +
-                        "(?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+                        "(id_garage, id_last_garage, id_model, damage, licence_plate, color, created_at, updated_at, uuid, owner, health) VALUES " +
+                        "(?,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
         preparedStatement.setInt(1, vehicleGarage.getGarageId());
         preparedStatement.setInt(2, vehicleGarage.getGarageLastId());
         preparedStatement.setInt(3, vehicleGarage.getModelId());
-        preparedStatement.setDouble(4, vehicleGarage.getDamage());
+        preparedStatement.setString(4, vehicleGarage.getDamage());
         preparedStatement.setString(5, vehicleGarage.getLicencePlate());
         preparedStatement.setString(6, vehicleGarage.getColor());
         preparedStatement.setDate(7, new Date(new java.util.Date().getTime()));
         preparedStatement.setDate(8, new Date(new java.util.Date().getTime()));
         preparedStatement.setString(9, vehicleGarage.getUuid());
         preparedStatement.setInt(10, vehicleGarage.getOwner());
+        preparedStatement.setDouble(11, vehicleGarage.getHealth());
         preparedStatement.executeUpdate();
 
         ResultSet returnId = preparedStatement.getGeneratedKeys();
@@ -41,12 +42,14 @@ public class VehicleGarageDAO {
         while(resultSet.next()) {
             VehicleGarage vehicleGarage = new VehicleGarage();
 
+            vehicleGarage.setVehicleGarageId(resultSet.getInt("id_vehicle_garage"));
             vehicleGarage.setOwner(resultSet.getInt("owner"));
             vehicleGarage.setUuid(resultSet.getString("uuid"));
             vehicleGarage.setGarageId(resultSet.getInt("id_garage"));
             vehicleGarage.setGarageLastId(resultSet.getInt("id_last_garage"));
             vehicleGarage.setModelId(resultSet.getInt("id_model"));
-            vehicleGarage.setDamage(0);
+            vehicleGarage.setDamage(resultSet.getString("damage"));
+            vehicleGarage.setHealth(resultSet.getDouble("health"));
             vehicleGarage.setLicencePlate(resultSet.getString("licence_plate"));
             vehicleGarage.setColor(resultSet.getString("color"));
             vehicleGarage.setCreatedAt(resultSet.getDate("created_at"));
@@ -59,12 +62,14 @@ public class VehicleGarageDAO {
 
     public static void saveVehicleGarage(VehicleGarage vehicleGarage) throws SQLException {
         PreparedStatement preparedStatement = Database.getConnection()
-                .prepareStatement("UPDATE tbl_vehicle_garage SET id_garage=?, id_last_garage=?, color=?, licence_plate=? WHERE id_vehicle_garage=?");
+                .prepareStatement("UPDATE tbl_vehicle_garage SET id_garage=?, id_last_garage=?, color=?, licence_plate=?, damage=?, health=? WHERE id_vehicle_garage=?");
         preparedStatement.setInt(1, vehicleGarage.getGarageId());
         preparedStatement.setInt(2, vehicleGarage.getGarageLastId());
         preparedStatement.setString(3, vehicleGarage.getColor());
         preparedStatement.setString(4, vehicleGarage.getLicencePlate());
-        preparedStatement.setInt(5, vehicleGarage.getVehicleGarageId());
+        preparedStatement.setString(5, vehicleGarage.getDamage());
+        preparedStatement.setDouble(6, vehicleGarage.getHealth());
+        preparedStatement.setInt(7, vehicleGarage.getVehicleGarageId());
         preparedStatement.execute();
     }
 }

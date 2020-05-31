@@ -12,6 +12,9 @@ public class ItemTemplate {
     private int foodValue;
     private int drinkValue;
     private int weaponId;
+    private int ammoPerRecharge;
+    private int maskId;
+    private int bagId;
 
     public int getId() {
         return id;
@@ -99,5 +102,29 @@ public class ItemTemplate {
 
     public void setWeaponId(int weaponId) {
         this.weaponId = weaponId;
+    }
+
+    public int getAmmoPerRecharge() {
+        return ammoPerRecharge;
+    }
+
+    public void setAmmoPerRecharge(int ammoPerRecharge) {
+        this.ammoPerRecharge = ammoPerRecharge;
+    }
+
+    public int getMaskId() {
+        return maskId;
+    }
+
+    public void setMaskId(int maskId) {
+        this.maskId = maskId;
+    }
+
+    public int getBagId() {
+        return bagId;
+    }
+
+    public void setBagId(int bagId) {
+        this.bagId = bagId;
     }
 }

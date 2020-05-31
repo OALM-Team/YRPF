@@ -138,8 +138,8 @@ public class InventoryManager {
         }
 
         GroundItem groundItem = new GroundItem(inventoryItem, payload.getQuantity(),
-                new Vector(player.getLocation().getX() + Basic.randomNumber(20, 60),
-                        player.getLocation().getY() + Basic.randomNumber(20, 60),
+                new Vector(player.getLocation().getX() + Basic.randomNumber(-150, 150),
+                        player.getLocation().getY() + Basic.randomNumber(-150, 150),
                         player.getLocation().getZ()));
         WorldManager.getGroundItems().add(groundItem);
         InventoryManager.getMainInventory(player).save();

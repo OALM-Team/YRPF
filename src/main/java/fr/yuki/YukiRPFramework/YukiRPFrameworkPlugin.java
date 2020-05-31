@@ -1,6 +1,7 @@
 package fr.yuki.YukiRPFramework;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import fr.yuki.YukiRPFramework.character.CharacterState;
 import fr.yuki.YukiRPFramework.commands.*;
 import fr.yuki.YukiRPFramework.dao.AccountDAO;
@@ -12,17 +13,23 @@ import fr.yuki.YukiRPFramework.inventory.Inventory;
 import fr.yuki.YukiRPFramework.manager.*;
 import fr.yuki.YukiRPFramework.model.Account;
 import fr.yuki.YukiRPFramework.model.House;
+import fr.yuki.YukiRPFramework.model.ItemShopObject;
 import fr.yuki.YukiRPFramework.net.payload.*;
 import fr.yuki.YukiRPFramework.utils.ServerConfig;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Location;
 import net.onfirenetwork.onsetjava.data.Vector;
+import net.onfirenetwork.onsetjava.data.Weapon;
 import net.onfirenetwork.onsetjava.plugin.Plugin;
 import net.onfirenetwork.onsetjava.plugin.event.EventHandler;
 import net.onfirenetwork.onsetjava.plugin.event.player.*;
 
+import java.io.FileReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 @Plugin(name = "YukiRPFramework", author = "Yuki")
 public class YukiRPFrameworkPlugin {
@@ -35,6 +42,7 @@ public class YukiRPFrameworkPlugin {
             Onset.registerListener(this);
             ModdingManager.init();
             InventoryManager.init();
+            ItemManager.init();
             CharacterManager.init();
             VehicleManager.init();
             GarageManager.init();
@@ -52,6 +60,7 @@ public class YukiRPFrameworkPlugin {
             Onset.registerCommand("item", new ItemCommand());
             Onset.registerCommand("loc", new LocCommand());
             Onset.registerCommand("v", new VCommand());
+            Onset.registerCommand("vmove", new MoveCommand());
             Onset.registerCommand("dv", new DVCommand());
             Onset.registerCommand("addgatheritem", new AddGatherItemCommand());
             Onset.registerCommand("listgatheritem", new ShowGatherItemListCommand());
@@ -71,6 +80,9 @@ public class YukiRPFrameworkPlugin {
             Onset.registerCommand("nitro", new NitroCommand());
             Onset.registerCommand("dhouse", new DebugHouseCommand());
             Onset.registerCommand("chouse", new CreateHouseCommand());
+            Onset.registerCommand("fhouse", new FreeHouseCommand());
+            Onset.registerCommand("houseprops", new SetHousePropsCommand());
+            Onset.registerCommand("givehousekey", new GiveHouseKeyCommand());
 
             // Register remote events
             Onset.registerRemoteEvent("GlobalUI:ToogleWindow");
@@ -107,6 +119,9 @@ public class YukiRPFrameworkPlugin {
             Onset.registerRemoteEvent("House:RequestBuy");
             Onset.registerRemoteEvent("Object:EditExistingPlacement");
             Onset.registerRemoteEvent("Phone:RequestBuyItemShop");
+            Onset.registerRemoteEvent("Weapon:StoreWeapon");
+            Onset.registerRemoteEvent("Growbox:Destroy");
+            Onset.registerRemoteEvent("ATM:GetInfos");
         } catch (Exception ex) {
             ex.printStackTrace();
             Onset.print("Can't start the plugin because : " + ex.toString());
@@ -166,6 +181,12 @@ public class YukiRPFrameworkPlugin {
                         account.getSaveZ() + 50,
                         account.getSaveH()));
                 Onset.broadcast("<span color=\"#ffee00\">" + account.getCharacterName() + " est de retour !</>");
+
+                // Set weapons
+                for(Map.Entry<Integer, Weapon> weaponEntry :
+                        ((HashMap<Integer, Weapon>)new Gson().fromJson(account.getWeapons(), new TypeToken<HashMap<Integer, Weapon>>(){}.getType())).entrySet()) {
+                    evt.getPlayer().setWeapon(weaponEntry.getKey(), weaponEntry.getValue());
+                }
             }
 
             // Insert the account in the cache if not exist
@@ -239,6 +260,10 @@ public class YukiRPFrameworkPlugin {
                     ATMManager.handleATMWithdraw(evt.getPlayer(), (int)Float.parseFloat((evt.getArgs()[0]).toString()));
                     break;
 
+                case "ATM:GetInfos":
+                    ATMManager.handleATMGetInfos(evt.getPlayer());
+                    break;
+
                 case "Vehicle:RequestLockToogle":
                     VehicleManager.handleVehicleLockRequest(evt.getPlayer());
                     break;
@@ -307,6 +332,10 @@ public class YukiRPFrameworkPlugin {
                     JobManager.handleUseJobTool(evt.getPlayer(), (evt.getArgs()[0]).toString());
                     break;
 
+                case "Growbox:Destroy":
+                    GrowboxManager.handleGrowboxDestroy(evt.getPlayer(), (evt.getArgs()[0]).toString());
+                    break;
+
                 case "Growbox:FillWaterPot":
                     GrowboxManager.handleGrowboxFillWaterPot(evt.getPlayer(), new Gson().fromJson((evt.getArgs()[0]).toString(),
                             GrowboxFillWaterPotPayload.class));
@@ -364,6 +393,10 @@ public class YukiRPFrameworkPlugin {
                 case "Phone:RequestBuyItemShop":
                     HouseManager.handleRequestBuyItemShop(evt.getPlayer(), Integer.parseInt((evt.getArgs()[0]).toString()));
                     break;
+
+                case "Weapon:StoreWeapon":
+                    WeaponManager.storeWeapon(evt.getPlayer());
+                    break;
             }
         }
         catch (Exception ex) {
@@ -394,8 +427,8 @@ public class YukiRPFrameworkPlugin {
                 HouseManager.handleHouseMenu(evt.getPlayer(), evt.getDoor().getLocation());
                 return;
             }
-            if(house.getAccountId() != account.getId() && house.isLocked()) {
-                SoundManager.playSound3D("sounds/toctoc.mp3", evt.getPlayer().getLocation(), 800, 0.5);
+            if(!HouseManager.canBuildInHouse(evt.getPlayer(), house) && house.isLocked()) {
+                SoundManager.playSound3D("sounds/toctoc.mp3", evt.getPlayer().getLocation(), 800, 1);
                 UIStateManager.sendNotification(evt.getPlayer(), ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.house.dont_own_it"));
                 return;
             }

@@ -5,8 +5,11 @@ import fr.yuki.YukiRPFramework.character.CharacterState;
 import fr.yuki.YukiRPFramework.character.CharacterStyle;
 import fr.yuki.YukiRPFramework.dao.AccountDAO;
 import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
+import fr.yuki.YukiRPFramework.inventory.Inventory;
+import fr.yuki.YukiRPFramework.inventory.InventoryItem;
 import fr.yuki.YukiRPFramework.model.Account;
 import fr.yuki.YukiRPFramework.net.payload.AddToastPayload;
+import fr.yuki.YukiRPFramework.net.payload.RequestThrowItemPayload;
 import fr.yuki.YukiRPFramework.net.payload.SetFoodPayload;
 import fr.yuki.YukiRPFramework.net.payload.StyleSavePartPayload;
 import net.onfirenetwork.onsetjava.Onset;
@@ -16,6 +19,7 @@ import net.onfirenetwork.onsetjava.entity.Player;
 
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.stream.Collectors;
 
 public class CharacterManager {
 
@@ -163,6 +167,14 @@ public class CharacterManager {
         player.setSpawnLocation(new Vector(account.getSaveX(), account.getSaveY(), account.getSaveZ()), 0);
         UIStateManager.handleUIToogle(player, "death");
         player.setRespawnTime(WorldManager.getServerConfig().getDeathRespawnDelay());
+
+        Inventory inventory = InventoryManager.getMainInventory(player);
+        for(InventoryItem inventoryItem : inventory.getInventoryItems().stream().collect(Collectors.toList())) {
+            RequestThrowItemPayload throwItemPayload = new RequestThrowItemPayload();
+            throwItemPayload.setId(inventoryItem.getId());
+            throwItemPayload.setQuantity(inventoryItem.getAmount());
+            InventoryManager.handleThrowItem(player, throwItemPayload);
+        }
     }
 
     public static void onPlayerSpawn(Player player) {

@@ -82,65 +82,71 @@ public class WearableWorldObject {
      * @param player The player
      */
     public void requestUnwear(Player player, boolean delete) {
-        // Put this resource in the chest
         Account account = WorldManager.getPlayerAccount(player);
-        if(!delete) {
-            Vehicle nearbyVehicle = VehicleManager.getNearestVehicle(player.getLocation());
-            if(nearbyVehicle != null) {
-                if(nearbyVehicle.getLocation().distance(player.getLocation()) < VehicleManager.getInteractionDistance(nearbyVehicle)) {
-                    /**if(!VehicleManager.canStoreWorldWearableObject(nearbyVehicle)) {
-                        UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Impossible car ce véhicule ne le permet pas");
-                        return;
-                    }*/
-                    if(nearbyVehicle.getPropertyInt("locked") == 1) {
-                        UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "action.vehicle.locked"));
+        try {
+            // Put this resource in the chest
+            if(!delete) {
+                Vehicle nearbyVehicle = VehicleManager.getNearestVehicle(player.getLocation());
+                if(nearbyVehicle != null) {
+                    if(nearbyVehicle.getLocation().distance(player.getLocation()) < VehicleManager.getInteractionDistance(nearbyVehicle)) {
+                        /**if(!VehicleManager.canStoreWorldWearableObject(nearbyVehicle)) {
+                         UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Impossible car ce véhicule ne le permet pas");
+                         return;
+                         }*/
+                        if(nearbyVehicle.getPropertyInt("locked") == 1) {
+                            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "action.vehicle.locked"));
+                            return;
+                        }
+
+                        if(!VehicleManager.storeWorldWearableObject(nearbyVehicle, this)) {
+                            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.vehicle.no_space_left"));
+                            return;
+                        }
+
+                        // Unattach the item
+                        this.position = player.getLocation();
+                        this.toolAnimation.unAttach();
+                        player.setAnimation(Animation.STOP);
+                        CharacterManager.getCharacterStateByPlayer(player).setWearableWorldObject(player, null);
+
+                        if(deliveryPointGoal != null)
+                            player.callRemoteEvent("Map:RemoveWaypoint", deliveryPointGoal.getWearableWorldObject().getUuid());
+
                         return;
                     }
-
-                    if(!VehicleManager.storeWorldWearableObject(nearbyVehicle, this)) {
-                        UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.vehicle.no_space_left"));
-                        return;
-                    }
-
-                    // Unattach the item
-                    this.position = player.getLocation();
-                    this.toolAnimation.unAttach();
-                    player.setAnimation(Animation.STOP);
-                    CharacterManager.getCharacterStateByPlayer(player).setWearableWorldObject(player, null);
-
-                    if(deliveryPointGoal != null)
-                        player.callRemoteEvent("Map:RemoveWaypoint", deliveryPointGoal.getWearableWorldObject().getUuid());
-
-                    return;
                 }
             }
-        }
 
-        // Delivery reward
-        if(deliveryPointGoal != null) {
-            if(deliveryPointGoal.isNear(player)) {
-                ArrayList<CharacterJobLevel> characterJobLevels = account.decodeCharacterJob();
-                CharacterJobLevel characterJobLevel = characterJobLevels.stream().filter(x -> x.getJobId().equals(JobEnum.DELIVERY.type)).findFirst().orElse(null);
+            // Delivery reward
+            if(deliveryPointGoal != null) {
+                if(deliveryPointGoal.isNear(player)) {
+                    ArrayList<CharacterJobLevel> characterJobLevels = account.decodeCharacterJob();
+                    CharacterJobLevel characterJobLevel = characterJobLevels.stream().filter(x -> x.getJobId().equals(JobEnum.DELIVERY.type)).findFirst().orElse(null);
 
-                int rewardPerDistance = (int)Math.floor((originPosition.distance(player.getLocation()) / 1000) * characterJobLevel.getJobLevel().getLevel());
-                InventoryManager.addItemToPlayer(player, ItemTemplateEnum.CASH.id, rewardPerDistance);
-                SoundManager.playSound3D("sounds/cash_register.mp3", player.getLocation(), 200, 1);
-                delete = true;
-                JobManager.addExp(player, JobEnum.DELIVERY, 15);
-                UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, I18n.t(account.getLang(), "toast.delivery.shipped",
-                        String.valueOf(rewardPerDistance), String.valueOf(Math.floor(originPosition.distance(player.getLocation()) / 100))));
+                    int rewardPerDistance = (int)Math.floor((originPosition.distance(player.getLocation()) / 1000) * characterJobLevel.getJobLevel().getLevel());
+                    InventoryManager.addItemToPlayer(player, ItemTemplateEnum.CASH.id, rewardPerDistance);
+                    SoundManager.playSound3D("sounds/cash_register.mp3", player.getLocation(), 200, 1);
+                    delete = true;
+                    JobManager.addExp(player, JobEnum.DELIVERY, 15);
+                    UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, I18n.t(account.getLang(), "toast.delivery.shipped",
+                            String.valueOf(rewardPerDistance), String.valueOf(Math.floor(originPosition.distance(player.getLocation()) / 100))));
+                }
+                player.callRemoteEvent("Map:RemoveWaypoint", deliveryPointGoal.getWearableWorldObject().getUuid());
             }
-            player.callRemoteEvent("Map:RemoveWaypoint", deliveryPointGoal.getWearableWorldObject().getUuid());
+
+            // Throw on ground
+            this.position = player.getLocation();
+            this.toolAnimation.unAttach();
+            if(!delete) this.createWorldObject();
+            player.setAnimation(Animation.STOP);
+            CharacterManager.getCharacterStateByPlayer(player).setWearableWorldObject(player, null);
+
+            if(delete) JobManager.getWearableWorldObjects().remove(this);
         }
-
-        // Throw on ground
-        this.position = player.getLocation();
-        this.toolAnimation.unAttach();
-        if(!delete) this.createWorldObject();
-        player.setAnimation(Animation.STOP);
-        CharacterManager.getCharacterStateByPlayer(player).setWearableWorldObject(player, null);
-
-        if(delete) JobManager.getWearableWorldObjects().remove(this);
+        catch (Exception ex) {
+            ex.printStackTrace();
+            CharacterManager.getCharacterStateByPlayer(player).setWearableWorldObject(player, null);
+        }
     }
 
     /**

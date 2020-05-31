@@ -103,6 +103,18 @@ public abstract class Job {
             for(JobSpawn jobSpawn : this.jobConfig.getResources()) {
                 Onset.print("Loaded " + jobSpawn.getName() + " from the job file " + this.getJobType().type + " with " + jobSpawn.getSpawns().size() + " spawn point(s)");
             }
+
+            // Check missing ressources with new update
+            for(HarvestableObject harvestableObject : this.harvestableObjectsTemplate) {
+                if(this.jobConfig.getResources().stream()
+                        .filter(x -> x.getName().equals(harvestableObject.getName())).findFirst().orElse(null) == null) {
+                    JobSpawn jobSpawn = new JobSpawn();
+                    jobSpawn.setName(harvestableObject.getName());
+                    this.jobConfig.getResources().add(jobSpawn);
+                    this.saveConfig();
+                    Onset.print("Add missing job ressource: " + harvestableObject.getName());
+                }
+            }
         } catch (Exception e) {
             Onset.print("Can't load job cache: " + e.toString());
         }

@@ -27,6 +27,7 @@ public class HouseItemObject {
         if(ModdingManager.isCustomModelId(this.getModelId())) ModdingManager.assignCustomModel(this.worldObject, this.getModelId());
         this.worldObject.setRotation(this.getRotation());
         this.worldObject.setProperty("houseItemId", this.id, true);
+        this.worldObject.setStreamDistance(2500);
 
         if(this.functionId != -1) {
             switch (this.functionId) {
@@ -34,7 +35,7 @@ public class HouseItemObject {
                     this.itemBehavior = new RadioBehavior(this);
                     break;
 
-                case 2: // ATTM
+                case 2: // ATM
                     this.itemBehavior = new ATMBehavior(this);
                     break;
             }

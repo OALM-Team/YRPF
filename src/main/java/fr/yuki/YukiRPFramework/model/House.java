@@ -15,8 +15,9 @@ public class House {
     private double ex;
     private double ey;
     private double ez;
-    private boolean locked = true;
 
+    private boolean locked = true;
+    private ArrayList<Integer> allowedPlayers = new ArrayList<>();
     private ArrayList<HouseItemObject> houseItemObjects = new ArrayList<>();
 
     public int getId() {
@@ -117,5 +118,13 @@ public class House {
 
     public void setHouseItemObjects(ArrayList<HouseItemObject> houseItemObjects) {
         this.houseItemObjects = houseItemObjects;
+    }
+
+    public ArrayList<Integer> getAllowedPlayers() {
+        return allowedPlayers;
+    }
+
+    public void setAllowedPlayers(ArrayList<Integer> allowedPlayers) {
+        this.allowedPlayers = allowedPlayers;
     }
 }

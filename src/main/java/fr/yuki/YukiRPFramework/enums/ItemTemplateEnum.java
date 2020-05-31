@@ -18,7 +18,15 @@ public enum ItemTemplateEnum {
     JERRICAN_FUEL("15"),
     CUFF("16"),
     DEFIBRILATOR("17"),
-    LIGHTSABER("18");
+    LIGHTSABER("18"),
+    DESERT_EAGLE("19"),
+    AMMO("20"),
+    GLOCK("21"),
+    SHOTGUN("22"),
+    RABBIT_MASK("23"),
+    LUFFY_HAT("24"),
+    BANDANA("25"),
+    TURTLE("26");
 
     public final String id;
 

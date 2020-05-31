@@ -1,10 +1,13 @@
 package fr.yuki.YukiRPFramework.model;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import fr.yuki.YukiRPFramework.dao.VehicleGarageDAO;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.entity.Vehicle;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class VehicleGarage {
@@ -14,7 +17,8 @@ public class VehicleGarage {
     private int garageId;
     private int garageLastId;
     private int modelId;
-    private double damage;
+    private String damage;
+    private double health;
     private String licencePlate;
     private String color;
     private Date createdAt;
@@ -53,11 +57,11 @@ public class VehicleGarage {
         this.modelId = modelId;
     }
 
-    public double getDamage() {
+    public String getDamage() {
         return damage;
     }
 
-    public void setDamage(double damage) {
+    public void setDamage(String damage) {
         this.damage = damage;
     }
 
@@ -132,5 +136,30 @@ public class VehicleGarage {
                 return;
             }
         }
+    }
+
+    public void applyDamages(Vehicle vehicle) {
+        ArrayList<Double> damages = new Gson().fromJson(this.damage, new TypeToken<ArrayList<Double>>(){}.getType());
+        for(int i = 0; i < damages.size(); i++) {
+            vehicle.setDamage(i + 1, damages.get(i));
+        }
+        vehicle.setHealth(this.health);
+    }
+
+    public void computeDamages(Vehicle vehicle) {
+        this.health = vehicle.getHealth();
+        ArrayList<Double> damages = new ArrayList<>();
+        for(int i = 0; i < 8; i++) {
+            damages.add(vehicle.getDamage(i + 1));
+        }
+        this.damage = new Gson().toJson(damages);
+    }
+
+    public double getHealth() {
+        return health;
+    }
+
+    public void setHealth(double health) {
+        this.health = health;
     }
 }

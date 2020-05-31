@@ -61,14 +61,16 @@ public class FuelManager {
         return null;
     }
 
-    public static boolean interactFuelPoint(Player player) {
+    public static boolean interactFuelPoint(Player player, boolean fake) {
         CharacterState characterState = CharacterManager.getCharacterStateByPlayer(player);
         if(!characterState.canInteract()) {
             return false;
         }
         if(player.getVehicle() != null) return false;
-        FuelPoint fuelPoint = getNearestFuelPoint(player);
-        if(fuelPoint == null) return false;
+        if(!fake) {
+            FuelPoint fuelPoint = getNearestFuelPoint(player);
+            if(fuelPoint == null) return false;
+        }
 
         Vehicle nearbyVehicle = VehicleManager.getNearestVehicle(player.getLocation());
         if(nearbyVehicle == null) return false;

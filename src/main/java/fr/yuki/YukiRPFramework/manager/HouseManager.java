@@ -61,7 +61,6 @@ public class HouseManager {
             houseItemObject.setHouse(house);
             house.getHouseItemObjects().add(houseItemObject);
             houseItemObject.spawn();
-            Onset.print("House item spawned id: " + houseItemObject.getId());
         }
     }
 
@@ -85,8 +84,14 @@ public class HouseManager {
     }
 
     public static void handleBuyHouseRequest(Player player) throws SQLException {
-        Door nearestDoor = WorldManager.getNearestDoor(player.getLocation());
-        House house = getHouseAtLocation(nearestDoor.getLocation());
+        House house = HouseManager.getHouseAtLocation(player.getLocation());
+        if(house == null) {
+            Onset.print("houseid by door: " + house.getId());
+            house = HouseManager.getHouseAtLocation(WorldManager.getNearestDoor(player.getLocation()).getLocation());
+        }
+        else {
+            Onset.print("houseid by playerloc: " + house.getId());
+        }
         if(house == null) return;
         Account account = WorldManager.getPlayerAccount(player);
         if(house.getAccountId() != -1) {
@@ -129,6 +134,18 @@ public class HouseManager {
         characterState.setCurrentObjectPlacementInstance(objectPlacementInstance);
         objectPlacementInstance.spawn();
         objectPlacementInstance.setEditableBy(player);
+    }
+
+    public static boolean canBuildInHouse(Player player, House house) {
+        Account account = WorldManager.getPlayerAccount(player);
+        if(account.getId() == house.getAccountId()) {
+            return true;
+        }
+        if(house.getAllowedPlayers().contains(account.getId())) {
+            return true;
+        }
+
+        return false;
     }
 
     public static ArrayList<House> getHouses() {

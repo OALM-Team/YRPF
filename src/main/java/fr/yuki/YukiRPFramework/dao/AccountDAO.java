@@ -1,6 +1,8 @@
 package fr.yuki.YukiRPFramework.dao;
 
+import com.google.gson.Gson;
 import fr.yuki.YukiRPFramework.Database;
+import fr.yuki.YukiRPFramework.manager.WeaponManager;
 import fr.yuki.YukiRPFramework.manager.WorldManager;
 import fr.yuki.YukiRPFramework.model.Account;
 import fr.yuki.YukiRPFramework.utils.ServerConfig;
@@ -44,6 +46,7 @@ public class AccountDAO {
             account.setFoodState(resultSet.getInt("food_state"));
             account.setDrinkState(resultSet.getInt("drink_state"));
             account.setPhoneNumber(resultSet.getString("phone_number"));
+            account.setWeapons(resultSet.getString("weapons"));
             account.setCreatedAt(resultSet.getDate("created_at"));
             account.setUpdatedAt(resultSet.getDate("updated_at"));
         }
@@ -109,7 +112,7 @@ public class AccountDAO {
         PreparedStatement preparedStatement = Database.getConnection()
                 .prepareStatement("UPDATE tbl_account SET is_banned=?, bank_money=?, save_x=?, save_y=?, save_z=?, save_h=?, character_creation_request=?," +
                         "character_style=?, character_name=?, job_levels=?, is_dead=?, admin_level=?, lang=?," +
-                        "food_state=?, drink_state=?, phone_number=? WHERE id_account=?");
+                        "food_state=?, drink_state=?, phone_number=?, weapons=? WHERE id_account=?");
         preparedStatement.setInt(1, account.getIsBanned());
         preparedStatement.setInt(2, account.getBankMoney());
         if(player == null) {
@@ -134,7 +137,14 @@ public class AccountDAO {
         preparedStatement.setInt(14, account.getFoodState());
         preparedStatement.setInt(15, account.getDrinkState());
         preparedStatement.setString(16, account.getPhoneNumber());
-        preparedStatement.setDouble(17, account.getId());
+        if(player == null) {
+            preparedStatement.setString(17, account.getWeapons());
+        }
+        else {
+            account.setWeapons(new Gson().toJson(WeaponManager.getPlayerWeapons(player)));
+            preparedStatement.setString(17, account.getWeapons());
+        }
+        preparedStatement.setDouble(18, account.getId());
         preparedStatement.execute();
     }
 }

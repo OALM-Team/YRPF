@@ -1,11 +1,14 @@
 package fr.yuki.YukiRPFramework.manager;
 
+import com.google.gson.Gson;
 import fr.yuki.YukiRPFramework.enums.ItemTemplateEnum;
 import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
 import fr.yuki.YukiRPFramework.i18n.I18n;
 import fr.yuki.YukiRPFramework.inventory.Inventory;
 import fr.yuki.YukiRPFramework.model.ATM;
 import fr.yuki.YukiRPFramework.model.Account;
+import fr.yuki.YukiRPFramework.net.payload.AddToastPayload;
+import fr.yuki.YukiRPFramework.net.payload.SetBankCashAmount;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.entity.Player;
 
@@ -77,5 +80,11 @@ public class ATMManager {
         account.setBankMoney(account.getBankMoney() - value);
         WorldManager.savePlayer(player);
         UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, I18n.t(account.getLang(), "toast.atm.success_withdraw", String.valueOf(value)));
+    }
+
+    public static void handleATMGetInfos(Player player) {
+        Account account = WorldManager.getPlayerAccount(player);
+        Inventory inventory = InventoryManager.getMainInventory(player);;
+        player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new SetBankCashAmount(account.getBankMoney(), inventory.getCashAmount())));
     }
 }

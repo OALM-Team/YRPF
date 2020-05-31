@@ -104,6 +104,22 @@ public class GrowBox implements JobToolHandler {
         return true;
     }
 
+    public void destroy(Player player) {
+        if(player != null) {
+            UIStateManager.handleUIToogle(player, "growboxmenu");
+            CharacterManager.setCharacterFreeze(player, false);
+        }
+
+        // Destroy pots
+        for(Pot pot : this.pots) {
+            pot.destroyWorldObject();
+        }
+        pots.clear();
+
+        // Destroy growbox
+        this.jobTool.destroy();
+    }
+
     public boolean addPot(Player player, WearableWorldObject wearableWorldObject) {
         Onset.print("Add pot request for the growbox");
         Account account = WorldManager.getPlayerAccount(player);

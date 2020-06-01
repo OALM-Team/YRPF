@@ -6,6 +6,7 @@ This server is written in Java and need the OnsetJavaPlugin (https://github.com/
 ![YRPF Logo](https://i.imgur.com/D8A8sJn.png)
 
 ### Install the plugin on your Onset Server  
+VIDEO: https://www.youtube.com/watch?v=cA_qUKJSUCU (in french) (Thank Papy Brossard)
 - The plugin has only been tested on Windows and Ubuntu 18
 - Install openjdk 11.0.7 on your server or Java for windows
 - Uncompress the release.zip in your Onset Server directory https://github.com/OALM-Team/YRPF/releases

@@ -22,7 +22,7 @@ VIDEO: https://www.youtube.com/watch?v=cA_qUKJSUCU (in french) (Thank Papy Bross
 - Run your server and have fun :)
 
 ## Common errors
-```libjvm.so: cannot open shared object file: No such file or directory```
+```libjvm.so: cannot open shared object file: No such file or directory```  
 OnsetJava can't find the libjvm.so on your system, try this:  
 https://stackoverflow.com/questions/28462302/libjvm-so-cannot-open-shared-object-file-no-such-file-or-directory  
 https://askubuntu.com/questions/584529/libjvm-so-cannot-open-shared-object-file-no-such-file-or-directory  

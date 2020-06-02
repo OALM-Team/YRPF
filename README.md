@@ -21,6 +21,12 @@ VIDEO: https://www.youtube.com/watch?v=cA_qUKJSUCU (in french) (Thank Papy Bross
 - Add the "yrpf" package to your server_config of Onset in the packages node
 - Run your server and have fun :)
 
+## Common errors
+```libjvm.so: cannot open shared object file: No such file or directory```
+OnsetJava can't find the libjvm.so on your system, try this:
+https://stackoverflow.com/questions/28462302/libjvm-so-cannot-open-shared-object-file-no-such-file-or-directory
+https://askubuntu.com/questions/584529/libjvm-so-cannot-open-shared-object-file-no-such-file-or-directory
+
 ## Contribute
 You can help us to translate the framework for other language : https://poeditor.com/join/project/FT7CELbHb6
 You can also make a PR for adding new features or fixing bugs

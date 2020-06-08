@@ -161,6 +161,8 @@ public class UIStateManager {
             InventoryManager.addItemToPlayer(player, ItemTemplateEnum.FISHING_ROD.id, 1);
         }
 
+        CharacterManager.getCharacterStateByPlayer(player).setHasUIReady(true);
+
         // Set lang to the UI
         setLang(player, account.getLang());
         CharacterManager.refreshFood(player);

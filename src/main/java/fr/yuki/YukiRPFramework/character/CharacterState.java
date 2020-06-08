@@ -1,9 +1,12 @@
 package fr.yuki.YukiRPFramework.character;
 
+import fr.yuki.YukiRPFramework.dao.AccountDAO;
 import fr.yuki.YukiRPFramework.job.ObjectPlacementInstance;
 import fr.yuki.YukiRPFramework.job.WearableWorldObject;
 import fr.yuki.YukiRPFramework.manager.ModdingManager;
+import fr.yuki.YukiRPFramework.manager.WorldManager;
 import fr.yuki.YukiRPFramework.modding.Line3D;
+import fr.yuki.YukiRPFramework.model.Account;
 import fr.yuki.YukiRPFramework.model.Bag;
 import fr.yuki.YukiRPFramework.model.Mask;
 import fr.yuki.YukiRPFramework.ui.UIState;
@@ -12,12 +15,14 @@ import net.onfirenetwork.onsetjava.data.Vector;
 import net.onfirenetwork.onsetjava.entity.Player;
 import net.onfirenetwork.onsetjava.entity.WorldObject;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class CharacterState {
     private WearableWorldObject wearableWorldObject;
     private boolean isDead = false;
     private boolean firstSpawn = true;
+    private boolean hasUIReady = false;
     private ObjectPlacementInstance currentObjectPlacementInstance = null;
     private boolean cuffed = false;
     private UIState uiState = null;
@@ -127,21 +132,33 @@ public class CharacterState {
         if(this.bagWorldObject != null) {
             this.bagWorldObject.destroy();
         }
+        Account account = WorldManager.getPlayerAccount(player);
         this.currentBag = bag;
         Onset.print("Attach bag id: " + bag.getModelId());
         this.bagWorldObject = Onset.getServer().createObject(new Vector(0, 0, 0), bag.getModelId());
         this.bagWorldObject.attach(player, new Vector(bag.getX(), bag.getY(), bag.getZ()), new Vector(bag.getRx(), bag.getRy(), bag.getRz()), bag.getSocket());
         if(ModdingManager.isCustomModelId(bag.getModelId())) ModdingManager.assignCustomModel(this.bagWorldObject, bag.getModelId());
         this.bagWorldObject.setScale(new Vector(bag.getSx(), bag.getSy(), bag.getSz()));
-        //TODO: Refresh weight
+        account.setBagId(this.currentBag.getModelId());
+        try {
+            AccountDAO.updateAccount(account, null);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
     }
 
-    public void unattachBag() {
+    public void unattachBag(Player player) {
         if(this.bagWorldObject != null) {
             this.bagWorldObject.destroy();
         }
+        Account account = WorldManager.getPlayerAccount(player);
         this.currentBag = null;
-        //TODO: Refresh weight
+        account.setBagId(-1);
+        try {
+            AccountDAO.updateAccount(account, null);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
     }
 
     public Mask getCurrentMask() {
@@ -158,5 +175,13 @@ public class CharacterState {
 
     public void setCurrentBag(Bag currentBag) {
         this.currentBag = currentBag;
+    }
+
+    public boolean isHasUIReady() {
+        return hasUIReady;
+    }
+
+    public void setHasUIReady(boolean hasUIReady) {
+        this.hasUIReady = hasUIReady;
     }
 }

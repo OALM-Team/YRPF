@@ -149,7 +149,7 @@ public class WorldManager {
      */
     public static Player findPlayerBySteamId(final String steamId) {
         for(Player p : Onset.getPlayers()) {
-            if(p.getSteamId() == steamId) return p;
+            if(p.getSteamId().equals(steamId)) return p;
         }
         return null;
     }

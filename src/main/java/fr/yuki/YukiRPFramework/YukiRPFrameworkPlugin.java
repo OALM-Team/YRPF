@@ -11,10 +11,9 @@ import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
 import fr.yuki.YukiRPFramework.i18n.I18n;
 import fr.yuki.YukiRPFramework.inventory.Inventory;
 import fr.yuki.YukiRPFramework.manager.*;
-import fr.yuki.YukiRPFramework.model.Account;
-import fr.yuki.YukiRPFramework.model.House;
-import fr.yuki.YukiRPFramework.model.ItemShopObject;
+import fr.yuki.YukiRPFramework.model.*;
 import fr.yuki.YukiRPFramework.net.payload.*;
+import fr.yuki.YukiRPFramework.tebex.TebexAPI;
 import fr.yuki.YukiRPFramework.utils.ServerConfig;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Location;
@@ -55,6 +54,7 @@ public class YukiRPFrameworkPlugin {
             FuelManager.init();
             PhoneManager.init();
             HouseManager.init();
+            TebexManager.init();
 
             // Register commands
             Onset.registerCommand("item", new ItemCommand());
@@ -126,6 +126,9 @@ public class YukiRPFrameworkPlugin {
             ex.printStackTrace();
             Onset.print("Can't start the plugin because : " + ex.toString());
         }
+    }
+
+    private void initTebex() throws Exception {
     }
 
     @EventHandler
@@ -203,6 +206,15 @@ public class YukiRPFrameworkPlugin {
                 account.setPhoneNumber(PhoneManager.generateRandomPhoneNumber());
                 AccountDAO.updateAccount(account, null);
                 Onset.print("Phone number generated : " + account.getPhoneNumber());
+            }
+
+            // Attach bag
+            if(account.getBagId() != -1) {
+                Account finalAccount = account;
+                Bag bag = ItemManager.bags.stream().filter(x -> x.getModelId() == finalAccount.getBagId())
+                        .findFirst().orElse(null);
+                CharacterState state = CharacterManager.getCharacterStateByPlayer(evt.getPlayer());
+                state.attachBag(bag, evt.getPlayer());
             }
 
             // If the player is dead

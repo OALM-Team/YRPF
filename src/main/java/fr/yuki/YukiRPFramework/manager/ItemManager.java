@@ -112,11 +112,13 @@ public class ItemManager {
                 return;
             }
             if(state.getCurrentBag() != null) {
-                state.unattachBag();
+                state.unattachBag(player);
                 return;
             }
             state.attachBag(bag, player);
             inventory.removeItem(inventoryItem, 1);
+
+            inventory.updateWeightView();
             return;
         }
 

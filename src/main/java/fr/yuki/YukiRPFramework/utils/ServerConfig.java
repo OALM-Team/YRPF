@@ -17,6 +17,7 @@ public class ServerConfig {
     private String sqlDb;
     private String langPath;
     private String serverLanguage;
+    private String tebexSecretKey;
 
     public double getDeathRespawnX() {
         return deathRespawnX;
@@ -144,5 +145,13 @@ public class ServerConfig {
 
     public void setServerLanguage(String serverLanguage) {
         this.serverLanguage = serverLanguage;
+    }
+
+    public String getTebexSecretKey() {
+        return tebexSecretKey;
+    }
+
+    public void setTebexSecretKey(String tebexSecretKey) {
+        this.tebexSecretKey = tebexSecretKey;
     }
 }

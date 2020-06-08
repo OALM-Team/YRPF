@@ -47,6 +47,7 @@ public class AccountDAO {
             account.setDrinkState(resultSet.getInt("drink_state"));
             account.setPhoneNumber(resultSet.getString("phone_number"));
             account.setWeapons(resultSet.getString("weapons"));
+            account.setBagId(resultSet.getInt("id_bag"));
             account.setCreatedAt(resultSet.getDate("created_at"));
             account.setUpdatedAt(resultSet.getDate("updated_at"));
         }
@@ -71,6 +72,7 @@ public class AccountDAO {
         account.setFoodState(100);
         account.setDrinkState(100);
         account.setPhoneNumber("");
+        account.setBagId(-1);
         account.setSaveX(serverConfig.getSpawnPointX());
         account.setSaveY(serverConfig.getSpawnPointY());
         account.setSaveZ(serverConfig.getSpawnPointZ());
@@ -112,7 +114,7 @@ public class AccountDAO {
         PreparedStatement preparedStatement = Database.getConnection()
                 .prepareStatement("UPDATE tbl_account SET is_banned=?, bank_money=?, save_x=?, save_y=?, save_z=?, save_h=?, character_creation_request=?," +
                         "character_style=?, character_name=?, job_levels=?, is_dead=?, admin_level=?, lang=?," +
-                        "food_state=?, drink_state=?, phone_number=?, weapons=? WHERE id_account=?");
+                        "food_state=?, drink_state=?, phone_number=?, weapons=?, id_bag=? WHERE id_account=?");
         preparedStatement.setInt(1, account.getIsBanned());
         preparedStatement.setInt(2, account.getBankMoney());
         if(player == null) {
@@ -144,7 +146,8 @@ public class AccountDAO {
             account.setWeapons(new Gson().toJson(WeaponManager.getPlayerWeapons(player)));
             preparedStatement.setString(17, account.getWeapons());
         }
-        preparedStatement.setDouble(18, account.getId());
+        preparedStatement.setDouble(18, account.getBagId());
+        preparedStatement.setDouble(19, account.getId());
         preparedStatement.execute();
     }
 }

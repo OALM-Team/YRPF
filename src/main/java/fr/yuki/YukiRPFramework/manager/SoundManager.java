@@ -22,10 +22,20 @@ public class SoundManager {
      * @param radius The radius max of the sound
      */
     public static void playSound3D(String fileName, Vector position, double radius, double volume) {
-        for(Player player : Onset.getPlayers()) {
-            if(player.getLocation().distance(position) < radius + 500) {
-                player.callRemoteEvent("Sound:PlaySound3D", fileName, position.getX(), position.getY(), position.getZ(), radius, volume);
+        try {
+            for(Player player : Onset.getPlayers()) {
+                try {
+                    if(player.getLocation().distance(position) < radius + 500) {
+                        player.callRemoteEvent("Sound:PlaySound3D", fileName, position.getX(), position.getY(), position.getZ(), radius, volume);
+                    }
+                }
+                catch (Exception ex) {
+                    ex.printStackTrace();
+                }
             }
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
 

@@ -143,6 +143,7 @@ public class InventoryManager {
                         player.getLocation().getZ()));
         WorldManager.getGroundItems().add(groundItem);
         InventoryManager.getMainInventory(player).save();
+        inventory.updateWeightView();
     }
 
     public static HashMap<Integer, ItemTemplate> getItemTemplates() {

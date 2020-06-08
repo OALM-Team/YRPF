@@ -2,13 +2,18 @@ package fr.yuki.YukiRPFramework.inventory;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import fr.yuki.YukiRPFramework.character.CharacterState;
 import fr.yuki.YukiRPFramework.dao.InventoryDAO;
 import fr.yuki.YukiRPFramework.enums.ItemTemplateEnum;
 import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
 import fr.yuki.YukiRPFramework.i18n.I18n;
+import fr.yuki.YukiRPFramework.manager.CharacterManager;
+import fr.yuki.YukiRPFramework.manager.ItemManager;
 import fr.yuki.YukiRPFramework.manager.UIStateManager;
 import fr.yuki.YukiRPFramework.manager.WorldManager;
 import fr.yuki.YukiRPFramework.model.Account;
+import fr.yuki.YukiRPFramework.model.Bag;
+import fr.yuki.YukiRPFramework.model.ItemTemplate;
 import fr.yuki.YukiRPFramework.net.payload.AddItemInventoryPayload;
 import fr.yuki.YukiRPFramework.net.payload.RemoteItemInventoryPayload;
 import fr.yuki.YukiRPFramework.net.payload.UpdateInventoryWeightPayload;
@@ -145,7 +150,16 @@ public class Inventory {
      * @return The max weight
      */
     public float getMaxWeight() {
-        return 40;
+        Player player = WorldManager.findPlayerByAccountId(this.getCharacterId());
+        CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
+        float baseMaxWeight = 40;
+        if(state.getCurrentBag() != null) {
+            Bag bag = ItemManager.bags.stream().filter(x -> x.getModelId() == state.getCurrentBag().getModelId())
+                    .findFirst().orElse(null);
+            return (float) (baseMaxWeight + bag.getBonusWeight());
+        } else {
+            return baseMaxWeight;
+        }
     }
 
     /**
@@ -215,6 +229,10 @@ public class Inventory {
                     ToastTypeEnum.WARN,
                     "-" + amount + " " + I18n.t(account.getLang(), "item.name." + item.getTemplateId()));
         }
+    }
+
+    public void updateWeightView() {
+        WorldManager.findPlayerByAccountId(this.getCharacterId()).callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new UpdateInventoryWeightPayload(this.getCurrentWeight(), this.getMaxWeight())));
     }
 
     public void throwItem(InventoryItem item, int quantity) {

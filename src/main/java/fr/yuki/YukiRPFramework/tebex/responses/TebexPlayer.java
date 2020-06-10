@@ -1,6 +1,6 @@
 package fr.yuki.YukiRPFramework.tebex.responses;
 
-public class Player {
+public class TebexPlayer {
     private String id;
     private String name;
     private String uuid;

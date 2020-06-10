@@ -18,6 +18,8 @@ public class ServerConfig {
     private String langPath;
     private String serverLanguage;
     private String tebexSecretKey;
+    private int timePerHour;
+    private int startHour;
 
     public double getDeathRespawnX() {
         return deathRespawnX;
@@ -153,5 +155,21 @@ public class ServerConfig {
 
     public void setTebexSecretKey(String tebexSecretKey) {
         this.tebexSecretKey = tebexSecretKey;
+    }
+
+    public int getTimePerHour() {
+        return timePerHour;
+    }
+
+    public void setTimePerHour(int timePerHour) {
+        this.timePerHour = timePerHour;
+    }
+
+    public int getStartHour() {
+        return startHour;
+    }
+
+    public void setStartHour(int startHour) {
+        this.startHour = startHour;
     }
 }

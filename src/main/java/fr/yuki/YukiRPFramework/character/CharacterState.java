@@ -9,6 +9,7 @@ import fr.yuki.YukiRPFramework.modding.Line3D;
 import fr.yuki.YukiRPFramework.model.Account;
 import fr.yuki.YukiRPFramework.model.Bag;
 import fr.yuki.YukiRPFramework.model.Mask;
+import fr.yuki.YukiRPFramework.phone.PhoneCall;
 import fr.yuki.YukiRPFramework.ui.UIState;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Vector;
@@ -32,6 +33,7 @@ public class CharacterState {
     private WorldObject maskWorldObject = null;
     private Bag currentBag = null;
     private WorldObject bagWorldObject = null;
+    private PhoneCall currentPhoneCall = null;
 
     public CharacterState() {
         this.uiState = new UIState();

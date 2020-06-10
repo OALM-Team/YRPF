@@ -54,6 +54,7 @@ public class YukiRPFrameworkPlugin {
             FuelManager.init();
             PhoneManager.init();
             HouseManager.init();
+            TimeManager.init();
             TebexManager.init();
 
             // Register commands
@@ -221,6 +222,9 @@ public class YukiRPFrameworkPlugin {
             if(account.getIsDead() == 1) {
                 evt.getPlayer().setHealth(0);
             }
+
+            // Set current time
+            TimeManager.setCurrentHourForPlayer(evt.getPlayer());
         } catch (Exception e) {
             e.printStackTrace();
             evt.getPlayer().kick("There is a error for retrieving your account: " + e.toString());

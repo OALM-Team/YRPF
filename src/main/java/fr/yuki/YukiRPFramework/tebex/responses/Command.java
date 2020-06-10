@@ -6,7 +6,7 @@ public class Command {
     private long payment;
     private long commandPackage;
     private Conditions conditions;
-    private Player player;
+    private TebexPlayer player;
 
     public long getID() { return id; }
     public void setID(long value) { this.id = value; }
@@ -23,6 +23,6 @@ public class Command {
     public Conditions getConditions() { return conditions; }
     public void setConditions(Conditions value) { this.conditions = value; }
 
-    public Player getPlayer() { return player; }
-    public void setPlayer(Player value) { this.player = value; }
+    public TebexPlayer getPlayer() { return player; }
+    public void setPlayer(TebexPlayer value) { this.player = value; }
 }

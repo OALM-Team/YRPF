@@ -1,12 +1,14 @@
 package fr.yuki.YukiRPFramework.manager;
 
 import com.google.gson.Gson;
+import fr.yuki.YukiRPFramework.character.CharacterState;
 import fr.yuki.YukiRPFramework.dao.PhoneContactDAO;
 import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
 import fr.yuki.YukiRPFramework.i18n.I18n;
 import fr.yuki.YukiRPFramework.model.Account;
 import fr.yuki.YukiRPFramework.model.PhoneContact;
 import fr.yuki.YukiRPFramework.net.payload.*;
+import fr.yuki.YukiRPFramework.phone.PhoneCall;
 import fr.yuki.YukiRPFramework.phone.PhoneMessage;
 import fr.yuki.YukiRPFramework.utils.Basic;
 import net.onfirenetwork.onsetjava.Onset;
@@ -147,6 +149,49 @@ public class PhoneManager {
                     conversations.getKey(), conversations.getValue().get(conversations.getValue().size() - 1).getMessage()
             )));
         }
+    }
+
+    public static void handleRequestCall(Player player, String phoneNumber) {
+        Onset.print("Request call to " + phoneNumber);
+        CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
+        if(state.getCurrentPhoneCall() != null){
+            Onset.print("Caller already in call");
+            return;
+        }
+        Player receiver = WorldManager.getPlayerByPhoneNumber(phoneNumber);
+        if(receiver == null) {
+            Onset.print("Can't find the receiver");
+            return;
+        }
+        CharacterState receiverState = CharacterManager.getCharacterStateByPlayer(receiver);
+        if(receiverState.getCurrentPhoneCall() != null) {
+            Onset.print("Receiver already in call");
+            return;
+        }
+
+        PhoneCall phoneCall = new PhoneCall(player, receiver);
+        state.setCurrentPhoneCall(phoneCall);
+        receiverState.setCurrentPhoneCall(phoneCall);
+        phoneCall.displayCall();
+        Onset.print("Call begin");
+    }
+
+    public static void handleCallAnswer(Player player) {
+        CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
+        if(state.getCurrentPhoneCall() == null){
+            Onset.print("Can't answer because there is no call");
+            return;
+        }
+        state.getCurrentPhoneCall().begin();
+    }
+
+    public static void handleCallEnd(Player player) {
+        CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
+        if(state.getCurrentPhoneCall() == null){
+            Onset.print("Can't answer because there is no call");
+            return;
+        }
+        state.getCurrentPhoneCall().end();
     }
 
     public static ArrayList<PhoneMessage> getConversationsWithNumber(String number) {

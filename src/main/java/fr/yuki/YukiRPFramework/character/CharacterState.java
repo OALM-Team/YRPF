@@ -186,4 +186,12 @@ public class CharacterState {
     public void setHasUIReady(boolean hasUIReady) {
         this.hasUIReady = hasUIReady;
     }
+
+    public PhoneCall getCurrentPhoneCall() {
+        return currentPhoneCall;
+    }
+
+    public void setCurrentPhoneCall(PhoneCall currentPhoneCall) {
+        this.currentPhoneCall = currentPhoneCall;
+    }
 }

@@ -6,9 +6,7 @@ import fr.yuki.YukiRPFramework.enums.ItemTemplateEnum;
 import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
 import fr.yuki.YukiRPFramework.inventory.Inventory;
 import fr.yuki.YukiRPFramework.model.Account;
-import fr.yuki.YukiRPFramework.net.payload.AddToastPayload;
-import fr.yuki.YukiRPFramework.net.payload.SetLangPayload;
-import fr.yuki.YukiRPFramework.net.payload.SetWindowStatePayload;
+import fr.yuki.YukiRPFramework.net.payload.*;
 import fr.yuki.YukiRPFramework.ui.UIState;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Location;
@@ -166,6 +164,9 @@ public class UIStateManager {
         // Set lang to the UI
         setLang(player, account.getLang());
         CharacterManager.refreshFood(player);
+
+        // Set phone number
+        player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new SetPhoneNumberPayload(account.getPhoneNumber())));
 
         // Apply style to character if there is one saved
         if(account.getCharacterCreationRequest() == 0) {

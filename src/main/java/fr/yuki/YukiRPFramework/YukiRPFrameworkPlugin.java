@@ -123,6 +123,9 @@ public class YukiRPFrameworkPlugin {
             Onset.registerRemoteEvent("Weapon:StoreWeapon");
             Onset.registerRemoteEvent("Growbox:Destroy");
             Onset.registerRemoteEvent("ATM:GetInfos");
+            Onset.registerRemoteEvent("Phone:RequestCall");
+            Onset.registerRemoteEvent("Phone:RequestAnswer");
+            Onset.registerRemoteEvent("Phone:RequestEndCall");
         } catch (Exception ex) {
             ex.printStackTrace();
             Onset.print("Can't start the plugin because : " + ex.toString());
@@ -241,7 +244,13 @@ public class YukiRPFrameworkPlugin {
         account.setSaveY(location.getY());
         account.setSaveZ(location.getZ());
         account.setSaveH(location.getHeading());
-        CharacterManager.getCharacterStates().remove(evt.getPlayer().getSteamId());
+        CharacterState state = CharacterManager.getCharacterStateByPlayer(evt.getPlayer());
+        if(state != null) {
+            if(state.getCurrentPhoneCall() != null ){
+                state.getCurrentPhoneCall().end();
+            }
+            CharacterManager.getCharacterStates().remove(evt.getPlayer().getSteamId());
+        }
         WorldManager.savePlayer(evt.getPlayer());
     }
 
@@ -412,6 +421,18 @@ public class YukiRPFrameworkPlugin {
 
                 case "Weapon:StoreWeapon":
                     WeaponManager.storeWeapon(evt.getPlayer());
+                    break;
+
+                case "Phone:RequestCall":
+                    PhoneManager.handleRequestCall(evt.getPlayer(), (evt.getArgs()[0]).toString());
+                    break;
+
+                case "Phone:RequestAnswer":
+                    PhoneManager.handleCallAnswer(evt.getPlayer());
+                    break;
+
+                case "Phone:RequestEndCall":
+                    PhoneManager.handleCallEnd(evt.getPlayer());
                     break;
             }
         }

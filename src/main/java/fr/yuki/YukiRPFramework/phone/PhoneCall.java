@@ -1,6 +1,8 @@
 package fr.yuki.YukiRPFramework.phone;
 
 import com.google.gson.Gson;
+import fr.yuki.YukiRPFramework.character.CharacterState;
+import fr.yuki.YukiRPFramework.manager.CharacterManager;
 import fr.yuki.YukiRPFramework.manager.SoundManager;
 import fr.yuki.YukiRPFramework.manager.WorldManager;
 import fr.yuki.YukiRPFramework.model.Account;
@@ -9,6 +11,7 @@ import fr.yuki.YukiRPFramework.net.payload.SetPhoneCallStatePayload;
 import fr.yuki.YukiRPFramework.net.payload.StartPhoneCallTimerPayload;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.entity.Player;
+import net.onfirenetwork.onsetjava.enums.Animation;
 
 public class PhoneCall {
     public static int CURRENT_CALL_ID = 1000;
@@ -44,8 +47,8 @@ public class PhoneCall {
             this.receiver.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new SetPhoneCallStatePayload(2,
                     callerAccount.getPhoneNumber())));
 
-            SoundManager.playSound3D("sounds/ringtone.mp3", this.receiver.getLocation(), 300, 0.2);
-            SoundManager.playSound3D("sounds/calling_beep.mp3", this.receiver.getLocation(), 300, 0.2);
+            SoundManager.playSound2D(this.receiver, "ringtone", "sounds/ringtone.mp3", 0.2);
+            SoundManager.playSound2D(this.caller, "beep", "sounds/calling_beep.mp3", 0.2);
         }
     }
 
@@ -61,6 +64,12 @@ public class PhoneCall {
                 receiverAccount.getPhoneNumber())));
         this.receiver.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new SetPhoneCallStatePayload(3,
                 callerAccount.getPhoneNumber())));
+
+        this.caller.setAnimation(Animation.PHONE_TALKING01);
+        this.receiver.setAnimation(Animation.PHONE_TALKING01);
+
+        SoundManager.stopSound2D(this.receiver, "ringtone");
+        SoundManager.stopSound2D(this.caller, "beep");
     }
 
     public void end() {
@@ -70,8 +79,12 @@ public class PhoneCall {
             this.receiver.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new SetPhoneCallStatePayload(-1,
                     "")));
 
-            SoundManager.playSound3D("sounds/call_end.mp3", this.receiver.getLocation(), 300, 0.2);
-            SoundManager.playSound3D("sounds/call_end.mp3", this.receiver.getLocation(), 300, 0.2);
+            SoundManager.playSound2D(this.receiver, "call_end", "sounds/call_end.mp3", 0.2);
+            SoundManager.playSound2D(this.caller, "call_end", "sounds/call_end.mp3", 0.2);
+
+
+            SoundManager.stopSound2D(this.receiver, "ringtone");
+            SoundManager.stopSound2D(this.caller, "beep");
         } else if(this.state == 2) { // In call
             this.caller.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new SetPhoneCallStatePayload(-1,
                     "")));
@@ -79,8 +92,16 @@ public class PhoneCall {
                     "")));
             this.caller.setVoiceChannel(this.id, false);
             this.receiver.setVoiceChannel(this.id, false);
-            SoundManager.playSound3D("sounds/call_end.mp3", this.receiver.getLocation(), 300, 0.2);
-            SoundManager.playSound3D("sounds/call_end.mp3", this.receiver.getLocation(), 300, 0.2);
+            SoundManager.playSound2D(this.receiver, "call_end", "sounds/call_end.mp3", 0.2);
+            SoundManager.playSound2D(this.caller, "call_end", "sounds/call_end.mp3", 0.2);
         }
+
+        CharacterState callerState = CharacterManager.getCharacterStateByPlayer(this.caller);
+        CharacterState receiverState = CharacterManager.getCharacterStateByPlayer(this.receiver);
+        callerState.setCurrentPhoneCall(null);
+        receiverState.setCurrentPhoneCall(null);
+
+        this.caller.setAnimation(Animation.PHONE_PUTAWAY);
+        this.receiver.setAnimation(Animation.PHONE_PUTAWAY);
     }
 }

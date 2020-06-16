@@ -61,4 +61,22 @@ public class SoundManager {
     public static HashMap<String, WorldObject> getAmbiantSounds() {
         return ambiantSounds;
     }
+
+    public static void playSound2D(Player player, String id, String fileName, double volume) {
+        try {
+            player.callRemoteEvent("Sound:PlayAndRegister2DSound", id, fileName, volume);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public static void stopSound2D(Player player, String id) {
+        try {
+            player.callRemoteEvent("Sound:Stop2DSound", id);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
 }

@@ -186,6 +186,7 @@ public class PhoneManager {
     }
 
     public static void handleCallEnd(Player player) {
+        Onset.print("Request end call");
         CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
         if(state.getCurrentPhoneCall() == null){
             Onset.print("Can't answer because there is no call");

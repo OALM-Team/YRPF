@@ -33,6 +33,7 @@ public class Account {
     private String phoneNumber;
     private String weapons;
     private int bagId;
+    private int compagnyId;
 
     public int getId() {
         return id;
@@ -234,5 +235,13 @@ public class Account {
 
     public void setBagId(int bagId) {
         this.bagId = bagId;
+    }
+
+    public int getCompagnyId() {
+        return compagnyId;
+    }
+
+    public void setCompagnyId(int compagnyId) {
+        this.compagnyId = compagnyId;
     }
 }

@@ -215,8 +215,9 @@ public class GarageManager {
         SellListItem sellListItem = vehicleSeller.getSellList().stream().filter(x -> x.getModelId() == payload.getModelId()).findFirst().orElse(null);
         if(sellListItem == null) return;
 
+        Vector spawnPoint = new Vector(vehicleSeller.getsX(), vehicleSeller.getsY(), vehicleSeller.getsZ());
         if(VehicleManager.getNearestVehicle(player.getLocation()) != null) {
-            if(VehicleManager.getNearestVehicle(player.getLocation()).getLocation().distance(player.getLocation()) < 400) {
+            if(VehicleManager.getNearestVehicle(spawnPoint).getLocation().distance(spawnPoint) < 400) {
                 UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.garage.vehicle_block_spawn"));
                 return;
             }
@@ -234,7 +235,7 @@ public class GarageManager {
 
         // Remove cash and spawn vehicle
         inventory.removeItem(inventory.getItemByType(ItemTemplateEnum.CASH.id), sellListItem.getPrice());
-        VehicleManager.CreateVehicleResult createVehicleResult = VehicleManager.createVehicle(sellListItem.getModelId(), player.getLocation(), player.getLocationAndHeading().getHeading(),
+        VehicleManager.CreateVehicleResult createVehicleResult = VehicleManager.createVehicle(sellListItem.getModelId(), spawnPoint, vehicleSeller.getH(),
                 player, null, false);
         createVehicleResult.getVehicleGarage().setColor(payload.getColor());
         createVehicleResult.getVehicleGarage().save();

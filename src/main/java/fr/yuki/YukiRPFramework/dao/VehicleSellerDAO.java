@@ -29,6 +29,10 @@ public class VehicleSellerDAO {
             vehicleSeller.setY(resultSet.getDouble("y"));
             vehicleSeller.setZ(resultSet.getDouble("z"));
             vehicleSeller.setH(resultSet.getDouble("h"));
+            vehicleSeller.setsX(resultSet.getDouble("s_x"));
+            vehicleSeller.setsY(resultSet.getDouble("s_y"));
+            vehicleSeller.setsZ(resultSet.getDouble("s_z"));
+            vehicleSeller.setsH(resultSet.getDouble("s_h"));
             vehicleSeller.setSellList(new Gson().fromJson(resultSet.getString("sell_list"),
                     new TypeToken<ArrayList<SellListItem>>(){}.getType()));
 

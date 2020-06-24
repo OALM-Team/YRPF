@@ -104,4 +104,12 @@ public class PhoneCall {
         this.caller.setAnimation(Animation.PHONE_PUTAWAY);
         this.receiver.setAnimation(Animation.PHONE_PUTAWAY);
     }
+
+    public Player getCaller() {
+        return caller;
+    }
+
+    public Player getReceiver() {
+        return receiver;
+    }
 }

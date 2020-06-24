@@ -123,6 +123,13 @@ public class UIStateManager {
                         ("houseBuy", uiState.isHouseBuy())));
                 break;
 
+            case "genericMenu":
+                uiState.setGenericMenu(!uiState.isGenericMenu());
+                r = uiState.isGenericMenu();
+                player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new SetWindowStatePayload
+                        ("genericMenu", uiState.isGenericMenu())));
+                break;
+
         }
         return r;
     }
@@ -167,6 +174,9 @@ public class UIStateManager {
 
         // Set phone number
         player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new SetPhoneNumberPayload(account.getPhoneNumber())));
+
+        // Send compagny
+        CompagnyManager.refreshCompagny(player);
 
         // Apply style to character if there is one saved
         if(account.getCharacterCreationRequest() == 0) {

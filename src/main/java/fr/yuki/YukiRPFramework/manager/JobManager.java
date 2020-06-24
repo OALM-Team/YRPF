@@ -409,6 +409,22 @@ public class JobManager {
         jobTool.getJobToolHandler().onUse(player);
     }
 
+    public static ArrayList<Player> getWhitelistedPlayersForJob(JobEnum jobEnum) {
+        ArrayList<Player> players = new ArrayList<>();
+        for(Player player : Onset.getPlayers()) {
+            try {
+                Account account = WorldManager.getPlayerAccount(player);
+                AccountJobWhitelist accountJobWhitelist = AccountManager.getAccountJobWhitelists().stream()
+                        .filter(x -> x.getAccountId() == account.getId() && x.getJobId().equals(jobEnum.type))
+                        .findFirst().orElse(null);
+                if(accountJobWhitelist != null) {
+                    players.add(player);
+                }
+            }catch (Exception exception) {}
+        }
+        return players;
+    }
+
     public static JobVehicleRental getNearbyVehicleRental(Player player) {
         for(JobVehicleRental jobVehicleRental : jobVehicleRentals) {
             if(jobVehicleRental.isNear(player)) return jobVehicleRental;

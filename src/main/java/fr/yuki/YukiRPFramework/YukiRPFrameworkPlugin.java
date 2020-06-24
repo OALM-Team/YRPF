@@ -2,6 +2,7 @@ package fr.yuki.YukiRPFramework;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import fr.yuki.YukiRPFramework.LuaAPI.LuaAPIManager;
 import fr.yuki.YukiRPFramework.character.CharacterState;
 import fr.yuki.YukiRPFramework.commands.*;
 import fr.yuki.YukiRPFramework.dao.AccountDAO;
@@ -11,6 +12,7 @@ import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
 import fr.yuki.YukiRPFramework.i18n.I18n;
 import fr.yuki.YukiRPFramework.inventory.Inventory;
 import fr.yuki.YukiRPFramework.manager.*;
+import fr.yuki.YukiRPFramework.modding.ModdingCustomModel;
 import fr.yuki.YukiRPFramework.model.*;
 import fr.yuki.YukiRPFramework.net.payload.*;
 import fr.yuki.YukiRPFramework.tebex.TebexAPI;
@@ -55,7 +57,9 @@ public class YukiRPFrameworkPlugin {
             PhoneManager.init();
             HouseManager.init();
             TimeManager.init();
+            CompagnyManager.init();
             TebexManager.init();
+            LuaAPIManager.init();
 
             // Register commands
             Onset.registerCommand("item", new ItemCommand());
@@ -84,6 +88,7 @@ public class YukiRPFrameworkPlugin {
             Onset.registerCommand("fhouse", new FreeHouseCommand());
             Onset.registerCommand("houseprops", new SetHousePropsCommand());
             Onset.registerCommand("givehousekey", new GiveHouseKeyCommand());
+            Onset.registerCommand("settime", new SetTimeCommand());
 
             // Register remote events
             Onset.registerRemoteEvent("GlobalUI:ToogleWindow");
@@ -126,6 +131,12 @@ public class YukiRPFrameworkPlugin {
             Onset.registerRemoteEvent("Phone:RequestCall");
             Onset.registerRemoteEvent("Phone:RequestAnswer");
             Onset.registerRemoteEvent("Phone:RequestEndCall");
+            Onset.registerRemoteEvent("Phone:RequestAttachPhone");
+            Onset.registerRemoteEvent("SetPlayerEditor");
+            Onset.registerRemoteEvent("Phone:RequestUrgency");
+            Onset.registerRemoteEvent("Phone:RequestListUrgency");
+            Onset.registerRemoteEvent("Phone:SolveUrgency");
+            Onset.registerRemoteEvent("Compagny:Create");
         } catch (Exception ex) {
             ex.printStackTrace();
             Onset.print("Can't start the plugin because : " + ex.toString());
@@ -228,6 +239,11 @@ public class YukiRPFrameworkPlugin {
 
             // Set current time
             TimeManager.setCurrentHourForPlayer(evt.getPlayer());
+
+            // Set modding objects
+            for(ModdingCustomModel customModel : ModdingManager.getModdingFile().getCustomModels()) {
+                evt.getPlayer().callRemoteEvent("Modding:AddCustomObject", customModel.getId(), customModel.getPath());
+            }
         } catch (Exception e) {
             e.printStackTrace();
             evt.getPlayer().kick("There is a error for retrieving your account: " + e.toString());
@@ -433,6 +449,32 @@ public class YukiRPFrameworkPlugin {
 
                 case "Phone:RequestEndCall":
                     PhoneManager.handleCallEnd(evt.getPlayer());
+                    break;
+
+                case "Phone:RequestAttachPhone":
+                    PhoneManager.handleAttachPhone(evt.getPlayer(), (evt.getArgs()[0]).toString());
+                    break;
+
+                case "SetPlayerEditor":
+                    ModdingManager.onEditorOpen(evt.getPlayer());
+                    break;
+
+                case "Phone:RequestUrgency":
+                    PhoneManager.handleUrgencyRequest(evt.getPlayer(), new Gson().fromJson((evt.getArgs()[0]).toString(),
+                            UrgencyRequestPayload.class));
+                    break;
+
+                case "Phone:RequestListUrgency":
+                    PhoneManager.handleUrgencyListRequest(evt.getPlayer());
+                    break;
+
+                case "Phone:SolveUrgency":
+                    PhoneManager.handleUrgencySolveRequest(evt.getPlayer(), new Gson().fromJson((evt.getArgs()[0]).toString(),
+                            SolveUrgencyPayload.class));
+                    break;
+
+                case "Compagny:Create":
+                    CompagnyManager.handleCreateRequest(evt.getPlayer(), (evt.getArgs()[0]).toString());
                     break;
             }
         }

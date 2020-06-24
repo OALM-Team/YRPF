@@ -34,6 +34,7 @@ public class CharacterState {
     private Bag currentBag = null;
     private WorldObject bagWorldObject = null;
     private PhoneCall currentPhoneCall = null;
+    private CharacterToolAnimation currentPhoneAttached = null;
 
     public CharacterState() {
         this.uiState = new UIState();
@@ -193,5 +194,13 @@ public class CharacterState {
 
     public void setCurrentPhoneCall(PhoneCall currentPhoneCall) {
         this.currentPhoneCall = currentPhoneCall;
+    }
+
+    public CharacterToolAnimation getCurrentPhoneAttached() {
+        return currentPhoneAttached;
+    }
+
+    public void setCurrentPhoneAttached(CharacterToolAnimation currentPhoneAttached) {
+        this.currentPhoneAttached = currentPhoneAttached;
     }
 }

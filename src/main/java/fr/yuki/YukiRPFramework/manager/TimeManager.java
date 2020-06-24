@@ -4,11 +4,11 @@ import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.entity.Player;
 
 public class TimeManager {
-    private static int currentHour;
+    private static float currentHour;
 
     public static void init() {
         currentHour = WorldManager.getServerConfig().getStartHour();
-        Onset.timer(getRealTimePerHour(), () -> tickHour());
+        Onset.timer(getRealTimePerHour() / 60, () -> tickHour());
         Onset.print("Time initialized");
     }
 
@@ -17,13 +17,13 @@ public class TimeManager {
     }
 
     public static void setCurrentHourForPlayer(Player player) {
-        player.callRemoteEvent("Time:SetHour", getCurrentHour());
+        player.callRemoteEvent("Time:SetHour", String.valueOf(getCurrentHour()));
     }
 
     public static void tickHour() {
-        currentHour += 1;
+        currentHour += 1f / 60f;
         if(currentHour > 24) currentHour = 0;
-        Onset.print("Time changed, current hour: " + currentHour);
+        //Onset.print("Time changed, current hour: " + currentHour);
         for(Player player : Onset.getPlayers()) {
             try {
                 setCurrentHourForPlayer(player);
@@ -32,11 +32,17 @@ public class TimeManager {
         }
     }
 
-    public static int getCurrentHour() {
+    public static float getCurrentHour() {
         return currentHour;
     }
 
-    public static void setCurrentHour(int value) {
+    public static void setCurrentHour(float value) {
         currentHour = value;
+        for(Player player : Onset.getPlayers()) {
+            try {
+                setCurrentHourForPlayer(player);
+            }
+            catch(Exception ex) {}
+        }
     }
 }

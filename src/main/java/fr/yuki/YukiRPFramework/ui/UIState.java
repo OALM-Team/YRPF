@@ -15,6 +15,7 @@ public class UIState {
     private boolean growboxmenu = false;
     private boolean phone = false;
     private boolean houseBuy = false;
+    private boolean genericMenu = false;
 
     public boolean isInventory() {
         return inventory;
@@ -126,5 +127,13 @@ public class UIState {
 
     public void setHouseBuy(boolean houseBuy) {
         this.houseBuy = houseBuy;
+    }
+
+    public boolean isGenericMenu() {
+        return genericMenu;
+    }
+
+    public void setGenericMenu(boolean genericMenu) {
+        this.genericMenu = genericMenu;
     }
 }

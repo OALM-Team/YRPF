@@ -13,6 +13,10 @@ public class VehicleSeller {
     private double y;
     private double z;
     private double h;
+    private double sX;
+    private double sY;
+    private double sZ;
+    private double sH;
     private ArrayList<SellListItem> sellList;
 
     public int getId() {
@@ -79,8 +83,40 @@ public class VehicleSeller {
         this.h = h;
     }
 
+    public double getsX() {
+        return sX;
+    }
+
+    public void setsX(double sX) {
+        this.sX = sX;
+    }
+
+    public double getsY() {
+        return sY;
+    }
+
+    public void setsY(double sY) {
+        this.sY = sY;
+    }
+
+    public double getsZ() {
+        return sZ;
+    }
+
+    public void setsZ(double sZ) {
+        this.sZ = sZ;
+    }
+
+    public double getsH() {
+        return sH;
+    }
+
+    public void setsH(double sH) {
+        this.sH = sH;
+    }
+
     public boolean isNear(Player player) {
-        if(player.getLocation().distance(new Vector(this.x, this.y, this.z)) < 150) {
+        if(player.getLocation().distance(new Vector(this.x, this.y, this.z)) < 250) {
             return true;
         }
         return false;

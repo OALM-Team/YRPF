@@ -48,6 +48,7 @@ public class AccountDAO {
             account.setPhoneNumber(resultSet.getString("phone_number"));
             account.setWeapons(resultSet.getString("weapons"));
             account.setBagId(resultSet.getInt("id_bag"));
+            account.setCompagnyId(resultSet.getInt("id_compagny"));
             account.setCreatedAt(resultSet.getDate("created_at"));
             account.setUpdatedAt(resultSet.getDate("updated_at"));
         }
@@ -73,6 +74,7 @@ public class AccountDAO {
         account.setDrinkState(100);
         account.setPhoneNumber("");
         account.setBagId(-1);
+        account.setCompagnyId(-1);
         account.setSaveX(serverConfig.getSpawnPointX());
         account.setSaveY(serverConfig.getSpawnPointY());
         account.setSaveZ(serverConfig.getSpawnPointZ());
@@ -84,8 +86,8 @@ public class AccountDAO {
         PreparedStatement preparedStatement = Database.getConnection()
                 .prepareStatement("INSERT INTO tbl_account " +
                         "(steam_account_name, steam_id, is_banned, created_at, updated_at, character_creation_request," +
-                        " character_style, character_name, save_x, save_y, save_z, save_h) VALUES " +
-                        "(?,?,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+                        " character_style, character_name, save_x, save_y, save_z, save_h, id_compagny) VALUES " +
+                        "(?,?,?,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
 
         preparedStatement.setString(1, account.getSteamName());
         preparedStatement.setString(2, account.getSteamId());
@@ -99,6 +101,7 @@ public class AccountDAO {
         preparedStatement.setDouble(10, account.getSaveY());
         preparedStatement.setDouble(11, account.getSaveZ());
         preparedStatement.setDouble(12, account.getSaveH());
+        preparedStatement.setInt(13, account.getCompagnyId());
         preparedStatement.executeUpdate();
 
         ResultSet returnId = preparedStatement.getGeneratedKeys();
@@ -114,7 +117,7 @@ public class AccountDAO {
         PreparedStatement preparedStatement = Database.getConnection()
                 .prepareStatement("UPDATE tbl_account SET is_banned=?, bank_money=?, save_x=?, save_y=?, save_z=?, save_h=?, character_creation_request=?," +
                         "character_style=?, character_name=?, job_levels=?, is_dead=?, admin_level=?, lang=?," +
-                        "food_state=?, drink_state=?, phone_number=?, weapons=?, id_bag=? WHERE id_account=?");
+                        "food_state=?, drink_state=?, phone_number=?, weapons=?, id_bag=?, id_compagny=? WHERE id_account=?");
         preparedStatement.setInt(1, account.getIsBanned());
         preparedStatement.setInt(2, account.getBankMoney());
         if(player == null) {
@@ -147,7 +150,8 @@ public class AccountDAO {
             preparedStatement.setString(17, account.getWeapons());
         }
         preparedStatement.setDouble(18, account.getBagId());
-        preparedStatement.setDouble(19, account.getId());
+        preparedStatement.setInt(19, account.getCompagnyId());
+        preparedStatement.setDouble(20, account.getId());
         preparedStatement.execute();
     }
 }

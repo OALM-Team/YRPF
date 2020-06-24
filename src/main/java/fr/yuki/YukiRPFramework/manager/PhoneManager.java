@@ -1,35 +1,48 @@
 package fr.yuki.YukiRPFramework.manager;
 
 import com.google.gson.Gson;
+import fr.yuki.YukiRPFramework.character.CharacterLoopAnimation;
 import fr.yuki.YukiRPFramework.character.CharacterState;
+import fr.yuki.YukiRPFramework.character.CharacterToolAnimation;
 import fr.yuki.YukiRPFramework.dao.PhoneContactDAO;
+import fr.yuki.YukiRPFramework.enums.JobEnum;
 import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
 import fr.yuki.YukiRPFramework.i18n.I18n;
+import fr.yuki.YukiRPFramework.job.Job;
 import fr.yuki.YukiRPFramework.model.Account;
+import fr.yuki.YukiRPFramework.model.AccountJobWhitelist;
 import fr.yuki.YukiRPFramework.model.PhoneContact;
 import fr.yuki.YukiRPFramework.net.payload.*;
 import fr.yuki.YukiRPFramework.phone.PhoneCall;
 import fr.yuki.YukiRPFramework.phone.PhoneMessage;
+import fr.yuki.YukiRPFramework.phone.UrgencyPhoneMessage;
 import fr.yuki.YukiRPFramework.utils.Basic;
 import net.onfirenetwork.onsetjava.Onset;
+import net.onfirenetwork.onsetjava.data.Vector;
 import net.onfirenetwork.onsetjava.entity.Player;
+import net.onfirenetwork.onsetjava.enums.Animation;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class PhoneManager {
     private static ArrayList<PhoneContact> phoneContacts;
     private static ArrayList<PhoneMessage> phoneMessages;
+    private static HashMap<String, ArrayList<UrgencyPhoneMessage>> urgencyMessages;
+
+    private static int urgencyPhoneMessageCurrentId = 1;
 
     public static void init() throws SQLException {
         phoneContacts = PhoneContactDAO.loadPhoneContacts();
         Onset.print("Loaded " + phoneContacts.size() + " phone contact(s) from the database");
 
         phoneMessages = new ArrayList<>();
+
+        // init urgency
+        urgencyMessages = new HashMap<>();
+        urgencyMessages.put("police", new ArrayList<>());
+        urgencyMessages.put("hospital", new ArrayList<>());
     }
 
     public static String generateRandomPhoneNumber() {
@@ -183,6 +196,8 @@ public class PhoneManager {
             return;
         }
         state.getCurrentPhoneCall().begin();
+        attachPhone(state.getCurrentPhoneCall().getCaller());
+        attachPhone(state.getCurrentPhoneCall().getReceiver());
     }
 
     public static void handleCallEnd(Player player) {
@@ -193,6 +208,68 @@ public class PhoneManager {
             return;
         }
         state.getCurrentPhoneCall().end();
+    }
+
+    public static void handleAttachPhone(Player player, String phoneState) {
+        CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
+        if(!state.canInteract()) return;
+        if(phoneState.equals("true")) {
+            attachPhone(player);
+        } else {
+            if(state.getCurrentPhoneCall() == null) {
+                player.setAnimation(Animation.PHONE_PUTAWAY);
+                state.getCurrentPhoneAttached().unAttach();
+                state.setCurrentPhoneAttached(null);
+            }
+        }
+    }
+
+    public static void handleUrgencyRequest(Player player, UrgencyRequestPayload payload) {
+        Account account = WorldManager.getPlayerAccount(player);
+        UrgencyPhoneMessage urgencyPhoneMessage = new UrgencyPhoneMessage();
+        urgencyPhoneMessage.setId(urgencyPhoneMessageCurrentId++);
+        urgencyPhoneMessage.setFromNumber(account.getPhoneNumber());
+        urgencyPhoneMessage.setToNumber(payload.getService());
+        urgencyPhoneMessage.setMessage(payload.getText());
+        urgencyPhoneMessage.setMessageType(1);
+        urgencyPhoneMessage.setService(payload.getService().toLowerCase());
+        urgencyMessages.get(payload.getService()).add(urgencyPhoneMessage);
+        UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, "Votre demande est désormais en attente");
+
+        // Display messages
+        JobEnum jobEnum = JobEnum.POLICE;
+        Onset.print("Add urgency for service: " + payload.getService().toLowerCase());
+        switch (payload.getService().toLowerCase()) {
+            case "police":
+                jobEnum = JobEnum.POLICE;
+                break;
+
+            case "hospital":
+                jobEnum = JobEnum.EMS;
+                break;
+        }
+        ArrayList<Player> whitelistedPlayers = JobManager.getWhitelistedPlayersForJob(jobEnum);
+        for(Player wPlayer : whitelistedPlayers) {
+            try {
+                player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new AddPhoneUrgencyPayload(
+                        urgencyPhoneMessage.getId(), urgencyPhoneMessage.getFromNumber(), urgencyPhoneMessage.getMessage(), urgencyPhoneMessage.getService()
+                )));
+                UIStateManager.sendNotification(wPlayer, ToastTypeEnum.SUCCESS, "Vous avez reçu une nouvelle urgence");
+                SoundManager.playSound3D("sounds/notif_1.mp3", wPlayer.getLocation(), 350, 2);
+            } catch (Exception ex) {
+                Onset.print("Can't send urgency: " + ex.toString());
+            }
+        }
+    }
+
+    public static void attachPhone(Player player) {
+        CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
+        if(state.getCurrentPhoneAttached() != null) return;
+        CharacterToolAnimation toolAnimation = new CharacterToolAnimation(50011, new Vector(-10,4,5),
+                new Vector(180,-40,90), new Vector(0.02, 0.02, 0.02), "hand_r");
+        player.setAnimation(Animation.PHONE_HOLD);
+        state.setCurrentPhoneAttached(toolAnimation);
+        toolAnimation.attach(player);
     }
 
     public static ArrayList<PhoneMessage> getConversationsWithNumber(String number) {
@@ -209,5 +286,41 @@ public class PhoneManager {
             }
         }
         return messages;
+    }
+
+    private static void refreshUrgencyMessages(Player player) {
+        Account account = WorldManager.getPlayerAccount(player);
+        boolean isPolice = AccountManager.getAccountJobWhitelists().stream()
+                .filter(x -> x.getAccountId() == account.getId() && x.getJobId().equals(JobEnum.POLICE.type))
+                .findFirst().orElse(null) != null;
+        boolean isEMS = AccountManager.getAccountJobWhitelists().stream()
+                .filter(x -> x.getAccountId() == account.getId() && x.getJobId().equals(JobEnum.EMS.type))
+                .findFirst().orElse(null) != null;
+        ArrayList<UrgencyPhoneMessage> urgencyPhoneMessages = new ArrayList<>();
+
+        // Check whitelists
+        if(isPolice) urgencyPhoneMessages.addAll(urgencyMessages.get("police"));
+        if(isEMS) urgencyPhoneMessages.addAll(urgencyMessages.get("hospital"));
+
+        player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new ClearPhoneUrgencyPayload()));
+        Collections.reverse(urgencyPhoneMessages); // Reverse to get the newest before
+        for(UrgencyPhoneMessage urgencyPhoneMessage : urgencyPhoneMessages) {
+            player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new AddPhoneUrgencyPayload(
+                    urgencyPhoneMessage.getId(), urgencyPhoneMessage.getFromNumber(), urgencyPhoneMessage.getMessage(), urgencyPhoneMessage.getService()
+            )));
+        }
+    }
+
+    public static void handleUrgencyListRequest(Player player) {
+        refreshUrgencyMessages(player);
+    }
+
+    public static void handleUrgencySolveRequest(Player player, SolveUrgencyPayload payload) {
+        UrgencyPhoneMessage phoneMessage = urgencyMessages.get(payload.getService()).stream()
+                .filter(x -> x.getId() == payload.getId()).findFirst().orElse(null);
+        if(phoneMessage == null) return;
+        urgencyMessages.get(payload.getService()).remove(phoneMessage);
+        refreshUrgencyMessages(player);
+        UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, "Urgence clôturée");
     }
 }

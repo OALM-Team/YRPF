@@ -6,6 +6,7 @@ import fr.yuki.YukiRPFramework.modding.ModdingCustomModel;
 import fr.yuki.YukiRPFramework.modding.ModdingFile;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.entity.Pickup;
+import net.onfirenetwork.onsetjava.entity.Player;
 import net.onfirenetwork.onsetjava.entity.WorldObject;
 
 import java.io.FileNotFoundException;
@@ -43,5 +44,12 @@ public class ModdingManager {
             return;
         }
         pickup.setProperty("customModelPath", moddingCustomModel.getPath(), true);
+    }
+
+    public static void onEditorOpen(Player player) {
+        Onset.print("Editor opened");
+        for(ModdingCustomModel customModel : moddingFile.getCustomModels()) {
+            player.callRemoteEvent("Editor:AddCustomObject", customModel.getId(), customModel.getPath());
+        }
     }
 }

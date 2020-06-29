@@ -144,6 +144,10 @@ public class UIStateManager {
         player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new AddToastPayload(type.type, message)));
     }
 
+    public static void sendNotification(Player player, String type, String message) {
+        player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new AddToastPayload(type, message)));
+    }
+
     public static void setLang(Player player, String lang) {
         Account account = WorldManager.getPlayerAccount(player);
         account.setLang(lang);

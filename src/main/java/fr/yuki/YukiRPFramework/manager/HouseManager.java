@@ -3,6 +3,7 @@ package fr.yuki.YukiRPFramework.manager;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import fr.yuki.YukiRPFramework.character.CharacterState;
+import fr.yuki.YukiRPFramework.dao.AccountDAO;
 import fr.yuki.YukiRPFramework.dao.HouseDAO;
 import fr.yuki.YukiRPFramework.dao.HouseItemDAO;
 import fr.yuki.YukiRPFramework.enums.ItemTemplateEnum;
@@ -13,10 +14,7 @@ import fr.yuki.YukiRPFramework.job.JobConfig;
 import fr.yuki.YukiRPFramework.job.JobSpawn;
 import fr.yuki.YukiRPFramework.job.ObjectPlacementInstance;
 import fr.yuki.YukiRPFramework.job.placementObject.GenericPlacementInstance;
-import fr.yuki.YukiRPFramework.model.Account;
-import fr.yuki.YukiRPFramework.model.House;
-import fr.yuki.YukiRPFramework.model.HouseItemObject;
-import fr.yuki.YukiRPFramework.model.ItemShopObject;
+import fr.yuki.YukiRPFramework.model.*;
 import fr.yuki.YukiRPFramework.net.payload.AddPhoneMessagePayload;
 import fr.yuki.YukiRPFramework.net.payload.SetHouseInfosPayload;
 import net.onfirenetwork.onsetjava.Onset;
@@ -137,12 +135,26 @@ public class HouseManager {
     }
 
     public static boolean canBuildInHouse(Player player, House house) {
-        Account account = WorldManager.getPlayerAccount(player);
-        if(account.getId() == house.getAccountId()) {
-            return true;
-        }
-        if(house.getAllowedPlayers().contains(account.getId())) {
-            return true;
+        try {
+            Account account = WorldManager.getPlayerAccount(player);
+            if(account.getId() == house.getAccountId()) {
+                return true;
+            }
+            if(house.getAllowedPlayers().contains(account.getId())) {
+                return true;
+            }
+
+            // Check same compagny
+            if(account.getCompagnyId() != -1) {
+                Account ownerAccount = AccountDAO.findAccountById(house.getAccountId());
+                if(ownerAccount != null) {
+                    if(account.getCompagnyId() == ownerAccount.getCompagnyId()) {
+                        return true;
+                    }
+                }
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
         }
 
         return false;

@@ -1,9 +1,8 @@
-package fr.yuki.YukiRPFramework.LuaAPI;
+package fr.yuki.YukiRPFramework.luaapi;
 
 import fr.yuki.YukiRPFramework.manager.WorldManager;
 import fr.yuki.YukiRPFramework.model.Account;
 import net.onfirenetwork.onsetjava.Onset;
-import net.onfirenetwork.onsetjava.entity.Player;
 import net.onfirenetwork.onsetjava.plugin.ExportFunction;
 
 public class GetAdminLevelEF implements ExportFunction {

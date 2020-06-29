@@ -66,4 +66,10 @@ public class WeaponManager {
             return;
         }
     }
+
+    public static void clearWeapons(Player player) {
+        player.setWeapon(1, 1, 0, true, false);
+        player.setWeapon(2, 1, 0, true, false);
+        player.setWeapon(3, 1, 0, true, false);
+    }
 }

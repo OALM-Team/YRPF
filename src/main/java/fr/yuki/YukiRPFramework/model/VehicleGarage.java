@@ -138,6 +138,15 @@ public class VehicleGarage {
         }
     }
 
+    public Vehicle getVehicle() {
+        for(Vehicle vehicle : Onset.getVehicles()) {
+            if(vehicle.getPropertyString("uuid").equals(this.getUuid())) {
+                return vehicle;
+            }
+        }
+        return null;
+    }
+
     public void applyDamages(Vehicle vehicle) {
         ArrayList<Double> damages = new Gson().fromJson(this.damage, new TypeToken<ArrayList<Double>>(){}.getType());
         for(int i = 0; i < damages.size(); i++) {

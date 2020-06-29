@@ -1,4 +1,4 @@
-package fr.yuki.YukiRPFramework.LuaAPI;
+package fr.yuki.YukiRPFramework.luaapi;
 
 import com.google.gson.Gson;
 import fr.yuki.YukiRPFramework.manager.WorldManager;

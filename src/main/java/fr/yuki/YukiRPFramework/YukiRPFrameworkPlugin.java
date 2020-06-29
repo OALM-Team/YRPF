@@ -2,7 +2,7 @@ package fr.yuki.YukiRPFramework;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import fr.yuki.YukiRPFramework.LuaAPI.LuaAPIManager;
+import fr.yuki.YukiRPFramework.luaapi.LuaAPIManager;
 import fr.yuki.YukiRPFramework.character.CharacterState;
 import fr.yuki.YukiRPFramework.commands.*;
 import fr.yuki.YukiRPFramework.dao.AccountDAO;
@@ -15,8 +15,8 @@ import fr.yuki.YukiRPFramework.manager.*;
 import fr.yuki.YukiRPFramework.modding.ModdingCustomModel;
 import fr.yuki.YukiRPFramework.model.*;
 import fr.yuki.YukiRPFramework.net.payload.*;
-import fr.yuki.YukiRPFramework.tebex.TebexAPI;
 import fr.yuki.YukiRPFramework.utils.ServerConfig;
+import fr.yuki.YukiRPFramework.world.RestrictedZone;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Location;
 import net.onfirenetwork.onsetjava.data.Vector;
@@ -25,10 +25,8 @@ import net.onfirenetwork.onsetjava.plugin.Plugin;
 import net.onfirenetwork.onsetjava.plugin.event.EventHandler;
 import net.onfirenetwork.onsetjava.plugin.event.player.*;
 
-import java.io.FileReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -89,6 +87,7 @@ public class YukiRPFrameworkPlugin {
             Onset.registerCommand("houseprops", new SetHousePropsCommand());
             Onset.registerCommand("givehousekey", new GiveHouseKeyCommand());
             Onset.registerCommand("settime", new SetTimeCommand());
+            Onset.registerCommand("getid", new GetIdCommand());
 
             // Register remote events
             Onset.registerRemoteEvent("GlobalUI:ToogleWindow");
@@ -137,6 +136,10 @@ public class YukiRPFrameworkPlugin {
             Onset.registerRemoteEvent("Phone:RequestListUrgency");
             Onset.registerRemoteEvent("Phone:SolveUrgency");
             Onset.registerRemoteEvent("Compagny:Create");
+            Onset.registerRemoteEvent("Compagny:InviteEmployee");
+            Onset.registerRemoteEvent("Compagny:AcceptInvitation");
+            Onset.registerRemoteEvent("Compagny:DeclineInvitation");
+            Onset.registerRemoteEvent("Compagny:KickEmployee");
         } catch (Exception ex) {
             ex.printStackTrace();
             Onset.print("Can't start the plugin because : " + ex.toString());
@@ -200,6 +203,9 @@ public class YukiRPFrameworkPlugin {
                         account.getSaveH()));
                 Onset.broadcast("<span color=\"#ffee00\">" + account.getCharacterName() + " est de retour !</>");
 
+                if(account.getOriginalStyle().equals("")) {
+                    account.setOriginalStyle(account.getCharacterStyle());
+                }
                 // Set weapons
                 for(Map.Entry<Integer, Weapon> weaponEntry :
                         ((HashMap<Integer, Weapon>)new Gson().fromJson(account.getWeapons(), new TypeToken<HashMap<Integer, Weapon>>(){}.getType())).entrySet()) {
@@ -476,6 +482,22 @@ public class YukiRPFrameworkPlugin {
                 case "Compagny:Create":
                     CompagnyManager.handleCreateRequest(evt.getPlayer(), (evt.getArgs()[0]).toString());
                     break;
+
+                case "Compagny:InviteEmployee":
+                    CompagnyManager.handleInviteEmployee(evt.getPlayer(), (evt.getArgs()[0]).toString());
+                    break;
+
+                case "Compagny:AcceptInvitation":
+                    CompagnyManager.handleAcceptInvitation(evt.getPlayer());
+                    break;
+
+                case "Compagny:DeclineInvitation":
+                    CompagnyManager.handleDeclineInvitation(evt.getPlayer());
+                    break;
+
+                case "Compagny:KickEmployee":
+                    CompagnyManager.handleKickEmployee(evt.getPlayer(), (evt.getArgs()[0]).toString());
+                    break;
             }
         }
         catch (Exception ex) {
@@ -512,6 +534,15 @@ public class YukiRPFrameworkPlugin {
                 return;
             }
         }
+
+        // Check Restricted Zone
+        for(RestrictedZone restrictedZone : WorldManager.getRestrictedZones()) {
+            if(!restrictedZone.canInteractWithDoor(evt.getPlayer(), evt.getDoor())) {
+                UIStateManager.sendNotification(evt.getPlayer(), ToastTypeEnum.ERROR, "Vous n'avez pas le droit d'intéragir avec cette porte");
+                return;
+            }
+        }
+
         if(VehicleManager.getNearestVehicle(evt.getPlayer().getLocation()) != null) {
             if(VehicleManager.getNearestVehicle(evt.getPlayer().getLocation())
                     .getLocation().distance(evt.getPlayer().getLocation()) < VehicleManager.getInteractionDistance(VehicleManager.getNearestVehicle(evt.getPlayer().getLocation()))) {

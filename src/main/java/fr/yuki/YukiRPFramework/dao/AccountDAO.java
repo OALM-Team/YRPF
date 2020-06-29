@@ -26,32 +26,52 @@ public class AccountDAO {
         preparedStatement.setString(1, steamId);
         ResultSet resultSet = preparedStatement.executeQuery();
         if(resultSet.next()) {
-            account = new Account();
-            account.setId(resultSet.getInt("id_account"));
-            account.setSteamName(resultSet.getString("steam_account_name"));
-            account.setSteamId(resultSet.getString("steam_id"));
-            account.setIsBanned(resultSet.getInt("is_banned"));
-            account.setBankMoney(resultSet.getInt("bank_money"));
-            account.setSaveX(resultSet.getDouble("save_x"));
-            account.setSaveY(resultSet.getDouble("save_y"));
-            account.setSaveZ(resultSet.getDouble("save_z"));
-            account.setSaveH(resultSet.getDouble("save_h"));
-            account.setCharacterCreationRequest(resultSet.getInt("character_creation_request"));
-            account.setCharacterStyle(resultSet.getString("character_style"));
-            account.setCharacterName(resultSet.getString("character_name"));
-            account.setJobLevels(resultSet.getString("job_levels"));
-            account.setIsDead(resultSet.getInt("is_dead"));
-            account.setLang(resultSet.getString("lang"));
-            account.setAdminLevel(resultSet.getInt("admin_level"));
-            account.setFoodState(resultSet.getInt("food_state"));
-            account.setDrinkState(resultSet.getInt("drink_state"));
-            account.setPhoneNumber(resultSet.getString("phone_number"));
-            account.setWeapons(resultSet.getString("weapons"));
-            account.setBagId(resultSet.getInt("id_bag"));
-            account.setCompagnyId(resultSet.getInt("id_compagny"));
-            account.setCreatedAt(resultSet.getDate("created_at"));
-            account.setUpdatedAt(resultSet.getDate("updated_at"));
+            account = fetchResultSet(resultSet);
         }
+        return account;
+    }
+
+    public static Account findAccountById(int id) throws SQLException {
+        Account account = null;
+        PreparedStatement preparedStatement = Database.getConnection()
+                .prepareStatement("SELECT * FROM tbl_account WHERE id_account=?");
+        preparedStatement.setInt(1, id);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        if(resultSet.next()) {
+            account = fetchResultSet(resultSet);
+        }
+        return account;
+    }
+
+    private static Account fetchResultSet(ResultSet resultSet) throws SQLException {
+        Account account = null;
+        account = new Account();
+        account.setId(resultSet.getInt("id_account"));
+        account.setSteamName(resultSet.getString("steam_account_name"));
+        account.setSteamId(resultSet.getString("steam_id"));
+        account.setIsBanned(resultSet.getInt("is_banned"));
+        account.setBankMoney(resultSet.getInt("bank_money"));
+        account.setSaveX(resultSet.getDouble("save_x"));
+        account.setSaveY(resultSet.getDouble("save_y"));
+        account.setSaveZ(resultSet.getDouble("save_z"));
+        account.setSaveH(resultSet.getDouble("save_h"));
+        account.setCharacterCreationRequest(resultSet.getInt("character_creation_request"));
+        account.setCharacterStyle(resultSet.getString("character_style"));
+        account.setCharacterName(resultSet.getString("character_name"));
+        account.setJobLevels(resultSet.getString("job_levels"));
+        account.setIsDead(resultSet.getInt("is_dead"));
+        account.setLang(resultSet.getString("lang"));
+        account.setAdminLevel(resultSet.getInt("admin_level"));
+        account.setFoodState(resultSet.getInt("food_state"));
+        account.setDrinkState(resultSet.getInt("drink_state"));
+        account.setPhoneNumber(resultSet.getString("phone_number"));
+        account.setWeapons(resultSet.getString("weapons"));
+        account.setBagId(resultSet.getInt("id_bag"));
+        account.setCompagnyId(resultSet.getInt("id_compagny"));
+        account.setIsInService(resultSet.getInt("is_in_service"));
+        account.setOriginalStyle(resultSet.getString("original_style"));
+        account.setCreatedAt(resultSet.getDate("created_at"));
+        account.setUpdatedAt(resultSet.getDate("updated_at"));
         return account;
     }
 
@@ -75,6 +95,8 @@ public class AccountDAO {
         account.setPhoneNumber("");
         account.setBagId(-1);
         account.setCompagnyId(-1);
+        account.setOriginalStyle("");
+        account.setIsInService(0);
         account.setSaveX(serverConfig.getSpawnPointX());
         account.setSaveY(serverConfig.getSpawnPointY());
         account.setSaveZ(serverConfig.getSpawnPointZ());
@@ -117,7 +139,7 @@ public class AccountDAO {
         PreparedStatement preparedStatement = Database.getConnection()
                 .prepareStatement("UPDATE tbl_account SET is_banned=?, bank_money=?, save_x=?, save_y=?, save_z=?, save_h=?, character_creation_request=?," +
                         "character_style=?, character_name=?, job_levels=?, is_dead=?, admin_level=?, lang=?," +
-                        "food_state=?, drink_state=?, phone_number=?, weapons=?, id_bag=?, id_compagny=? WHERE id_account=?");
+                        "food_state=?, drink_state=?, phone_number=?, weapons=?, id_bag=?, id_compagny=?, is_in_service=?, original_style=? WHERE id_account=?");
         preparedStatement.setInt(1, account.getIsBanned());
         preparedStatement.setInt(2, account.getBankMoney());
         if(player == null) {
@@ -151,7 +173,9 @@ public class AccountDAO {
         }
         preparedStatement.setDouble(18, account.getBagId());
         preparedStatement.setInt(19, account.getCompagnyId());
-        preparedStatement.setDouble(20, account.getId());
+        preparedStatement.setInt(20, account.getIsInService());
+        preparedStatement.setString(21, account.getOriginalStyle());
+        preparedStatement.setDouble(22, account.getId());
         preparedStatement.execute();
     }
 }

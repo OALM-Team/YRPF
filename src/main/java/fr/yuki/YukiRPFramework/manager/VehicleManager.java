@@ -109,6 +109,7 @@ public class VehicleManager {
             // Create the key for the player
             createKeyForVehicle(vehicle, player);
             player.enterVehicle(vehicle);
+            vehicle.setHeading(heading);
 
             return new CreateVehicleResult(vehicle, vehicleGarage);
         } catch (Exception ex) {

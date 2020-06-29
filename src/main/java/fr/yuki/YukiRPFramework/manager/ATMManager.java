@@ -87,4 +87,11 @@ public class ATMManager {
         Inventory inventory = InventoryManager.getMainInventory(player);;
         player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new SetBankCashAmount(account.getBankMoney(), inventory.getCashAmount())));
     }
+
+    public static void removeCashFromBank(Player player, int amount) {
+        Account account = WorldManager.getPlayerAccount(player);
+        if(amount > account.getBankMoney()) return;
+        account.setBankMoney(account.getBankMoney() - amount);
+        WorldManager.savePlayer(player);
+    }
 }

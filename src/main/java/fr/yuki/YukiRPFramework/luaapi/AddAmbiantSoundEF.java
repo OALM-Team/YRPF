@@ -1,4 +1,4 @@
-package fr.yuki.YukiRPFramework.LuaAPI;
+package fr.yuki.YukiRPFramework.luaapi;
 
 import fr.yuki.YukiRPFramework.manager.SoundManager;
 import net.onfirenetwork.onsetjava.Onset;

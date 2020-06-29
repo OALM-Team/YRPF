@@ -14,6 +14,7 @@ import fr.yuki.YukiRPFramework.job.DeliveryPointConfig;
 import fr.yuki.YukiRPFramework.job.Job;
 import fr.yuki.YukiRPFramework.job.ObjectPlacementInstance;
 import fr.yuki.YukiRPFramework.job.placementObject.GenericPlacementInstance;
+import fr.yuki.YukiRPFramework.modding.Line3D;
 import fr.yuki.YukiRPFramework.model.*;
 import fr.yuki.YukiRPFramework.net.payload.AddSellerItemPayload;
 import fr.yuki.YukiRPFramework.net.payload.AddToastPayload;
@@ -21,6 +22,7 @@ import fr.yuki.YukiRPFramework.net.payload.BuySellItemRequestPayload;
 import fr.yuki.YukiRPFramework.net.payload.SetWindowStatePayload;
 import fr.yuki.YukiRPFramework.ui.UIState;
 import fr.yuki.YukiRPFramework.utils.ServerConfig;
+import fr.yuki.YukiRPFramework.world.RestrictedZone;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Location;
 import net.onfirenetwork.onsetjava.data.Vector;
@@ -40,6 +42,7 @@ public class WorldManager {
     private static ArrayList<VehicleSeller> vehicleSellers;
     private static ArrayList<GroundItem> groundItems;
     private static ArrayList<Seller> sellers;
+    private static ArrayList<RestrictedZone> restrictedZones;
 
     /**
      * Init the world manager
@@ -48,6 +51,7 @@ public class WorldManager {
     public static void init() throws SQLException, IOException {
         accounts = new HashMap<>();
         groundItems = new ArrayList<>();
+        restrictedZones = new ArrayList<>();
 
         // Load atms
         atms = ATMDAO.loadATMs();
@@ -68,6 +72,11 @@ public class WorldManager {
         sellers = SellerDAO.loadSellers();
         Onset.print("Loaded " + sellers.size() + " seller(s) from the database");
         spawnSellers();
+
+        // Load restricted zones
+        //TEST: Add temp zone
+        //restrictedZones.add(new RestrictedZone(new Line3D(175496, 195661, 1304, 167570, 189466, 1305, 6),
+        //        "POLICE"));
 
     }
 
@@ -198,8 +207,14 @@ public class WorldManager {
             if(VehicleManager.handleVehicleChestStorageRequest(player)) return;
         }
         if(GarageManager.handleGarageInteract(player)) return;
-        if(player.getVehicle() == null)
+        if(player.getVehicle() == null){
             if(JobManager.requestVehicleRental(player)) return;
+        } else {
+            if(JobManager.getNearbyVehicleRental(player) != null) {
+                JobManager.destroyRentalVehiclesForPlayer(player);
+                return;
+            }
+        }
         if(player.getVehicle() == null)
             if(JobManager.handleSellJobNpcInventoryItem(player)) return;
         if(player.getVehicle() == null) if(JobManager.handleJobOutfitRequest(player)) return;
@@ -559,5 +574,9 @@ public class WorldManager {
             }
         }
         return search;
+    }
+
+    public static ArrayList<RestrictedZone> getRestrictedZones() {
+        return restrictedZones;
     }
 }

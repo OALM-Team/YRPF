@@ -20,6 +20,7 @@ public class ServerConfig {
     private String tebexSecretKey;
     private int timePerHour;
     private int startHour;
+    private String welcomeMessage;
 
     public double getDeathRespawnX() {
         return deathRespawnX;
@@ -171,5 +172,13 @@ public class ServerConfig {
 
     public void setStartHour(int startHour) {
         this.startHour = startHour;
+    }
+
+    public String getWelcomeMessage() {
+        return welcomeMessage;
+    }
+
+    public void setWelcomeMessage(String welcomeMessage) {
+        this.welcomeMessage = welcomeMessage;
     }
 }

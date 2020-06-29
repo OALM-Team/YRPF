@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import fr.yuki.YukiRPFramework.character.CharacterState;
 import fr.yuki.YukiRPFramework.character.CharacterStyle;
 import fr.yuki.YukiRPFramework.dao.AccountDAO;
+import fr.yuki.YukiRPFramework.enums.ItemTemplateEnum;
 import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
 import fr.yuki.YukiRPFramework.inventory.Inventory;
 import fr.yuki.YukiRPFramework.inventory.InventoryItem;
@@ -118,10 +119,13 @@ public class CharacterManager {
 
             case "name":
                 account.setCharacterName(payload.getValue());
-                Onset.broadcast("<span color=\"#ffee00\">Bienvenue " + account.getCharacterName() + " sur la Preview OALM</>");
+                String msg = WorldManager.getServerConfig().getWelcomeMessage();
+                msg = msg.replace("%name%", account.getCharacterName());
+                Onset.broadcast("<span color=\"#ffee00\">" + msg + "</>");
                 break;
         }
         account.setCharacterStyle(characterStyle);
+        account.setOriginalStyle(new Gson().toJson(characterStyle));
         WorldManager.savePlayer(player);
     }
 
@@ -156,6 +160,11 @@ public class CharacterManager {
         characterState.setDead(true);
         setCharacterFreeze(player, true);
 
+        if(characterState.getCurrentBag() != null) {
+            characterState.unattachBag(player);
+            return;
+        }
+
         // Update account
         Account account = WorldManager.getPlayerAccount(player);
         account.setIsDead(1);
@@ -170,11 +179,13 @@ public class CharacterManager {
 
         Inventory inventory = InventoryManager.getMainInventory(player);
         for(InventoryItem inventoryItem : inventory.getInventoryItems().stream().collect(Collectors.toList())) {
+            if(inventoryItem.getTemplate().getId() == Integer.parseInt(ItemTemplateEnum.VKEY.id)) continue;
             RequestThrowItemPayload throwItemPayload = new RequestThrowItemPayload();
             throwItemPayload.setId(inventoryItem.getId());
             throwItemPayload.setQuantity(inventoryItem.getAmount());
             InventoryManager.handleThrowItem(player, throwItemPayload);
         }
+        WeaponManager.clearWeapons(player);
     }
 
     public static void onPlayerSpawn(Player player) {

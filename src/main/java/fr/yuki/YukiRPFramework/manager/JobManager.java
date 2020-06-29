@@ -176,25 +176,35 @@ public class JobManager {
             }
         }
 
-        // Apply the outfit
-        CharacterStyle characterStyle = account.decodeCharacterStyle();
-        for(JobOutfitItem jobOutfitItem : jobOutfit.decodeOutfit()) {
-            switch (jobOutfitItem.getType().toLowerCase()) {
-                case "top":
-                    characterStyle.setTop(jobOutfitItem.getValue());
-                    break;
+        if(account.getIsInService() == 1) {
+            CharacterStyle characterStyle = account.decodeOriginalCharacterStyle();
+            account.setCharacterStyle(characterStyle);
+            characterStyle.attachStyleToPlayer(player);
+            account.setIsInService(0);
+        } else {
+            // Apply the outfit
+            CharacterStyle characterStyle = account.decodeCharacterStyle();
+            for(JobOutfitItem jobOutfitItem : jobOutfit.decodeOutfit()) {
+                switch (jobOutfitItem.getType().toLowerCase()) {
+                    case "top":
+                        characterStyle.setTop(jobOutfitItem.getValue());
+                        break;
 
-                case "pant":
-                    characterStyle.setPant(jobOutfitItem.getValue());
-                    break;
+                    case "pant":
+                        characterStyle.setPant(jobOutfitItem.getValue());
+                        break;
 
-                case "shoes":
-                    characterStyle.setShoes(jobOutfitItem.getValue());
-                    break;
+                    case "shoes":
+                        characterStyle.setShoes(jobOutfitItem.getValue());
+                        break;
+                }
             }
+            account.setCharacterStyle(characterStyle);
+            characterStyle.attachStyleToPlayer(player);
+            account.setIsInService(1);
         }
-        account.setCharacterStyle(characterStyle);
-        characterStyle.attachStyleToPlayer(player);
+        SoundManager.playSound3D("sounds/zip.mp3", player.getLocation(), 500, 0.2);
+        WorldManager.savePlayer(player);
         UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, I18n.t(account.getLang(), "toast.outfit.success_change"));
 
         return true;
@@ -390,7 +400,11 @@ public class JobManager {
         Account account = WorldManager.getPlayerAccount(player);
         for(VehicleGarage vehicleGarage : GarageManager.getVehicleGarages().stream()
                 .filter(x -> x.isRental() && x.getOwner() == account.getId()).collect(Collectors.toList())) {
+            if(vehicleGarage.getVehicle() != null) {
+                VehicleManager.clearKeysForVehicle(vehicleGarage.getVehicle(), player);
+            }
             vehicleGarage.destroy();
+            GarageManager.getVehicleGarages().remove(vehicleGarage);
         }
     }
 

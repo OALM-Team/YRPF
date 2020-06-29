@@ -10,6 +10,7 @@ import fr.yuki.YukiRPFramework.model.Account;
 import fr.yuki.YukiRPFramework.model.Bag;
 import fr.yuki.YukiRPFramework.model.Mask;
 import fr.yuki.YukiRPFramework.phone.PhoneCall;
+import fr.yuki.YukiRPFramework.ui.GenericMenu;
 import fr.yuki.YukiRPFramework.ui.UIState;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Vector;
@@ -34,7 +35,9 @@ public class CharacterState {
     private Bag currentBag = null;
     private WorldObject bagWorldObject = null;
     private PhoneCall currentPhoneCall = null;
+    private int currentCompagnyInvited = -1;
     private CharacterToolAnimation currentPhoneAttached = null;
+    private GenericMenu currentGenericMenu = null;
 
     public CharacterState() {
         this.uiState = new UIState();
@@ -202,5 +205,21 @@ public class CharacterState {
 
     public void setCurrentPhoneAttached(CharacterToolAnimation currentPhoneAttached) {
         this.currentPhoneAttached = currentPhoneAttached;
+    }
+
+    public int getCurrentCompagnyInvited() {
+        return currentCompagnyInvited;
+    }
+
+    public void setCurrentCompagnyInvited(int currentCompagnyInvited) {
+        this.currentCompagnyInvited = currentCompagnyInvited;
+    }
+
+    public GenericMenu getCurrentGenericMenu() {
+        return currentGenericMenu;
+    }
+
+    public void setCurrentGenericMenu(GenericMenu currentGenericMenu) {
+        this.currentGenericMenu = currentGenericMenu;
     }
 }

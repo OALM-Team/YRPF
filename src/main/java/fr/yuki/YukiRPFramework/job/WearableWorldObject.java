@@ -123,7 +123,7 @@ public class WearableWorldObject {
                     ArrayList<CharacterJobLevel> characterJobLevels = account.decodeCharacterJob();
                     CharacterJobLevel characterJobLevel = characterJobLevels.stream().filter(x -> x.getJobId().equals(JobEnum.DELIVERY.type)).findFirst().orElse(null);
 
-                    int rewardPerDistance = (int)Math.floor((originPosition.distance(player.getLocation()) / 1000) * characterJobLevel.getJobLevel().getLevel());
+                    int rewardPerDistance = (int)Math.floor(((originPosition.distance(player.getLocation()) / 1000) / 1.8));
                     InventoryManager.addItemToPlayer(player, ItemTemplateEnum.CASH.id, rewardPerDistance);
                     SoundManager.playSound3D("sounds/cash_register.mp3", player.getLocation(), 200, 1);
                     delete = true;

@@ -34,6 +34,8 @@ public class Account {
     private String weapons;
     private int bagId;
     private int compagnyId;
+    private int isInService;
+    private String originalStyle;
 
     public int getId() {
         return id;
@@ -164,6 +166,11 @@ public class Account {
         return new Gson().fromJson(this.characterStyle, CharacterStyle.class);
     }
 
+    public CharacterStyle decodeOriginalCharacterStyle() {
+        if(this.originalStyle.equals("")) return new CharacterStyle();
+        return new Gson().fromJson(this.originalStyle, CharacterStyle.class);
+    }
+
     public void setJobLevels(ArrayList<CharacterJobLevel> jobLevels) {
         this.jobLevels = new Gson().toJson(jobLevels);
     }
@@ -243,5 +250,21 @@ public class Account {
 
     public void setCompagnyId(int compagnyId) {
         this.compagnyId = compagnyId;
+    }
+
+    public int getIsInService() {
+        return isInService;
+    }
+
+    public void setIsInService(int isInService) {
+        this.isInService = isInService;
+    }
+
+    public String getOriginalStyle() {
+        return originalStyle;
+    }
+
+    public void setOriginalStyle(String originalStyle) {
+        this.originalStyle = originalStyle;
     }
 }

@@ -107,10 +107,6 @@ public class GarageManager {
         vehicleGarage.setGarageId(garage.getId());
         vehicleGarage.setGarageLastId(garage.getId());
         vehicleGarage.computeDamages(vehicle);
-        Onset.print(vehicleGarage.getDamage());
-        Onset.print(vehicleGarage.getHealth());
-        Onset.print(vehicleGarage.getUuid());
-        Onset.print(vehicleGarage.getVehicleGarageId());
         VehicleManager.clearKeysForVehicle(vehicle, player);
         vehicleGarage.save();
 
@@ -157,13 +153,13 @@ public class GarageManager {
             }
         }
 
+        UIStateManager.handleUIToogle(player, "garage");
         vehicleGarage.setGarageId(-1);
         vehicleGarage.setGarageLastId(garage.getId());
         VehicleManager.CreateVehicleResult createVehicleResult = VehicleManager.createVehicle(vehicleGarage.getModelId(),
                 new Vector(garage.getX(), garage.getY(), garage.getZ()), player.getLocationAndHeading().getHeading(),
                 player, vehicleGarage, false);
         vehicleGarage.applyDamages(createVehicleResult.getVehicle());
-        UIStateManager.handleUIToogle(player, "garage");
         vehicleGarage.save();
     }
 

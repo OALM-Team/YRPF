@@ -23,8 +23,8 @@ public class FisherJob extends Job {
 
 
     @Override
-    public JobEnum getJobType() {
-        return JobEnum.FISHER;
+    public String getJobType() {
+        return JobEnum.FISHER.type;
     }
 
     @Override

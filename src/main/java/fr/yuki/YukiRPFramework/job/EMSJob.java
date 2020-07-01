@@ -16,8 +16,8 @@ public class EMSJob extends Job {
     }
 
     @Override
-    public JobEnum getJobType() {
-        return JobEnum.EMS;
+    public String getJobType() {
+        return JobEnum.EMS.type;
     }
 
     @Override

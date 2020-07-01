@@ -32,7 +32,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class JobManager {
-    private static LinkedHashMap<JobEnum, Job> jobs;
+    private static LinkedHashMap<String, Job> jobs;
     private static ArrayList<WearableWorldObject> wearableWorldObjects;
     private static ArrayList<JobNPC> jobNPCS;
     private static ArrayList<JobTool> jobTools;
@@ -61,17 +61,37 @@ public class JobManager {
 
         wearableWorldObjects = new ArrayList<>();
         jobs = new LinkedHashMap<>();
-        jobs.put(JobEnum.LUMBERJACK, new LumberjackJob());
-        jobs.put(JobEnum.GARBAGE, new GarbageJob());
-        jobs.put(JobEnum.DELIVERY, new DeliveryJob());
-        jobs.put(JobEnum.MINER, new MinerJob());
-        jobs.put(JobEnum.FISHER, new FisherJob());
-        jobs.put(JobEnum.POLICE, new PoliceJob());
-        jobs.put(JobEnum.WEED, new WeedJob());
-        jobs.put(JobEnum.EMS, new EMSJob());
+        jobs.put(JobEnum.LUMBERJACK.type, new LumberjackJob());
+        jobs.put(JobEnum.GARBAGE.type, new GarbageJob());
+        jobs.put(JobEnum.DELIVERY.type, new DeliveryJob());
+        jobs.put(JobEnum.MINER.type, new MinerJob());
+        jobs.put(JobEnum.FISHER.type, new FisherJob());
+        jobs.put(JobEnum.POLICE.type, new PoliceJob());
+        jobs.put(JobEnum.WEED.type, new WeedJob());
+        jobs.put(JobEnum.EMS.type, new EMSJob());
 
         spawnJobOutfitsPoint();
         spawnVehicleRentalSpawns();
+        initPaycheck();
+    }
+
+    public static void initPaycheck() {
+        int paycheckAmount = 1000;
+        Onset.timer(60000 * 30, () -> {
+            for(Player player : Onset.getPlayers()) {
+                try {
+                    Account account = WorldManager.getPlayerAccount(player);
+                    AccountJobWhitelist accountJobWhitelist = AccountManager.getAccountJobWhitelists().stream()
+                            .filter(x -> x.getAccountId() == account.getId())
+                            .findFirst().orElse(null);
+                    if(accountJobWhitelist != null){
+                        UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, "Salaire +" + paycheckAmount + "$ !");
+                        //InventoryManager.addItemToPlayer(player, ItemTemplateEnum.CASH.id, paycheckAmount);
+                        account.setBankMoney(account.getBankMoney() + paycheckAmount);
+                    }
+                } catch (Exception ex) {}
+            }
+        });
     }
 
     private static void loadDeliveryPoints() throws IOException {
@@ -106,10 +126,10 @@ public class JobManager {
     public static void initCharacterJobs(Player player) {
         Account account = WorldManager.getPlayerAccount(player);
         ArrayList<CharacterJobLevel> characterJobLevels = account.decodeCharacterJob();
-        for(Map.Entry<JobEnum, Job> job : jobs.entrySet()) {
-            if(characterJobLevels.stream().filter(x -> x.getJobId().equals(job.getKey().type)).findFirst().orElse(null) == null) {
+        for(Map.Entry<String, Job> job : jobs.entrySet()) {
+            if(characterJobLevels.stream().filter(x -> x.getJobId().equals(job.getKey())).findFirst().orElse(null) == null) {
                 CharacterJobLevel characterJobLevel = new CharacterJobLevel();
-                characterJobLevel.setJobId(job.getKey().type);
+                characterJobLevel.setJobId(job.getKey());
                 characterJobLevel.setExp(0);
                 characterJobLevels.add(characterJobLevel);
             }
@@ -150,13 +170,13 @@ public class JobManager {
         JobOutfit jobOutfit = getNearbyJobOutfit(player);
         if(jobOutfit == null) return false;
         Account account = WorldManager.getPlayerAccount(player);
-        Job job = jobs.values().stream().filter(x -> x.getJobType().type.equals(jobOutfit.getJobId())).findFirst().orElse(null);
+        Job job = jobs.values().stream().filter(x -> x.getJobType().equals(jobOutfit.getJobId())).findFirst().orElse(null);
         if(job == null) return false;
 
         // Check level and whitelist level
         if(job.isWhitelisted()) {
             AccountJobWhitelist accountJobWhitelist = AccountManager.getAccountJobWhitelists().stream()
-                    .filter(x -> x.getAccountId() == account.getId() && x.getJobId().equals(job.getJobType().type))
+                    .filter(x -> x.getAccountId() == account.getId() && x.getJobId().equals(job.getJobType()))
                     .findFirst().orElse(null);
             if(accountJobWhitelist == null) {
                 UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.outfit.level_required"));
@@ -221,7 +241,7 @@ public class JobManager {
         if(!state.canInteract()) return false;
 
         Account account = WorldManager.getPlayerAccount(player);
-        for(Map.Entry<JobEnum, Job> job : jobs.entrySet()) {
+        for(Map.Entry<String, Job> job : jobs.entrySet()) {
             for(WorldHarvestObject worldHarvestObject : job.getValue().getWorldHarvestObjects()) {
                 if(worldHarvestObject.isNear(player)) {
                     if(CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject() != null) {
@@ -237,12 +257,12 @@ public class JobManager {
         return false;
     }
 
-    public static void addExp(Player player, JobEnum job, int amount) {
+    public static void addExp(Player player, String job, int amount) {
         if(amount <= 0) return;
         amount = amount * WorldManager.getServerConfig().getXpRate();
         Account account = WorldManager.getPlayerAccount(player);
         ArrayList<CharacterJobLevel> characterJobLevels = account.decodeCharacterJob();
-        CharacterJobLevel characterJobLevel = characterJobLevels.stream().filter(x -> x.getJobId().equals(job.type)).findFirst().orElse(null);
+        CharacterJobLevel characterJobLevel = characterJobLevels.stream().filter(x -> x.getJobId().equals(job)).findFirst().orElse(null);
         if(characterJobLevel == null) return;
 
         JobLevel previousJobLevel = characterJobLevel.getJobLevel();
@@ -360,13 +380,13 @@ public class JobManager {
             }
         }
 
-        Job job = jobs.values().stream().filter(x -> x.getJobType().type.equals(nearbyJobVehicleRental.getJobId())).findFirst().orElse(null);
+        Job job = jobs.values().stream().filter(x -> x.getJobType().equals(nearbyJobVehicleRental.getJobId())).findFirst().orElse(null);
         if(job == null) return false;
 
         // Check level and whitelist level
         if(job.isWhitelisted()) {
             AccountJobWhitelist accountJobWhitelist = AccountManager.getAccountJobWhitelists().stream()
-                    .filter(x -> x.getAccountId() == account.getId() && x.getJobId().equals(job.getJobType().type))
+                    .filter(x -> x.getAccountId() == account.getId() && x.getJobId().equals(job.getJobType()))
                     .findFirst().orElse(null);
             if(accountJobWhitelist == null) {
                 UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.job.not_whitelisted"));
@@ -460,7 +480,7 @@ public class JobManager {
         return null;
     }
 
-    public static LinkedHashMap<JobEnum, Job> getJobs() {
+    public static LinkedHashMap<String, Job> getJobs() {
         return jobs;
     }
 

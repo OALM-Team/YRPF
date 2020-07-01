@@ -36,6 +36,8 @@ public class Account {
     private int compagnyId;
     private int isInService;
     private String originalStyle;
+    private double health;
+    private int commandLevel;
 
     public int getId() {
         return id;
@@ -266,5 +268,21 @@ public class Account {
 
     public void setOriginalStyle(String originalStyle) {
         this.originalStyle = originalStyle;
+    }
+
+    public double getHealth() {
+        return health;
+    }
+
+    public void setHealth(double health) {
+        this.health = health;
+    }
+
+    public int getCommandLevel() {
+        return commandLevel;
+    }
+
+    public void setCommandLevel(int commandLevel) {
+        this.commandLevel = commandLevel;
     }
 }

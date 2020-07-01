@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public abstract class Job {
-    public abstract JobEnum getJobType();
+    public abstract String getJobType();
     public abstract int getRefillInterval();
     public abstract boolean isWhitelisted();
 
@@ -42,7 +42,7 @@ public abstract class Job {
      * Spawn npcs for this job
      */
     private void spawnNpcs() {
-        for(JobNPC jobNPC : JobManager.getJobNPCS().stream().filter(x -> x.getJobId().equals(this.getJobType().type)).collect(Collectors.toList())) {
+        for(JobNPC jobNPC : JobManager.getJobNPCS().stream().filter(x -> x.getJobId().equals(this.getJobType())).collect(Collectors.toList())) {
             NPC npc = Onset.getServer().createNPC(new Vector(jobNPC.getX(), jobNPC.getY(), jobNPC.getZ()), jobNPC.getH());
             Onset.getServer().createText3D(jobNPC.getName() + " [Utiliser]", 20, jobNPC.getX(),
                     jobNPC.getY(), jobNPC.getZ() + 150, 0 , 0 ,0);
@@ -58,7 +58,7 @@ public abstract class Job {
      */
     private void spawnTools() {
         this.jobTools = new ArrayList<>(JobManager.getJobTools().stream()
-                .filter(x -> x.getJobType().equals(this.getJobType().type)).collect(Collectors.toList()));
+                .filter(x -> x.getJobType().equals(this.getJobType())).collect(Collectors.toList()));
         for(JobTool tool : this.jobTools) {
             tool.spawn(this);
         }
@@ -71,9 +71,9 @@ public abstract class Job {
     protected boolean setup() {
         try {
             new File("yrpf").mkdir();
-            if(new File("yrpf/" + this.getJobType().name() + ".json").exists()) return true;
-            new File("yrpf/" + this.getJobType().name() + ".json").createNewFile();
-            FileWriter fileWriter = new FileWriter("yrpf/" + this.getJobType().name() + ".json");
+            if(new File("yrpf/" + this.getJobType() + ".json").exists()) return true;
+            new File("yrpf/" + this.getJobType() + ".json").createNewFile();
+            FileWriter fileWriter = new FileWriter("yrpf/" + this.getJobType() + ".json");
 
             // Create job config file first
             this.jobConfig = new JobConfig();
@@ -99,9 +99,9 @@ public abstract class Job {
     protected void load() {
         try {
             new File("yrpf").mkdir();
-            this.jobConfig = new Gson().fromJson(new FileReader("yrpf/" + this.getJobType().name() + ".json"), JobConfig.class);
+            this.jobConfig = new Gson().fromJson(new FileReader("yrpf/" + this.getJobType() + ".json"), JobConfig.class);
             for(JobSpawn jobSpawn : this.jobConfig.getResources()) {
-                Onset.print("Loaded " + jobSpawn.getName() + " from the job file " + this.getJobType().type + " with " + jobSpawn.getSpawns().size() + " spawn point(s)");
+                Onset.print("Loaded " + jobSpawn.getName() + " from the job file " + this.getJobType() + " with " + jobSpawn.getSpawns().size() + " spawn point(s)");
             }
 
             // Check missing ressources with new update
@@ -125,7 +125,7 @@ public abstract class Job {
      */
     public void saveConfig() {
         try {
-            FileWriter fileWriter = new FileWriter("yrpf/" + this.getJobType().name() + ".json");
+            FileWriter fileWriter = new FileWriter("yrpf/" + this.getJobType() + ".json");
             fileWriter.write(new Gson().toJson(this.jobConfig));
             fileWriter.close();
         } catch (Exception e) {
@@ -137,7 +137,7 @@ public abstract class Job {
      * Refill all resources for this job
      */
     public void refillHarvestResources() {
-        Onset.print("Refill resources for job=" + this.getJobType().type);
+        Onset.print("Refill resources for job=" + this.getJobType());
         for(JobSpawn jobSpawn : this.jobConfig.getResources()) {
             HarvestableObject harvestableObject = this.harvestableObjectsTemplate.stream()
                     .filter(x -> x.getName().equals(jobSpawn.getName())).findFirst().orElse(null);

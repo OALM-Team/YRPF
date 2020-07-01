@@ -21,8 +21,8 @@ public class MinerJob extends Job {
 
 
     @Override
-    public JobEnum getJobType() {
-        return JobEnum.MINER;
+    public String getJobType() {
+        return JobEnum.MINER.type;
     }
 
     @Override

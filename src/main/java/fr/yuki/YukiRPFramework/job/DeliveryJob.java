@@ -20,8 +20,8 @@ public class DeliveryJob extends Job {
     }
 
     @Override
-    public JobEnum getJobType() {
-        return JobEnum.DELIVERY;
+    public String getJobType() {
+        return JobEnum.DELIVERY.type;
     }
 
     @Override

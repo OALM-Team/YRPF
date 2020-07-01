@@ -1,14 +1,15 @@
 package fr.yuki.YukiRPFramework.job;
 
-import fr.yuki.YukiRPFramework.enums.JobEnum;
+import fr.yuki.YukiRPFramework.job.harvest.Garbage;
 
 import java.util.ArrayList;
 
-public class PoliceJob extends Job {
-    public PoliceJob() {
-        super();
-        this.harvestableObjectsTemplate = new ArrayList<>();
+public class CustomJob extends Job {
+    private String jobName;
 
+    public CustomJob(String jobName) {
+        this.jobName = jobName;
+        this.harvestableObjectsTemplate = new ArrayList<>();
         if(this.setup()) {
             this.load();
         }
@@ -16,7 +17,7 @@ public class PoliceJob extends Job {
 
     @Override
     public String getJobType() {
-        return JobEnum.POLICE.type;
+        return this.jobName;
     }
 
     @Override
@@ -26,6 +27,6 @@ public class PoliceJob extends Job {
 
     @Override
     public boolean isWhitelisted() {
-        return true;
+        return false;
     }
 }

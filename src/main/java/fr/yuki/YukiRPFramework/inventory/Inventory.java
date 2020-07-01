@@ -152,7 +152,7 @@ public class Inventory {
     public float getMaxWeight() {
         Player player = WorldManager.findPlayerByAccountId(this.getCharacterId());
         CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
-        float baseMaxWeight = 40;
+        float baseMaxWeight = 55;
         if(state.getCurrentBag() != null) {
             Bag bag = ItemManager.bags.stream().filter(x -> x.getModelId() == state.getCurrentBag().getModelId())
                     .findFirst().orElse(null);

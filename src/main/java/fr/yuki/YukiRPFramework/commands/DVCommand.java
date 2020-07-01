@@ -19,7 +19,10 @@ public class DVCommand implements CommandExecutor {
                 .filter(x -> x.getUuid().equals(vehicle.getPropertyString("uuid")))
                 .findFirst().orElse(null);
         if(vehicleGarage == null) return true;
-        if(!vehicleGarage.isRental()) vehicleGarage.setGarageId(1);
+        if(!vehicleGarage.isRental()) {
+            vehicleGarage.setGarageId(vehicleGarage.getGarageLastId());
+            vehicleGarage.save();
+        }
         if(vehicle.getDriver() != null) vehicle.getDriver().exitVehicle();
 
         Onset.delay(1000, () -> {

@@ -30,8 +30,8 @@ public class WeedJob extends Job {
     }
 
     @Override
-    public JobEnum getJobType() {
-        return JobEnum.WEED;
+    public String getJobType() {
+        return JobEnum.WEED.type;
     }
 
     @Override

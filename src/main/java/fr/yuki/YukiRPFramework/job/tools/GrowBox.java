@@ -172,7 +172,7 @@ public class GrowBox implements JobToolHandler {
         inventory.removeItem(seedItem, 1);
         player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new AddGrowboxMenuItemPayload(pot.getUuid(),
                 554, pot.getWater(), pot.getState(), pot.isSeed())));
-        JobManager.addExp(player, JobEnum.WEED, 15);
+        JobManager.addExp(player, JobEnum.WEED.type, 15);
     }
 
     public void harvestPot(Player player, String potId) {

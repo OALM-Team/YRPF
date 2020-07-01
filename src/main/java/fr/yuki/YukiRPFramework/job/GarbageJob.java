@@ -20,8 +20,8 @@ public class GarbageJob extends Job {
     }
 
     @Override
-    public JobEnum getJobType() {
-        return JobEnum.GARBAGE;
+    public String getJobType() {
+        return JobEnum.GARBAGE.type;
     }
 
     @Override

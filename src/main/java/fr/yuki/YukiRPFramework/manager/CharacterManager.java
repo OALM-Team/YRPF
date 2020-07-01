@@ -6,6 +6,7 @@ import fr.yuki.YukiRPFramework.character.CharacterStyle;
 import fr.yuki.YukiRPFramework.dao.AccountDAO;
 import fr.yuki.YukiRPFramework.enums.ItemTemplateEnum;
 import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
+import fr.yuki.YukiRPFramework.i18n.I18n;
 import fr.yuki.YukiRPFramework.inventory.Inventory;
 import fr.yuki.YukiRPFramework.inventory.InventoryItem;
 import fr.yuki.YukiRPFramework.model.Account;
@@ -13,6 +14,8 @@ import fr.yuki.YukiRPFramework.net.payload.AddToastPayload;
 import fr.yuki.YukiRPFramework.net.payload.RequestThrowItemPayload;
 import fr.yuki.YukiRPFramework.net.payload.SetFoodPayload;
 import fr.yuki.YukiRPFramework.net.payload.StyleSavePartPayload;
+import fr.yuki.YukiRPFramework.ui.GenericMenu;
+import fr.yuki.YukiRPFramework.ui.GenericMenuItem;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Location;
 import net.onfirenetwork.onsetjava.data.Vector;
@@ -243,7 +246,56 @@ public class CharacterManager {
         });
     }
 
+    public static void handleCharacterInteract(Player player) {
+        Player nearestPlayer = WorldManager.getNearestPlayer(player);
+        //nearestPlayer = player; // Temp test
+        if(nearestPlayer == null) return;
+        if(nearestPlayer.getLocation().distance(player.getLocation()) < 200) {
+            // Build generic menu
+            CharacterState characterState = CharacterManager.getCharacterStateByPlayer(player);
+            GenericMenu genericMenu = new GenericMenu(player);
+            genericMenu.getItems().add(new GenericMenuItem("Fouiller la personne", "window.CallEvent(\"RemoteCallInterface\"," +
+                    " \"Character:InspectCharacter\", \"" + nearestPlayer.getId() + "\");"));
+            genericMenu.addCloseItem();
+            genericMenu.show();
+            characterState.setCurrentGenericMenu(genericMenu);
+        }
+    }
+
     public static HashMap<String, CharacterState> getCharacterStates() {
         return characterStates;
+    }
+
+    public static void handleGenericMenuDismiss(Player player) {
+        CharacterState characterState = CharacterManager.getCharacterStateByPlayer(player);
+        if(characterState.getCurrentGenericMenu() != null) {
+            characterState.getCurrentGenericMenu().hide();
+            characterState.setCurrentGenericMenu(null);
+        }
+    }
+
+    public static void handleInspectCharacter(Player player, int inspectPlayerId) {
+        handleGenericMenuDismiss(player); // Close generic menu
+
+        Player target = Onset.getPlayer(inspectPlayerId);
+        if(target == null) return;
+        CharacterState targetState = CharacterManager.getCharacterStateByPlayer(target);
+        if(!targetState.isCuffed()) {
+            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "La personne n'est pas fouillable");
+            return;
+        }
+        Account account = WorldManager.getPlayerAccount(player);
+
+        // Display items
+        CharacterState characterState = CharacterManager.getCharacterStateByPlayer(player);
+        GenericMenu genericMenu = new GenericMenu(player);
+        Inventory inventory = InventoryManager.getMainInventory(target);
+        for(InventoryItem item : inventory.getInventoryItems()) {
+            String itemName = I18n.t(account.getLang(), "item.name." + item.getTemplateId());
+            genericMenu.getItems().add(new GenericMenuItem("x" + item.getAmount() + " " + itemName, ""));
+        }
+        genericMenu.addCloseItem();
+        genericMenu.show();
+        characterState.setCurrentGenericMenu(genericMenu);
     }
 }

@@ -88,6 +88,7 @@ public class YukiRPFrameworkPlugin {
             Onset.registerCommand("givehousekey", new GiveHouseKeyCommand());
             Onset.registerCommand("settime", new SetTimeCommand());
             Onset.registerCommand("getid", new GetIdCommand());
+            Onset.registerCommand("setcommandlevel", new SetCommandLevelCommand());
 
             // Register remote events
             Onset.registerRemoteEvent("GlobalUI:ToogleWindow");
@@ -140,6 +141,9 @@ public class YukiRPFrameworkPlugin {
             Onset.registerRemoteEvent("Compagny:AcceptInvitation");
             Onset.registerRemoteEvent("Compagny:DeclineInvitation");
             Onset.registerRemoteEvent("Compagny:KickEmployee");
+            Onset.registerRemoteEvent("Character:Interact");
+            Onset.registerRemoteEvent("Character:InspectCharacter");
+            Onset.registerRemoteEvent("GenericMenu:Dismiss");
         } catch (Exception ex) {
             ex.printStackTrace();
             Onset.print("Can't start the plugin because : " + ex.toString());
@@ -241,6 +245,8 @@ public class YukiRPFrameworkPlugin {
             // If the player is dead
             if(account.getIsDead() == 1) {
                 evt.getPlayer().setHealth(0);
+            } else {
+                evt.getPlayer().setHealth(account.getHealth());
             }
 
             // Set current time
@@ -497,6 +503,18 @@ public class YukiRPFrameworkPlugin {
 
                 case "Compagny:KickEmployee":
                     CompagnyManager.handleKickEmployee(evt.getPlayer(), (evt.getArgs()[0]).toString());
+                    break;
+
+                case "Character:Interact":
+                    CharacterManager.handleCharacterInteract(evt.getPlayer());
+                    break;
+
+                case "GenericMenu:Dismiss":
+                    CharacterManager.handleGenericMenuDismiss(evt.getPlayer());
+                    break;
+
+                case "Character:InspectCharacter":
+                    CharacterManager.handleInspectCharacter(evt.getPlayer(), Integer.parseInt((evt.getArgs()[0]).toString()));
                     break;
             }
         }

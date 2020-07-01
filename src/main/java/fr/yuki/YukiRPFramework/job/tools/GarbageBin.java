@@ -32,7 +32,7 @@ public class GarbageBin implements JobToolHandler {
 
     @Override
     public boolean onUnwear(Player player, WearableWorldObject wearableWorldObject) {
-        JobManager.addExp(player, JobEnum.GARBAGE, 20);
+        JobManager.addExp(player, JobEnum.GARBAGE.type, 20);
 
         InventoryManager.addItemToPlayer(player, ItemTemplateEnum.CASH.id, this.jobTool.getReward());
         SoundManager.playSound3D("sounds/cash_register.mp3", player.getLocation(), 200, 1);

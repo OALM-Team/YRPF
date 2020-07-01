@@ -127,7 +127,7 @@ public class WearableWorldObject {
                     InventoryManager.addItemToPlayer(player, ItemTemplateEnum.CASH.id, rewardPerDistance);
                     SoundManager.playSound3D("sounds/cash_register.mp3", player.getLocation(), 200, 1);
                     delete = true;
-                    JobManager.addExp(player, JobEnum.DELIVERY, 15);
+                    JobManager.addExp(player, JobEnum.DELIVERY.type, 15);
                     UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, I18n.t(account.getLang(), "toast.delivery.shipped",
                             String.valueOf(rewardPerDistance), String.valueOf(Math.floor(originPosition.distance(player.getLocation()) / 100))));
                 }

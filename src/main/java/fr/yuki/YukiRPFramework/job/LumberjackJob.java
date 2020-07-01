@@ -28,8 +28,8 @@ public class LumberjackJob extends Job {
     }
 
     @Override
-    public JobEnum getJobType() {
-        return JobEnum.LUMBERJACK;
+    public String getJobType() {
+        return JobEnum.LUMBERJACK.type;
     }
 
     @Override

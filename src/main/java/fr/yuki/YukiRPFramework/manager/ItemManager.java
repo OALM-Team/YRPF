@@ -159,7 +159,60 @@ public class ItemManager {
             case "28": // RepairKit
                 useRepairKit(player, inventoryItem);
                 break;
+
+            case "33": // Bandage
+                useBandage(player, inventoryItem);
+                break;
+                
+            case "34": // Jack
+                useJack(player, inventoryItem);
+                break;
         }
+    }
+
+    private static void useJack(Player player, InventoryItem inventoryItem) {
+        if(player.getVehicle() != null) return;
+        CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
+        if(!state.canInteract()) return;
+        Vehicle vehicle = VehicleManager.getNearestVehicle(player.getLocation());
+        if(vehicle == null) return;
+        if(vehicle.getLocation().distance(player.getLocation()) > 500) return;
+        Inventory inventory = InventoryManager.getMainInventory(player);
+        inventory.removeItem(inventoryItem, 1);
+
+        CharacterLoopAnimation characterLoopAnimation = new CharacterLoopAnimation(player, Animation.COMBINE,
+                5000, 2, "sounds/car_repair_1.mp3");
+        characterLoopAnimation.start();
+        CharacterManager.setCharacterFreeze(player, true);
+        vehicle.setEngineOn(false);
+        Onset.delay(15000, () -> {
+            CharacterManager.setCharacterFreeze(player, false);
+            vehicle.setRotation(new Vector(0 , vehicle.getRotation().getY(),0));
+        });
+    }
+
+    private static void useBandage(Player player, InventoryItem inventoryItem) {
+        CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
+        Account account = WorldManager.getPlayerAccount(player);
+        if(!state.canInteract()) {
+            return;
+        }
+        if(state.getWearableWorldObject() != null) { // Can't use the item because the player wear something already
+            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "action.vehicle.wearSomething"));
+            return;
+        }
+        if(player.isDead()) return;
+        if(player.getHealth() >= 100) return;
+
+        player.setAnimation(Animation.COMBINE);
+        if(player.getHealth() + 25 > 100) {
+            player.setHealth(100);
+        } else {
+            player.setHealth(player.getHealth() + 25);
+        }
+
+        Inventory inventory = InventoryManager.getMainInventory(player);
+        inventory.removeItem(inventoryItem, 1);
     }
 
     private static void useFood(Player player, InventoryItem inventoryItem) {

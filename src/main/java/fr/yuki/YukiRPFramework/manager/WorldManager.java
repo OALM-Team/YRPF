@@ -287,13 +287,13 @@ public class WorldManager {
         // Check job
         if(!seller.getJobRequired().equals("")) {
             Account account = WorldManager.getPlayerAccount(player);
-            Job job = JobManager.getJobs().values().stream().filter(x -> x.getJobType().type.equals(seller.getJobRequired())).findFirst().orElse(null);
+            Job job = JobManager.getJobs().values().stream().filter(x -> x.getJobType().equals(seller.getJobRequired())).findFirst().orElse(null);
             if(job == null) return;
 
             // Check level and whitelist level
             if(job.isWhitelisted()) {
                 AccountJobWhitelist accountJobWhitelist = AccountManager.getAccountJobWhitelists().stream()
-                        .filter(x -> x.getAccountId() == account.getId() && x.getJobId().equals(job.getJobType().type))
+                        .filter(x -> x.getAccountId() == account.getId() && x.getJobId().equals(job.getJobType()))
                         .findFirst().orElse(null);
                 if(accountJobWhitelist == null) {
                     UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.job.not_whitelisted"));

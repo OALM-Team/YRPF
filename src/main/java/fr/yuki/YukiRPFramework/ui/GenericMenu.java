@@ -27,6 +27,10 @@ public class GenericMenu {
         }
     }
 
+    public void addCloseItem() {
+        this.getItems().add(new GenericMenuItem("Fermer", "window.CallEvent(\"RemoteCallInterface\", \"GenericMenu:Dismiss\");"));
+    }
+
     public void hide() {
         if(UIStateManager.handleUIToogle(player, "genericMenu"))
             UIStateManager.handleUIToogle(player, "genericMenu");

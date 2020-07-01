@@ -56,6 +56,19 @@ public class GarageManager {
         return null;
     }
 
+    public static Garage getNearestFromPosGarage(Player player) {
+        Garage nearest = null;
+        double distance = 999999999;
+        for(Garage garage : WorldManager.getGarages()) {
+            double d = player.getLocation().distance(new Vector(garage.getX(), garage.getY(), garage.getZ()));
+            if(d < distance) {
+                nearest = garage;
+                distance = d;
+            }
+        }
+        return nearest;
+    }
+
     /**
      * Open the garage to the player
      * @param player The player
@@ -230,10 +243,12 @@ public class GarageManager {
         UIStateManager.handleUIToogle(player, "vseller");
 
         // Remove cash and spawn vehicle
+        Garage nearestGarage = getNearestFromPosGarage(player);
         inventory.removeItem(inventory.getItemByType(ItemTemplateEnum.CASH.id), sellListItem.getPrice());
         VehicleManager.CreateVehicleResult createVehicleResult = VehicleManager.createVehicle(sellListItem.getModelId(), spawnPoint, vehicleSeller.getH(),
                 player, null, false);
         createVehicleResult.getVehicleGarage().setColor(payload.getColor());
+        createVehicleResult.getVehicleGarage().setGarageLastId(nearestGarage.getId());
         createVehicleResult.getVehicleGarage().save();
         createVehicleResult.getVehicle().setColor(new Color(payload.getAWTColor().getRed(), payload.getAWTColor().getGreen(), payload.getAWTColor().getBlue()));
 

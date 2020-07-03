@@ -99,7 +99,7 @@ public class AccountDAO {
         account.setCompagnyId(-1);
         account.setOriginalStyle("");
         account.setIsInService(0);
-        account.setHealth(1000);
+        account.setHealth(100);
         account.setCommandLevel(0);
         account.setSaveX(serverConfig.getSpawnPointX());
         account.setSaveY(serverConfig.getSpawnPointY());

@@ -29,6 +29,7 @@ public class JobVehicleRentalDAO {
             jobVehicleRental.setSpawnX(resultSet.getDouble("spawn_x"));
             jobVehicleRental.setSpawnY(resultSet.getDouble("spawn_y"));
             jobVehicleRental.setSpawnZ(resultSet.getDouble("spawn_z"));
+            jobVehicleRental.setColor(resultSet.getString("color"));
             jobVehicleRentals.add(jobVehicleRental);
         }
         return jobVehicleRentals;

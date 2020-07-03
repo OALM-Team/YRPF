@@ -1,6 +1,8 @@
 package fr.yuki.YukiRPFramework.job;
 
+import fr.yuki.YukiRPFramework.character.CharacterJobLevel;
 import fr.yuki.YukiRPFramework.character.CharacterLoopAnimation;
+import fr.yuki.YukiRPFramework.enums.JobEnum;
 import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
 import fr.yuki.YukiRPFramework.i18n.I18n;
 import fr.yuki.YukiRPFramework.job.harvest.HarvestableObject;
@@ -11,6 +13,7 @@ import net.onfirenetwork.onsetjava.entity.Player;
 import net.onfirenetwork.onsetjava.entity.WorldObject;
 import net.onfirenetwork.onsetjava.enums.Animation;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 public class WorldHarvestObject {
@@ -61,6 +64,17 @@ public class WorldHarvestObject {
                     I18n.t(account.getLang(), "toast.job.already_used"));
             return;
         }
+
+        // Check resources level
+        ArrayList<CharacterJobLevel> characterJobLevels = account.decodeCharacterJob();
+        CharacterJobLevel characterJobLevel = characterJobLevels.stream().filter(x -> x.getJobId().equals(this.job.getJobType()))
+                .findFirst().orElse(null);
+        if(characterJobLevel == null) return;
+        if(characterJobLevel.getJobLevel().getLevel() < this.harvestableObject.getLevelRequired()) {
+            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.tool.no_level_required"));
+            return;
+        }
+
         Onset.print("Harvest " + this.harvestableObject.getName() + " with a duration of " + this.harvestableObject.getBaseHarvestTime() + "ms");
         this.setAvailable(false);
         CharacterManager.setCharacterFreeze(player, true);
@@ -98,6 +112,14 @@ public class WorldHarvestObject {
 
     public String getUuid() {
         return uuid;
+    }
+
+    public HarvestableObject getHarvestableObject() {
+        return harvestableObject;
+    }
+
+    public Job getJob() {
+        return job;
     }
 
     public JobSpawnPosition getJobSpawnPosition() {

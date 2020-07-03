@@ -130,6 +130,13 @@ public class UIStateManager {
                         ("genericMenu", uiState.isGenericMenu())));
                 break;
 
+            case "customOutfit":
+                uiState.setCustomOutfit(!uiState.isCustomOutfit());
+                r = uiState.isCustomOutfit();
+                player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new SetWindowStatePayload
+                        ("customOutfit", uiState.isCustomOutfit())));
+                break;
+
         }
         return r;
     }
@@ -160,6 +167,7 @@ public class UIStateManager {
 
         // Temp for beta
         Inventory inventory = InventoryManager.getMainInventory(player);
+        /**
         if(inventory.getItemByType(ItemTemplateEnum.LUMBERJACK_HATCHET_1.id) == null) {
             InventoryManager.addItemToPlayer(player, ItemTemplateEnum.LUMBERJACK_HATCHET_1.id, 1);
         }
@@ -168,7 +176,7 @@ public class UIStateManager {
         }
         if(inventory.getItemByType(ItemTemplateEnum.FISHING_ROD.id) == null) {
             InventoryManager.addItemToPlayer(player, ItemTemplateEnum.FISHING_ROD.id, 1);
-        }
+        }*/
 
         CharacterManager.getCharacterStateByPlayer(player).setHasUIReady(true);
 

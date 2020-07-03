@@ -188,7 +188,8 @@ public class YukiRPFrameworkPlugin {
                 evt.getPlayer().setProperty("accountId", account.getId(), true);
 
                 // Start money
-                InventoryManager.addItemToPlayer(evt.getPlayer(), ItemTemplateEnum.CASH.id, 15000);
+                InventoryManager.addItemToPlayer(evt.getPlayer(), ItemTemplateEnum.CASH.id, 500);
+                account.setBankMoney(3500);
             }
             else {
                 if(account.getIsBanned()==1) {
@@ -336,7 +337,7 @@ public class YukiRPFrameworkPlugin {
                     break;
 
                 case "Character:Style:CustomDone":
-                    CharacterManager.handleCharacterCustomDone(evt.getPlayer());
+                    CharacterManager.handleCharacterCustomDone(evt.getPlayer(), (evt.getArgs()[0]).toString());
                     break;
 
                 case "Global:UIReady":
@@ -597,7 +598,35 @@ public class YukiRPFrameworkPlugin {
         Onset.print("Player chat message="+evt.getMessage());
         Account account = WorldManager.getPlayerAccount(evt.getPlayer());
         if(account.getAdminLevel() > 0) {
-            Onset.broadcast("<span color=\"#ff0000\">[Admin] " + account.getCharacterName() + "(" + evt.getPlayer().getId() + ")</>: "
+            String color = "ff0000";
+            String name = "Staff";
+            switch (account.getCommandLevel()) {
+                case 1:
+                    color = "984fff";
+                    name = "Helpeur";
+                    break;
+
+                case 2:
+                    color = "0c42f2";
+                    name = "Modérateur";
+                    break;
+
+                case 3:
+                    color = "577eff";
+                    name = "Modérateur+";
+                    break;
+
+                case 4:
+                    color = "fc0097";
+                    name = "Administrateur";
+                    break;
+
+                case 5:
+                    color = "00ff2a";
+                    name = "Fondateur";
+                    break;
+            }
+            Onset.broadcast("<span color=\"#" + color + "\">[" + name + "] " + account.getCharacterName() + "(" + evt.getPlayer().getId() + ")</>: "
                     + evt.getMessage());
         } else {
             Onset.broadcast("<span color=\"#ffae00\">[Citoyen] " + account.getCharacterName() + "(" + evt.getPlayer().getId() + ")</>: "

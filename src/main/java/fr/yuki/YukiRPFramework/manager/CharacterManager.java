@@ -132,7 +132,7 @@ public class CharacterManager {
         WorldManager.savePlayer(player);
     }
 
-    public static void handleCharacterCustomDone(Player player) {
+    public static void handleCharacterCustomDone(Player player, String type) {
         Account account = WorldManager.getPlayerAccount(player);
         CharacterStyle characterStyle = account.decodeCharacterStyle();
         characterStyle.attachStyleToPlayer(player);
@@ -141,7 +141,11 @@ public class CharacterManager {
         player.setProperty("characterName", account.getCharacterName(), true);
         account.setCharacterCreationRequest(0);
         WorldManager.savePlayer(player);
-        UIStateManager.handleUIToogle(player, "customCharacter");
+        if(type.equals("character")) {
+            UIStateManager.handleUIToogle(player, "customCharacter");
+        } else {
+            UIStateManager.handleUIToogle(player, "customOutfit");
+        }
     }
 
     /**

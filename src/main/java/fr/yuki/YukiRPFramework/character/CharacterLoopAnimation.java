@@ -7,17 +7,34 @@ import net.onfirenetwork.onsetjava.enums.Animation;
 
 public class CharacterLoopAnimation {
     private Player player;
-    private Animation animation;
+    private String animation;
     private int loopInterval;
     private int loopAmount;
     private String loopSound;
     private boolean isActive = false;
     private CharacterToolAnimation characterToolAnimation;
 
+    public CharacterLoopAnimation(String animation, int loopInterval, int loopAmount,
+                                  String loopSound) {
+        this.animation = animation;
+        this.loopInterval = loopInterval;
+        this.loopAmount = loopAmount;
+        this.loopSound = loopSound;
+    }
+
+    public CharacterLoopAnimation(Player player, String animation, int loopInterval, int loopAmount,
+                                  String loopSound) {
+        this.player = player;
+        this.animation = animation.toString();
+        this.loopInterval = loopInterval;
+        this.loopAmount = loopAmount;
+        this.loopSound = loopSound;
+    }
+
     public CharacterLoopAnimation(Player player, Animation animation, int loopInterval, int loopAmount,
                                   String loopSound) {
         this.player = player;
-        this.animation = animation;
+        this.animation = animation.toString();
         this.loopInterval = loopInterval;
         this.loopAmount = loopAmount;
         this.loopSound = loopSound;
@@ -62,5 +79,61 @@ public class CharacterLoopAnimation {
             this.characterToolAnimation.unAttach();
         }
         this.player.setAnimation(Animation.STOP);
+    }
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    public void setPlayer(Player player) {
+        this.player = player;
+    }
+
+    public String getAnimation() {
+        return animation;
+    }
+
+    public void setAnimation(String animation) {
+        this.animation = animation;
+    }
+
+    public int getLoopInterval() {
+        return loopInterval;
+    }
+
+    public void setLoopInterval(int loopInterval) {
+        this.loopInterval = loopInterval;
+    }
+
+    public int getLoopAmount() {
+        return loopAmount;
+    }
+
+    public void setLoopAmount(int loopAmount) {
+        this.loopAmount = loopAmount;
+    }
+
+    public String getLoopSound() {
+        return loopSound;
+    }
+
+    public void setLoopSound(String loopSound) {
+        this.loopSound = loopSound;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
+    }
+
+    public CharacterToolAnimation getCharacterToolAnimation() {
+        return characterToolAnimation;
+    }
+
+    public void setCharacterToolAnimation(CharacterToolAnimation characterToolAnimation) {
+        this.characterToolAnimation = characterToolAnimation;
     }
 }

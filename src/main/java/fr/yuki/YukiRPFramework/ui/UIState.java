@@ -16,6 +16,7 @@ public class UIState {
     private boolean phone = false;
     private boolean houseBuy = false;
     private boolean genericMenu = false;
+    private boolean customOutfit = false;
 
     public boolean isInventory() {
         return inventory;
@@ -135,5 +136,13 @@ public class UIState {
 
     public void setGenericMenu(boolean genericMenu) {
         this.genericMenu = genericMenu;
+    }
+
+    public boolean isCustomOutfit() {
+        return customOutfit;
+    }
+
+    public void setCustomOutfit(boolean customOutfit) {
+        this.customOutfit = customOutfit;
     }
 }

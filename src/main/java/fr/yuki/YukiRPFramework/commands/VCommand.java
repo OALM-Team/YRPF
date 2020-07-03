@@ -10,6 +10,10 @@ public class VCommand implements CommandExecutor {
     @Override
     public boolean onCommand(Player player, String s, String[] args) {
         if(WorldManager.getPlayerAccount(player).getAdminLevel() == 0) return false;
+        if(WorldManager.getPlayerAccount(player).getCommandLevel() < 3) {
+            player.sendMessage("You don't have the level required for this command");
+            return true;
+        }
         int modelId = Integer.parseInt(args[0]);
         VehicleManager.createVehicle(modelId, player.getLocation(),
                 player.getLocationAndHeading().getHeading(), player, null, false);

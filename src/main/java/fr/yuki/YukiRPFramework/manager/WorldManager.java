@@ -43,6 +43,7 @@ public class WorldManager {
     private static ArrayList<GroundItem> groundItems;
     private static ArrayList<Seller> sellers;
     private static ArrayList<RestrictedZone> restrictedZones;
+    private static ArrayList<OutfitPoint> outfitPoints;
 
     /**
      * Init the world manager
@@ -73,11 +74,10 @@ public class WorldManager {
         Onset.print("Loaded " + sellers.size() + " seller(s) from the database");
         spawnSellers();
 
-        // Load restricted zones
-        //TEST: Add temp zone
-        //restrictedZones.add(new RestrictedZone(new Line3D(175496, 195661, 1304, 167570, 189466, 1305, 6),
-        //        "POLICE"));
-
+        // Load outfit points
+        outfitPoints = OutfitPointDAO.loadOutfitPoint();
+        Onset.print("Loaded " + outfitPoints.size() + " outfit point(s) from the database");
+        spawnOutfitPoints();
     }
 
     public static void initServerConfig() throws IOException {
@@ -90,6 +90,20 @@ public class WorldManager {
             FileWriter fileWriter = new FileWriter("yrpf/server_config.json");
             fileWriter.write(new Gson().toJson(serverConfig));
             fileWriter.close();
+        }
+    }
+
+    private static void spawnOutfitPoints() {
+        for(OutfitPoint outfitPoint : outfitPoints) {
+            try  {
+                Pickup pickup = Onset.getServer().createPickup(new Vector(outfitPoint.getX(), outfitPoint.getY(), outfitPoint.getZ()-100), 336);
+                pickup.setScale(new Vector(1,1,0.1d));
+                pickup.setProperty("color", "5314b8", true);
+                Onset.getServer().createText3D("Changer de style [" + I18n.t(WorldManager.getServerConfig().getServerLanguage(), "ui.common.use") + "]", 15, outfitPoint.getX(), outfitPoint.getY(), outfitPoint.getZ() + 150, 0 , 0 ,0);
+            }
+            catch(Exception ex) {
+                Onset.print("Can't spawn the atm: " + ex.toString());
+            }
         }
     }
 
@@ -198,6 +212,7 @@ public class WorldManager {
         }
 
         if(ATMManager.handleATMInteract(player)) return;
+        if(handleOutfitPointsInteract(player)) return;
         if(GarageManager.handleVSellerInteract(player)) return;
         if(player.getVehicle() == null)
             if(handlePickupGroundItem(player)) return;
@@ -219,6 +234,13 @@ public class WorldManager {
             if(JobManager.handleSellJobNpcInventoryItem(player)) return;
         if(player.getVehicle() == null) if(JobManager.handleJobOutfitRequest(player)) return;
         if(player.getVehicle() == null) if(handleSellerInteract(player)) return;
+    }
+
+    public static boolean handleOutfitPointsInteract(Player player) {
+        OutfitPoint outfitPoint = getNearbyOutfitPoint(player);
+        if(outfitPoint == null) return false;
+        UIStateManager.handleUIToogle(player, "customOutfit");
+        return true;
     }
 
     /**
@@ -272,6 +294,15 @@ public class WorldManager {
             }
         }
         return false;
+    }
+
+    public static OutfitPoint getNearbyOutfitPoint(Player player) {
+        for(OutfitPoint outfitPoint : outfitPoints) {
+            if(outfitPoint.isNear(player)) {
+                return outfitPoint;
+            }
+        }
+        return null;
     }
 
     public static Seller getNearbySeller(Player player) {

@@ -1,6 +1,6 @@
 package fr.yuki.YukiRPFramework.luaapi;
 
-import fr.yuki.YukiRPFramework.luaapi.job.CreateJobEF;
+import fr.yuki.YukiRPFramework.luaapi.job.*;
 import net.onfirenetwork.onsetjava.Onset;
 
 public class LuaAPIManager {
@@ -14,5 +14,10 @@ public class LuaAPIManager {
 
         // Job API
         Onset.getServer().addFunctionExport("CreateJob", new CreateJobEF());
+        Onset.getServer().addFunctionExport("AddJobLevel", new AddJobLevelEF());
+        Onset.getServer().addFunctionExport("AddJobResource", new AddJobResourceEF());
+        Onset.getServer().addFunctionExport("AddItemResourceRequirement", new AddItemResourceRequirementEF());
+        Onset.getServer().addFunctionExport("SetHarvestAnimation", new SetHarvestAnimationEF());
+
     }
 }

@@ -16,6 +16,7 @@ public class JobVehicleRental {
     private double spawnX;
     private double spawnY;
     private double spawnZ;
+    private String color;
 
     public int getId() {
         return id;
@@ -115,5 +116,13 @@ public class JobVehicleRental {
 
     public void setLevelRequired(int levelRequired) {
         this.levelRequired = levelRequired;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
     }
 }

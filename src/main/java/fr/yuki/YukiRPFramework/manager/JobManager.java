@@ -18,6 +18,7 @@ import fr.yuki.YukiRPFramework.net.payload.AddToastPayload;
 import fr.yuki.YukiRPFramework.net.payload.AddXpBarItemPayload;
 import fr.yuki.YukiRPFramework.ui.UIState;
 import net.onfirenetwork.onsetjava.Onset;
+import net.onfirenetwork.onsetjava.data.Color;
 import net.onfirenetwork.onsetjava.data.Vector;
 import net.onfirenetwork.onsetjava.entity.Pickup;
 import net.onfirenetwork.onsetjava.entity.Player;
@@ -249,6 +250,7 @@ public class JobManager {
                         return true;
                     }
 
+
                     worldHarvestObject.harvest(player);
                     return true;
                 }
@@ -408,9 +410,12 @@ public class JobManager {
 
         destroyRentalVehiclesForPlayer(player);
 
-        VehicleManager.createVehicle(nearbyJobVehicleRental.getVehicleModelId(),
+        VehicleManager.CreateVehicleResult result = VehicleManager.createVehicle(nearbyJobVehicleRental.getVehicleModelId(),
                 new Vector(nearbyJobVehicleRental.getSpawnX(), nearbyJobVehicleRental.getSpawnY(), nearbyJobVehicleRental.getSpawnZ()),
                 player.getLocationAndHeading().getHeading(), player, null, true);
+
+        java.awt.Color color = java.awt.Color.decode(nearbyJobVehicleRental.getColor());
+        result.getVehicle().setColor(new Color(color.getRed(), color.getGreen(), color.getBlue()));
         UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, I18n.t(account.getLang(), "toast.job_vehicle.success_rental",
                 String.valueOf(nearbyJobVehicleRental.getCost())));
         return true;

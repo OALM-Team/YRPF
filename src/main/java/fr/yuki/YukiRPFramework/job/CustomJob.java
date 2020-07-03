@@ -6,9 +6,11 @@ import java.util.ArrayList;
 
 public class CustomJob extends Job {
     private String jobName;
+    private int refillInterval;
 
-    public CustomJob(String jobName) {
+    public CustomJob(String jobName, int refillInterval) {
         this.jobName = jobName;
+        this.refillInterval = refillInterval;
         this.harvestableObjectsTemplate = new ArrayList<>();
         if(this.setup()) {
             this.load();
@@ -22,7 +24,7 @@ public class CustomJob extends Job {
 
     @Override
     public int getRefillInterval() {
-        return 0;
+        return this.refillInterval;
     }
 
     @Override

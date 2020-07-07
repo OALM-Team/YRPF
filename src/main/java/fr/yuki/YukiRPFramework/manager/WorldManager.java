@@ -265,12 +265,8 @@ public class WorldManager {
      * @param player The player
      */
     public static void savePlayer(Player player) {
-        try {
-            Account account = getPlayerAccount(player);
-            AccountDAO.updateAccount(account, player);
-        } catch (Exception ex) {
-            Onset.print("Can't save the account: " + ex.toString());
-        }
+        Account account = getPlayerAccount(player);
+        account.save(player);
     }
 
     public static GroundItem getNearestGroundItem(Vector position) {
@@ -531,7 +527,7 @@ public class WorldManager {
 
             targetState.setDead(false);
             Account account = WorldManager.getPlayerAccount(target);
-            account.setIsDead(0);
+            account.setDead(false);
             Location location = target.getLocationAndHeading();
             account.setSaveX(location.getX());
             account.setSaveY(location.getY());

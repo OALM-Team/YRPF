@@ -2,12 +2,11 @@ package fr.yuki.YukiRPFramework;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import eu.bebendorf.ajorm.Repo;
 import fr.yuki.YukiRPFramework.luaapi.LuaAPIManager;
 import fr.yuki.YukiRPFramework.character.CharacterState;
 import fr.yuki.YukiRPFramework.commands.*;
-import fr.yuki.YukiRPFramework.dao.AccountDAO;
 import fr.yuki.YukiRPFramework.dao.InventoryDAO;
-import fr.yuki.YukiRPFramework.enums.ItemTemplateEnum;
 import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
 import fr.yuki.YukiRPFramework.i18n.I18n;
 import fr.yuki.YukiRPFramework.inventory.Inventory;
@@ -166,7 +165,7 @@ public class YukiRPFrameworkPlugin {
         // Create or update the account
         try {
             Onset.print("Player joining steamId=" + evt.getPlayer().getSteamId());
-            Account account = AccountDAO.findAccountBySteamId(evt.getPlayer().getSteamId());
+            Account account = Repo.get(Account.class).where("steamId", evt.getPlayer().getSteamId()).get();
             ServerConfig serverConfig = WorldManager.getServerConfig();
 
             // Clear state
@@ -180,7 +179,16 @@ public class YukiRPFrameworkPlugin {
             // Create the account if doesnt exist
             if(account == null) {
                 Onset.print("Create the account for the steamId=" + evt.getPlayer().getSteamId());
-                account = AccountDAO.createAccount(evt.getPlayer());
+
+                account = new Account();
+                account.setSteamName(evt.getPlayer().getName());
+                account.setSteamId(evt.getPlayer().getSteamId());
+                account.setPhoneNumber(PhoneManager.generateRandomPhoneNumber());
+                account.setSaveX(serverConfig.getSpawnPointX());
+                account.setSaveY(serverConfig.getSpawnPointY());
+                account.setSaveZ(serverConfig.getSpawnPointZ());
+                account.setSaveH(serverConfig.getSpawnPointH());
+                account.save();
                 WorldManager.getAccounts().put(account.getId(), account);
 
                 // Set spawn location
@@ -204,7 +212,7 @@ public class YukiRPFrameworkPlugin {
                 evt.getPlayer().setProperty("accountId", account.getId(), true);
             }
             else {
-                if(account.getIsBanned()==1) {
+                if(account.isBanned()) {
                     evt.getPlayer().kick("You have been banned, bye bye");
                     return;
                 }
@@ -219,7 +227,7 @@ public class YukiRPFrameworkPlugin {
                         account.getSaveH()));
 
                 if(account.getCharacterName().equals("Unknown")) { // Recovery
-                    account.setCharacterCreationRequest(1);
+                    account.setCharacterCreationRequest(true);
                     account.setPhoneNumber(PhoneManager.generateRandomPhoneNumber());
                     account.setBankMoney(4000);
                     Onset.print("Phone number generated : " + account.getPhoneNumber());
@@ -255,7 +263,7 @@ public class YukiRPFrameworkPlugin {
             // Generate a phone number for the player
             if(account.getPhoneNumber().trim().equals("")) {
                 account.setPhoneNumber(PhoneManager.generateRandomPhoneNumber());
-                AccountDAO.updateAccount(account, null);
+                account.save();
                 Onset.print("Phone number generated : " + account.getPhoneNumber());
             }
 
@@ -268,7 +276,7 @@ public class YukiRPFrameworkPlugin {
             }
 
             // If the player is dead
-            if(account.getIsDead() == 1) {
+            if(account.isDead()) {
                 evt.getPlayer().setHealth(0);
             } else {
                 evt.getPlayer().setHealth(account.getHealth());

@@ -3,14 +3,12 @@ package fr.yuki.YukiRPFramework.manager;
 import com.google.gson.Gson;
 import fr.yuki.YukiRPFramework.character.CharacterState;
 import fr.yuki.YukiRPFramework.character.CharacterStyle;
-import fr.yuki.YukiRPFramework.dao.AccountDAO;
 import fr.yuki.YukiRPFramework.enums.ItemTemplateEnum;
 import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
 import fr.yuki.YukiRPFramework.i18n.I18n;
 import fr.yuki.YukiRPFramework.inventory.Inventory;
 import fr.yuki.YukiRPFramework.inventory.InventoryItem;
 import fr.yuki.YukiRPFramework.model.Account;
-import fr.yuki.YukiRPFramework.net.payload.AddToastPayload;
 import fr.yuki.YukiRPFramework.net.payload.RequestThrowItemPayload;
 import fr.yuki.YukiRPFramework.net.payload.SetFoodPayload;
 import fr.yuki.YukiRPFramework.net.payload.StyleSavePartPayload;
@@ -21,7 +19,6 @@ import net.onfirenetwork.onsetjava.data.Location;
 import net.onfirenetwork.onsetjava.data.Vector;
 import net.onfirenetwork.onsetjava.entity.Player;
 
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 
@@ -139,7 +136,7 @@ public class CharacterManager {
 
         player.setName(account.getCharacterName());
         player.setProperty("characterName", account.getCharacterName(), true);
-        account.setCharacterCreationRequest(0);
+        account.setCharacterCreationRequest(true);
         WorldManager.savePlayer(player);
         if(type.equals("character")) {
             UIStateManager.handleUIToogle(player, "customCharacter");
@@ -174,12 +171,8 @@ public class CharacterManager {
 
         // Update account
         Account account = WorldManager.getPlayerAccount(player);
-        account.setIsDead(1);
-        try {
-            AccountDAO.updateAccount(account, null);
-        } catch (Exception ex) {
-            Onset.print("Can't save account: " + ex.toString());
-        }
+        account.setDead(true);
+        account.save();
         player.setSpawnLocation(new Vector(account.getSaveX(), account.getSaveY(), account.getSaveZ()), 0);
         UIStateManager.handleUIToogle(player, "death");
         player.setRespawnTime(WorldManager.getServerConfig().getDeathRespawnDelay());
@@ -208,9 +201,9 @@ public class CharacterManager {
         } else {
             Account account = WorldManager.getPlayerAccount(player);
             if(account != null) {
-                if(account.getIsDead() == 1) {
+                if(account.isDead()) {
                     UIStateManager.handleUIToogle(player, "death");
-                    account.setIsDead(0);
+                    account.setDead(false);
                     CharacterManager.setCharacterFreeze(player, false);
                     Onset.print("Player respawned after death");
                     //UIStateManager.sendNotification(player, ToastTypeEnum.WARN,

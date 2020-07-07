@@ -2,162 +2,79 @@ package fr.yuki.YukiRPFramework.model;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import eu.bebendorf.ajorm.Model;
+import eu.bebendorf.ajorm.annotation.Column;
+import eu.bebendorf.ajorm.annotation.Dates;
+import eu.bebendorf.ajorm.annotation.Table;
 import fr.yuki.YukiRPFramework.character.CharacterJobLevel;
 import fr.yuki.YukiRPFramework.character.CharacterStyle;
-import fr.yuki.YukiRPFramework.net.payload.RequestBuyVehiclePayload;
+import fr.yuki.YukiRPFramework.manager.WeaponManager;
+import lombok.Getter;
+import lombok.Setter;
+import net.onfirenetwork.onsetjava.data.Location;
+import net.onfirenetwork.onsetjava.entity.Player;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
 
-public class Account {
+@Dates @Getter @Setter @Table("tbl_account")
+public class Account extends Model {
+    @Column
     private int id;
-    private int adminLevel;
+    @Column
+    private int adminLevel = 0;
+    @Column(column = "steam_account_name")
     private String steamName;
+    @Column
     private String steamId;
-    private Date createdAt;
-    private Date updatedAt;
-    private int isBanned;
-    private int bankMoney;
+    @Column
+    private boolean isBanned = false;
+    @Column
+    private int bankMoney = 4000;
+    @Column
     private double saveX;
+    @Column
     private double saveY;
+    @Column
     private double saveZ;
+    @Column
     private double saveH;
-    private int characterCreationRequest;
-    private String characterStyle;
-    private String characterName;
-    private String jobLevels;
-    private int isDead;
-    private String lang;
-    private int foodState;
-    private int drinkState;
+    @Column
+    private boolean characterCreationRequest = true;
+    @Column
+    private String characterStyle = "";
+    @Column
+    private String characterName = "Unknown";
+    @Column
+    private String jobLevels = "[]";
+    @Column
+    private boolean isDead = false;
+    @Column
+    private String lang = "fr";
+    @Column
+    private int foodState = 100;
+    @Column
+    private int drinkState = 100;
+    @Column
     private String phoneNumber;
-    private String weapons;
-    private int bagId;
-    private int compagnyId;
-    private int isInService;
-    private String originalStyle;
-    private double health;
-    private int commandLevel;
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getSteamName() {
-        return steamName;
-    }
-
-    public void setSteamName(String steamName) {
-        this.steamName = steamName;
-    }
-
-    public String getSteamId() {
-        return steamId;
-    }
-
-    public void setSteamId(String steamId) {
-        this.steamId = steamId;
-    }
-
-    public Date getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public Date getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(Date updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public int getIsBanned() {
-        return isBanned;
-    }
-
-    public void setIsBanned(int isBanned) {
-        this.isBanned = isBanned;
-    }
-
-    public int getBankMoney() {
-        return bankMoney;
-    }
-
-    public void setBankMoney(int bankMoney) {
-        this.bankMoney = bankMoney;
-    }
-
-    public double getSaveX() {
-        return saveX;
-    }
-
-    public void setSaveX(double saveX) {
-        this.saveX = saveX;
-    }
-
-    public double getSaveY() {
-        return saveY;
-    }
-
-    public void setSaveY(double saveY) {
-        this.saveY = saveY;
-    }
-
-    public double getSaveZ() {
-        return saveZ;
-    }
-
-    public void setSaveZ(double saveZ) {
-        this.saveZ = saveZ;
-    }
-
-    public double getSaveH() {
-        return saveH;
-    }
-
-    public void setSaveH(double saveH) {
-        this.saveH = saveH;
-    }
-
-    public int getFoodState() {
-        return foodState;
-    }
-
-    public void setFoodState(int foodState) {
-        this.foodState = foodState;
-    }
-
-    public int getDrinkState() {
-        return drinkState;
-    }
-
-    public void setDrinkState(int drinkState) {
-        this.drinkState = drinkState;
-    }
-
-    public int getCharacterCreationRequest() {
-        return characterCreationRequest;
-    }
-
-    public void setCharacterCreationRequest(int characterCreationRequest) {
-        this.characterCreationRequest = characterCreationRequest;
-    }
-
-    public String getCharacterStyle() {
-        return characterStyle;
-    }
-
-    public void setCharacterStyle(String characterStyle) {
-        this.characterStyle = characterStyle;
-    }
+    @Column
+    private String weapons = "[]";
+    @Column
+    private int bagId = -1;
+    @Column
+    private int companyId = -1;
+    @Column
+    private boolean isInService = false;
+    @Column
+    private String originalStyle = "";
+    @Column
+    private double health = 100;
+    @Column
+    private int commandLevel = 0;
+    @Column
+    private Timestamp createdAt;
+    @Column
+    private Timestamp updatedAt;
 
     public void setCharacterStyle(CharacterStyle characterStyle) {
         this.characterStyle = new Gson().toJson(characterStyle);
@@ -182,107 +99,17 @@ public class Account {
         return new Gson().fromJson(this.jobLevels, new TypeToken<ArrayList<CharacterJobLevel>>(){}.getType());
     }
 
-    public String getCharacterName() {
-        return characterName;
+    public void save(Player player){
+        if(player != null){
+            Location loc = player.getLocationAndHeading();
+            health = player.getHealth();
+            saveX = loc.getX();
+            saveY = loc.getY();
+            saveZ = loc.getZ();
+            saveH = loc.getHeading();
+            weapons = new Gson().toJson(WeaponManager.getPlayerWeapons(player));
+        }
+        save();
     }
 
-    public void setCharacterName(String characterName) {
-        this.characterName = characterName;
-    }
-
-    public String getJobLevels() {
-        return jobLevels;
-    }
-
-    public void setJobLevels(String jobLevels) {
-        this.jobLevels = jobLevels;
-    }
-
-    public int getIsDead() {
-        return isDead;
-    }
-
-    public void setIsDead(int isDead) {
-        this.isDead = isDead;
-    }
-
-    public int getAdminLevel() {
-        return adminLevel;
-    }
-
-    public void setAdminLevel(int adminLevel) {
-        this.adminLevel = adminLevel;
-    }
-
-    public String getLang() {
-        return lang;
-    }
-
-    public void setLang(String lang) {
-        this.lang = lang;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    public String getWeapons() {
-        return weapons;
-    }
-
-    public void setWeapons(String weapons) {
-        this.weapons = weapons;
-    }
-
-    public int getBagId() {
-        return bagId;
-    }
-
-    public void setBagId(int bagId) {
-        this.bagId = bagId;
-    }
-
-    public int getCompagnyId() {
-        return compagnyId;
-    }
-
-    public void setCompagnyId(int compagnyId) {
-        this.compagnyId = compagnyId;
-    }
-
-    public int getIsInService() {
-        return isInService;
-    }
-
-    public void setIsInService(int isInService) {
-        this.isInService = isInService;
-    }
-
-    public String getOriginalStyle() {
-        return originalStyle;
-    }
-
-    public void setOriginalStyle(String originalStyle) {
-        this.originalStyle = originalStyle;
-    }
-
-    public double getHealth() {
-        return health;
-    }
-
-    public void setHealth(double health) {
-        this.health = health;
-    }
-
-    public int getCommandLevel() {
-        return commandLevel;
-    }
-
-    public void setCommandLevel(int commandLevel) {
-        this.commandLevel = commandLevel;
-    }
 }

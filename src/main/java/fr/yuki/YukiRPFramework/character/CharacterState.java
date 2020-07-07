@@ -1,6 +1,5 @@
 package fr.yuki.YukiRPFramework.character;
 
-import fr.yuki.YukiRPFramework.dao.AccountDAO;
 import fr.yuki.YukiRPFramework.job.ObjectPlacementInstance;
 import fr.yuki.YukiRPFramework.job.WearableWorldObject;
 import fr.yuki.YukiRPFramework.manager.ModdingManager;
@@ -17,7 +16,6 @@ import net.onfirenetwork.onsetjava.data.Vector;
 import net.onfirenetwork.onsetjava.entity.Player;
 import net.onfirenetwork.onsetjava.entity.WorldObject;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class CharacterState {
@@ -148,11 +146,7 @@ public class CharacterState {
         if(ModdingManager.isCustomModelId(bag.getModelId())) ModdingManager.assignCustomModel(this.bagWorldObject, bag.getModelId());
         this.bagWorldObject.setScale(new Vector(bag.getSx(), bag.getSy(), bag.getSz()));
         account.setBagId(this.currentBag.getModelId());
-        try {
-            AccountDAO.updateAccount(account, null);
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
+        account.save();
     }
 
     public void unattachBag(Player player) {
@@ -162,11 +156,7 @@ public class CharacterState {
         Account account = WorldManager.getPlayerAccount(player);
         this.currentBag = null;
         account.setBagId(-1);
-        try {
-            AccountDAO.updateAccount(account, null);
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
+        account.save();
     }
 
     public Mask getCurrentMask() {

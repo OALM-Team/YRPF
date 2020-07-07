@@ -208,11 +208,11 @@ public class JobManager {
             }
         }
 
-        if(account.getIsInService() == 1) {
+        if(account.isInService()) {
             CharacterStyle characterStyle = account.decodeOriginalCharacterStyle();
             account.setCharacterStyle(characterStyle);
             characterStyle.attachStyleToPlayer(player);
-            account.setIsInService(0);
+            account.setInService(false);
         } else {
             // Apply the outfit
             CharacterStyle characterStyle = account.decodeCharacterStyle();
@@ -233,7 +233,7 @@ public class JobManager {
             }
             account.setCharacterStyle(characterStyle);
             characterStyle.attachStyleToPlayer(player);
-            account.setIsInService(1);
+            account.setInService(true);
         }
         SoundManager.playSound3D("sounds/zip.mp3", player.getLocation(), 500, 0.2);
         WorldManager.savePlayer(player);

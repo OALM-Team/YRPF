@@ -2,8 +2,6 @@ package fr.yuki.YukiRPFramework.manager;
 
 import com.google.gson.Gson;
 import fr.yuki.YukiRPFramework.character.CharacterState;
-import fr.yuki.YukiRPFramework.dao.AccountDAO;
-import fr.yuki.YukiRPFramework.enums.ItemTemplateEnum;
 import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
 import fr.yuki.YukiRPFramework.inventory.Inventory;
 import fr.yuki.YukiRPFramework.model.Account;
@@ -197,15 +195,15 @@ public class UIStateManager {
         // Generate a phone number for the player
         if(account.getPhoneNumber().trim().equals("")) {
             account.setPhoneNumber(PhoneManager.generateRandomPhoneNumber());
-            AccountDAO.updateAccount(account, null);
+            account.save();
             Onset.print("Phone number generated : " + account.getPhoneNumber());
         }
 
         // Apply style to character if there is one saved
-        if(account.getCharacterCreationRequest() == 0) {
+        if(!account.isCharacterCreationRequest()) {
             CharacterManager.setCharacterStyle(player);
 
-            if(account.getIsDead() == 0) {
+            if(!account.isDead()) {
                 player.setRagdoll(false);
                 CharacterManager.teleportWithLevelLoading(player, new Location(account.getSaveX(),
                         account.getSaveY(),
@@ -232,7 +230,7 @@ public class UIStateManager {
                     WorldManager.savePlayer(player);
                 });
             }
-        } else if(account.getCharacterCreationRequest() == 1) { // Request character creation if no style set
+        } else if(account.isCharacterCreationRequest()) { // Request character creation if no style set
             CharacterManager.teleportWithLevelLoading(player, new Location(WorldManager.getServerConfig().getSpawnPointX() +  Basic.randomNumber(-30,30),
                     WorldManager.getServerConfig().getSpawnPointY() +  Basic.randomNumber(-30,30), WorldManager.getServerConfig().getSpawnPointZ(),
                     WorldManager.getServerConfig().getSpawnPointH()));

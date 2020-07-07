@@ -2,14 +2,12 @@ package fr.yuki.YukiRPFramework.manager;
 
 import com.google.gson.Gson;
 import fr.yuki.YukiRPFramework.character.CharacterState;
-import fr.yuki.YukiRPFramework.dao.AccountDAO;
 import fr.yuki.YukiRPFramework.dao.CompagnyDAO;
 import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
 import fr.yuki.YukiRPFramework.model.Account;
 import fr.yuki.YukiRPFramework.model.Compagny;
 import fr.yuki.YukiRPFramework.net.payload.AddCompagnyEmployeePayload;
 import fr.yuki.YukiRPFramework.net.payload.ClearCompagnyEmployeesPayload;
-import fr.yuki.YukiRPFramework.net.payload.ClearPhoneUrgencyPayload;
 import fr.yuki.YukiRPFramework.net.payload.SetCompagnyPayload;
 import fr.yuki.YukiRPFramework.ui.GenericMenu;
 import fr.yuki.YukiRPFramework.ui.GenericMenuItem;
@@ -41,7 +39,7 @@ public class CompagnyManager {
 
     public static void handleCreateRequest(Player player, String name) throws SQLException {
         Account account = WorldManager.getPlayerAccount(player);
-        if(account.getCompagnyId() != -1) return;
+        if(account.getCompanyId() != -1) return;
         if(getCompagnyByName(name.trim()) != null) {
             UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Ce nom est déjà pris");
             return;
@@ -57,7 +55,7 @@ public class CompagnyManager {
         compagny.setOwner(player.getSteamId());
         compagny.setMaxMember(5);
         CompagnyDAO.insertCompagny(compagny);
-        account.setCompagnyId(compagny.getId());
+        account.setCompanyId(compagny.getId());
         WorldManager.savePlayer(player);
         compagnies.add(compagny);
         Onset.print("Compagny " + name + " created");
@@ -71,7 +69,7 @@ public class CompagnyManager {
             try {
                 Account account = WorldManager.getPlayerAccount(player);
                 if(account == null) continue;
-                if(account.getCompagnyId() == compagny.getId()) players.add(player);
+                if(account.getCompanyId() == compagny.getId()) players.add(player);
             } catch (Exception ex) {}
         }
         return players;
@@ -79,22 +77,18 @@ public class CompagnyManager {
 
     public static void refreshCompagny(Player player) {
         Account account = WorldManager.getPlayerAccount(player);
-        if(account.getCompagnyId() == -1) { // No compagny
+        if(account.getCompanyId() == -1) { // No compagny
             player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new SetCompagnyPayload(
                     -1, "", 0,0
             )));
         } else { // Has compagny
-            Compagny compagny = getCompagnyById(account.getCompagnyId());
+            Compagny compagny = getCompagnyById(account.getCompanyId());
             if(compagny == null) { // Can't find the compagny
                 player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new SetCompagnyPayload(
                         -1, "", 0,0
                 )));
-                account.setCompagnyId(-1);
-                try {
-                    AccountDAO.updateAccount(account, null);
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
+                account.setCompanyId(-1);
+                account.save();
                 UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Votre entreprise n'existe plus");
                 return;
             }
@@ -120,7 +114,7 @@ public class CompagnyManager {
             return;
         }
         Account account = WorldManager.getPlayerAccount(player);
-        Compagny compagny = getCompagnyById(account.getCompagnyId());
+        Compagny compagny = getCompagnyById(account.getCompanyId());
         if(compagny == null) return;
         UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, "Invitation envoyée");
         CharacterState characterState = CharacterManager.getCharacterStateByPlayer(invitedPlayer);
@@ -139,7 +133,7 @@ public class CompagnyManager {
         Account account = WorldManager.getPlayerAccount(player);
         CharacterState characterState = CharacterManager.getCharacterStateByPlayer(player);
         Compagny compagny = getCompagnyById(characterState.getCurrentCompagnyInvited());
-        account.setCompagnyId(compagny.getId());
+        account.setCompanyId(compagny.getId());
         WorldManager.savePlayer(player);
 
         // Reset invitation
@@ -168,7 +162,7 @@ public class CompagnyManager {
 
     public static void handleKickEmployee(Player player, String steamid) {
         Account account = WorldManager.getPlayerAccount(player);
-        Compagny compagny = getCompagnyById(account.getCompagnyId());
+        Compagny compagny = getCompagnyById(account.getCompanyId());
         if(!compagny.isOwner(player)) return;
         Player targetPlayer = WorldManager.findPlayerBySteamId(steamid);
         if(targetPlayer == null) return;
@@ -177,7 +171,7 @@ public class CompagnyManager {
             UIStateManager.sendNotification(targetPlayer, ToastTypeEnum.ERROR, "Action impossible, contactez un administrateur pour supprimer l'entreprise");
             return;
         }
-        targetAccount.setCompagnyId(-1);
+        targetAccount.setCompanyId(-1);
         WorldManager.savePlayer(targetPlayer);
 
         for (Player employee : getOnlineEmployees(compagny)) {

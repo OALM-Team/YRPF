@@ -18,7 +18,7 @@ public class BanCommand implements CommandExecutor {
                 .findFirst().orElse(null);
         if(playerTarget == null) return true;
         Account account = WorldManager.getPlayerAccount(playerTarget);
-        account.setIsBanned(1);
+        account.setBanned(true);
         WorldManager.savePlayer(playerTarget);
         playerTarget.kick("You have been banned, bye bye");
 

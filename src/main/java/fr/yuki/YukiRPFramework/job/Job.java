@@ -36,6 +36,12 @@ public abstract class Job {
         this.worldHarvestObjects = new ArrayList<>();
         this.spawnNpcs();
         this.spawnTools();
+
+        if(this.getRefillInterval() > 0) {
+            Onset.timer(this.getRefillInterval(), () -> {
+                refillHarvestResources();
+            });
+        }
     }
 
     /**
@@ -148,6 +154,7 @@ public abstract class Job {
                 }
                 WorldObject worldObject = Onset.getServer().createObject(new Vector(jobSpawnPosition.getX(),
                         jobSpawnPosition.getY(), jobSpawnPosition.getZ() - 100), harvestableObject.getModelId());
+                worldObject.setScale(harvestableObject.getScale());
                 worldObject.setProperty("harvestable", 1, true);
                 worldObject.setProperty("harvestableResourceName", harvestableObject.getName(), true);
                 worldObject.setProperty("harvestableInteractDistance", harvestableObject.distanceToInteract(), true);
@@ -158,10 +165,6 @@ public abstract class Job {
                 this.worldHarvestObjects.add(worldHarvestObject);
             }
         }
-
-        Onset.delay(this.getRefillInterval(), () -> {
-            refillHarvestResources();
-        });
     }
 
     public ArrayList<WorldHarvestObject> getWorldHarvestObjects() {

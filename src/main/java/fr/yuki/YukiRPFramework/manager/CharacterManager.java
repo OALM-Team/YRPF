@@ -196,8 +196,10 @@ public class CharacterManager {
     }
 
     public static void onPlayerSpawn(Player player) {
-        if(CharacterManager.getCharacterStateByPlayer(player) == null)
+        if(CharacterManager.getCharacterStateByPlayer(player) == null) {
+            Onset.print("No state found for " + player.getSteamId());
             CharacterManager.getCharacterStates().put(player.getSteamId(), new CharacterState());
+        }
 
         CharacterState characterState = getCharacterStateByPlayer(player);
         if(characterState.isFirstSpawn()) {
@@ -260,6 +262,8 @@ public class CharacterManager {
             GenericMenu genericMenu = new GenericMenu(player);
             genericMenu.getItems().add(new GenericMenuItem("Fouiller la personne", "window.CallEvent(\"RemoteCallInterface\"," +
                     " \"Character:InspectCharacter\", \"" + nearestPlayer.getId() + "\");"));
+            genericMenu.getItems().add(new GenericMenuItem("Donner les clés de la maison", "window.CallEvent(\"RemoteCallInterface\"," +
+                    " \"Character:GiveHouseKey\", \"" + nearestPlayer.getId() + "\");"));
             genericMenu.addCloseItem();
             genericMenu.show();
             characterState.setCurrentGenericMenu(genericMenu);

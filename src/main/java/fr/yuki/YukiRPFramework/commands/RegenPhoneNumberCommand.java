@@ -1,13 +1,16 @@
 package fr.yuki.YukiRPFramework.commands;
 
-import fr.yuki.YukiRPFramework.manager.CharacterManager;
+import fr.yuki.YukiRPFramework.dao.AccountDAO;
+import fr.yuki.YukiRPFramework.manager.PhoneManager;
 import fr.yuki.YukiRPFramework.manager.WorldManager;
 import fr.yuki.YukiRPFramework.model.Account;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.entity.Player;
 import net.onfirenetwork.onsetjava.plugin.CommandExecutor;
 
-public class CuffCommand implements CommandExecutor {
+import java.sql.SQLException;
+
+public class RegenPhoneNumberCommand implements CommandExecutor {
     @Override
     public boolean onCommand(Player player, String s, String[] args) {
         if(WorldManager.getPlayerAccount(player).getAdminLevel() == 0) return false;
@@ -17,11 +20,15 @@ public class CuffCommand implements CommandExecutor {
         }
         Player playerTarget = Onset.getPlayers().stream().filter(x -> x.getId() == Integer.parseInt(args[0]))
                 .findFirst().orElse(null);
-
         if(playerTarget == null) return true;
         Account account = WorldManager.getPlayerAccount(playerTarget);
-        WorldManager.cuffPlayer(playerTarget);
-        CharacterManager.setCharacterFreeze(playerTarget, false);
+        account.setPhoneNumber(PhoneManager.generateRandomPhoneNumber());
+        try {
+            AccountDAO.updateAccount(account, null);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        Onset.print("Phone number generated : " + account.getPhoneNumber());
 
         return true;
     }

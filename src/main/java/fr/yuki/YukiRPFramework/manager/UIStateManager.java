@@ -2,15 +2,19 @@ package fr.yuki.YukiRPFramework.manager;
 
 import com.google.gson.Gson;
 import fr.yuki.YukiRPFramework.character.CharacterState;
+import fr.yuki.YukiRPFramework.dao.AccountDAO;
 import fr.yuki.YukiRPFramework.enums.ItemTemplateEnum;
 import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
 import fr.yuki.YukiRPFramework.inventory.Inventory;
 import fr.yuki.YukiRPFramework.model.Account;
 import fr.yuki.YukiRPFramework.net.payload.*;
 import fr.yuki.YukiRPFramework.ui.UIState;
+import fr.yuki.YukiRPFramework.utils.Basic;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Location;
 import net.onfirenetwork.onsetjava.entity.Player;
+
+import java.sql.SQLException;
 
 public class UIStateManager {
     /**
@@ -161,7 +165,7 @@ public class UIStateManager {
         player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new SetLangPayload(account.getLang())));
     }
 
-    public static void handleUIReady(Player player) {
+    public static void handleUIReady(Player player) throws SQLException {
         Account account = WorldManager.getPlayerAccount(player);
         MapManager.setupGameMap(player);
 
@@ -189,6 +193,13 @@ public class UIStateManager {
 
         // Send compagny
         CompagnyManager.refreshCompagny(player);
+
+        // Generate a phone number for the player
+        if(account.getPhoneNumber().trim().equals("")) {
+            account.setPhoneNumber(PhoneManager.generateRandomPhoneNumber());
+            AccountDAO.updateAccount(account, null);
+            Onset.print("Phone number generated : " + account.getPhoneNumber());
+        }
 
         // Apply style to character if there is one saved
         if(account.getCharacterCreationRequest() == 0) {
@@ -222,7 +233,17 @@ public class UIStateManager {
                 });
             }
         } else if(account.getCharacterCreationRequest() == 1) { // Request character creation if no style set
-            UIStateManager.handleUIToogle(player, "customCharacter");
+            CharacterManager.teleportWithLevelLoading(player, new Location(WorldManager.getServerConfig().getSpawnPointX() +  Basic.randomNumber(-30,30),
+                    WorldManager.getServerConfig().getSpawnPointY() +  Basic.randomNumber(-30,30), WorldManager.getServerConfig().getSpawnPointZ(),
+                    WorldManager.getServerConfig().getSpawnPointH()));
+            Onset.delay(1000, () -> {
+                CharacterManager.teleportWithLevelLoading(player, new Location(WorldManager.getServerConfig().getSpawnPointX() +  Basic.randomNumber(-30,30),
+                        WorldManager.getServerConfig().getSpawnPointY() +  Basic.randomNumber(-30,30), WorldManager.getServerConfig().getSpawnPointZ(),
+                        WorldManager.getServerConfig().getSpawnPointH()));
+                Onset.delay(500, () -> {
+                    UIStateManager.handleUIToogle(player, "customCharacter");
+                });
+            });
         }
     }
 }

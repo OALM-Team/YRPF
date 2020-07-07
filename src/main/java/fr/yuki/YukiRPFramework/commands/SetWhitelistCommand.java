@@ -33,7 +33,7 @@ public class SetWhitelistCommand implements CommandExecutor {
         accountJobWhitelist = new AccountJobWhitelist();
         accountJobWhitelist.setAccountId(account.getId());
         accountJobWhitelist.setJobId(args[1].toUpperCase());
-        accountJobWhitelist.setJobLevel(Integer.parseInt(args[2]));
+        accountJobWhitelist.setJobLevel(Integer.parseInt(args[2]) <= 1 ? 2 : Integer.parseInt(args[2]));
         AccountManager.getAccountJobWhitelists().add(accountJobWhitelist);
         try {
             AccountJobWhitelistDAO.insertAccountJobWhiteList(accountJobWhitelist);

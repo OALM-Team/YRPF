@@ -19,10 +19,12 @@ public class ATMManager {
      */
     public static boolean handleATMInteract(Player player) {
         for(ATM atm : WorldManager.getAtms()) {
-            if(atm.isNear(player)) {
-                openATM(player, atm);
-                return true;
-            }
+            try {
+                if(atm.isNear(player)) {
+                    openATM(player, atm);
+                    return true;
+                }
+            }catch (Exception ex) {}
         }
         return false;
     }
@@ -76,7 +78,7 @@ public class ATMManager {
         }
 
         // Add the bank money and save the player
-        InventoryManager.addItemToPlayer(player, ItemTemplateEnum.CASH.id, value);
+        InventoryManager.addItemToPlayer(player, ItemTemplateEnum.CASH.id, value, false);
         account.setBankMoney(account.getBankMoney() - value);
         WorldManager.savePlayer(player);
         UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, I18n.t(account.getLang(), "toast.atm.success_withdraw", String.valueOf(value)));

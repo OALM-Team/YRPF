@@ -57,12 +57,12 @@ public class WeaponManager {
                 .filter(x -> x.getWeaponId() == weapon.getModel()).findFirst().orElse(null);
         if(itemTemplate == null) return;
 
-        if(InventoryManager.addItemToPlayer(player, String.valueOf(itemTemplate.getId()), 1) == null) return;
+        if(InventoryManager.addItemToPlayer(player, String.valueOf(itemTemplate.getId()), 1, true) == null) return;
         int ammoBack = (weapon.getAmmo() - (weapon.getAmmo() % itemTemplate.getAmmoPerRecharge())) / itemTemplate.getAmmoPerRecharge();
         player.setWeapon(player.getWeaponSlot(), 1, 0, true, false);
         WorldManager.savePlayer(player);
         if(ammoBack == 0) return;
-        if(InventoryManager.addItemToPlayer(player, ItemTemplateEnum.AMMO.id, ammoBack) == null) {
+        if(InventoryManager.addItemToPlayer(player, ItemTemplateEnum.AMMO.id, ammoBack, false) == null) {
             return;
         }
     }

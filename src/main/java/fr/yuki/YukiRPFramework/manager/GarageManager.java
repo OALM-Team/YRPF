@@ -30,6 +30,7 @@ public class GarageManager {
         // Reset last garage to vehicle
         for(VehicleGarage vehicleGarage : vehicleGarages) {
             vehicleGarage.setGarageId(vehicleGarage.getGarageLastId());
+            VehicleGarageDAO.saveVehicleGarage(vehicleGarage);
         }
     }
 

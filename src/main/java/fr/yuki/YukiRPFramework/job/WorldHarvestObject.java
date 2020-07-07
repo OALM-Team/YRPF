@@ -81,15 +81,19 @@ public class WorldHarvestObject {
         CharacterLoopAnimation characterLoopAnimation = harvestableObject.getCharacterLoopHarvestAnimation(player);
         characterLoopAnimation.start();
         Onset.delay(this.harvestableObject.getBaseHarvestTime(), () -> {
-            characterLoopAnimation.stop();
-            CharacterManager.setCharacterFreeze(player, false);
+            try {
+                characterLoopAnimation.stop();
+                CharacterManager.setCharacterFreeze(player, false);
 
-            //UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS,
-            //        "Vous avez récolté " + this.harvestableObject.getName() + " en " + (this.harvestableObject.getBaseHarvestTime() / 1000) + "s");
+                //UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS,
+                //        "Vous avez récolté " + this.harvestableObject.getName() + " en " + (this.harvestableObject.getBaseHarvestTime() / 1000) + "s");
 
-            JobManager.addExp(player, job.getJobType(), this.harvestableObject.getXp());
-            this.harvestableObject.onHarvestDone(player, this);
+                JobManager.addExp(player, job.getJobType(), this.harvestableObject.getXp());
+                this.harvestableObject.onHarvestDone(player, this);
 
+            }catch (Exception ex) {
+                Onset.print("Error when harvesting the object: " + ex.toString());
+            }
             this.delete();
         });
     }

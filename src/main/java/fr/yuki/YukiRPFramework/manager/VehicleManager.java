@@ -127,7 +127,7 @@ public class VehicleManager {
      */
     public static InventoryItem createKeyForVehicle(Vehicle vehicle, Player player) {
         String vehicleUUID = vehicle.getPropertyString("uuid");
-        InventoryItem keyItem = InventoryManager.addItemToPlayer(player, ItemTemplateEnum.VKEY.id, 1);
+        InventoryItem keyItem = InventoryManager.addItemToPlayer(player, ItemTemplateEnum.VKEY.id, 1, false);
         if(keyItem == null) return null;
         keyItem.getExtraProperties().put("vehicle_uuid", vehicleUUID);
         InventoryManager.getMainInventory(player).save();
@@ -141,9 +141,12 @@ public class VehicleManager {
      */
     public static void clearKeysForVehicle(Vehicle vehicle, Player player) {
         for(InventoryItem keyItem : InventoryManager.getMainInventory(player).getItemsByType(ItemTemplateEnum.VKEY.id)) {
-            if(keyItem.getExtraProperties().get("vehicle_uuid").equals(vehicle.getPropertyString("uuid"))) {
-                InventoryManager.getMainInventory(player).removeItem(keyItem, keyItem.getAmount());
+            try {
+                if(keyItem.getExtraProperties().get("vehicle_uuid").equals(vehicle.getPropertyString("uuid"))) {
+                    InventoryManager.getMainInventory(player).removeItem(keyItem, keyItem.getAmount());
+                }
             }
+            catch (Exception ex) {}
         }
     }
 
@@ -314,15 +317,22 @@ public class VehicleManager {
         if(vehicle.getLocation().distance(player.getLocation()) > getInteractionDistance(vehicle)) return false;
 
         Account account = WorldManager.getPlayerAccount(player);
-        if(vehicle.getPropertyInt("locked") == 1) {
-            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "action.vehicle.locked"));
-            return true;
+        try{
+            if(vehicle.getPropertyInt("locked") == 1) {
+                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "action.vehicle.locked"));
+                return true;
+            }
+            if(!UIStateManager.handleUIToogle(player, "vchest")) return true;
+        } catch (Exception ex) {
+            return false;
         }
-        if(!UIStateManager.handleUIToogle(player, "vchest")) return true;
-
         for(WearableWorldObject wearableWorldObject : getVehicleWearableObjects(vehicle)) {
-            player.callRemoteEvent("GlobalUI:DispatchToUI",
-                    new Gson().toJson(new AddVChestItemPayload(wearableWorldObject.getUuid(), wearableWorldObject.getModelId(), "")));
+            try {
+                player.callRemoteEvent("GlobalUI:DispatchToUI",
+                        new Gson().toJson(new AddVChestItemPayload(wearableWorldObject.getUuid(), wearableWorldObject.getModelId(), "")));
+            }catch (Exception ex) {
+
+            }
         }
         return true;
     }

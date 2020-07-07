@@ -33,6 +33,8 @@ public class SellerDAO {
 
             sellers.add(seller);
         }
+        preparedStatement.close();
+        resultSet.close();
         return sellers;
     }
 }

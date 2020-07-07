@@ -79,6 +79,11 @@ public class Turtle implements HarvestableObject {
 
     @Override
     public void onHarvestDone(Player player, WorldHarvestObject worldHarvestObject) {
-        InventoryManager.addItemToPlayer(player, ItemTemplateEnum.TURTLE.id, 1);
+        InventoryManager.addItemToPlayer(player, ItemTemplateEnum.TURTLE.id, 1, true);
+    }
+
+    @Override
+    public Vector getScale() {
+        return new Vector(1, 1, 1);
     }
 }

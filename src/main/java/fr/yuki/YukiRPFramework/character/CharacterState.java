@@ -38,6 +38,7 @@ public class CharacterState {
     private int currentCompagnyInvited = -1;
     private CharacterToolAnimation currentPhoneAttached = null;
     private GenericMenu currentGenericMenu = null;
+    private boolean isInvisible = false;
 
     public CharacterState() {
         this.uiState = new UIState();
@@ -69,6 +70,7 @@ public class CharacterState {
     }
 
     public void setFirstSpawn(boolean firstSpawn) {
+        Onset.print("FirstSpawn: " + firstSpawn);
         this.firstSpawn = firstSpawn;
     }
 
@@ -221,5 +223,13 @@ public class CharacterState {
 
     public void setCurrentGenericMenu(GenericMenu currentGenericMenu) {
         this.currentGenericMenu = currentGenericMenu;
+    }
+
+    public boolean isInvisible() {
+        return isInvisible;
+    }
+
+    public void setInvisible(boolean invisible) {
+        isInvisible = invisible;
     }
 }

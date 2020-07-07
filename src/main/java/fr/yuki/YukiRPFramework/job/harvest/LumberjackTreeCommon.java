@@ -54,6 +54,11 @@ public class LumberjackTreeCommon implements HarvestableObject {
     }
 
     @Override
+    public Vector getScale() {
+        return new Vector(1, 1, 1);
+    }
+
+    @Override
     public ItemTemplateEnum getItemRequired() {
         return ItemTemplateEnum.LUMBERJACK_HATCHET_1;
     }

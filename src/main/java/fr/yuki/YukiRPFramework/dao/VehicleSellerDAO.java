@@ -38,6 +38,8 @@ public class VehicleSellerDAO {
 
             vehicleSellers.add(vehicleSeller);
         }
+        preparedStatement.close();
+        resultSet.close();
         return vehicleSellers;
     }
 }

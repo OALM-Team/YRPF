@@ -42,6 +42,11 @@ public class DeliveryPackage implements HarvestableObject {
     }
 
     @Override
+    public Vector getScale() {
+        return new Vector(1, 1, 1);
+    }
+
+    @Override
     public boolean needItemToHarvest() {
         return false;
     }

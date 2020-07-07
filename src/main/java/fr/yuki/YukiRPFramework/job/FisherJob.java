@@ -29,7 +29,7 @@ public class FisherJob extends Job {
 
     @Override
     public int getRefillInterval() {
-        return 60000 * 5;
+        return 60000 * 3;
     }
 
     @Override

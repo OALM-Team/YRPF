@@ -233,6 +233,7 @@ public class PhoneManager {
         urgencyPhoneMessage.setMessage(payload.getText());
         urgencyPhoneMessage.setMessageType(1);
         urgencyPhoneMessage.setService(payload.getService().toLowerCase());
+        urgencyPhoneMessage.setPosition(player.getLocation());
         urgencyMessages.get(payload.getService()).add(urgencyPhoneMessage);
         UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, "Votre demande est désormais en attente");
 
@@ -252,7 +253,9 @@ public class PhoneManager {
         for(Player wPlayer : whitelistedPlayers) {
             try {
                 player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new AddPhoneUrgencyPayload(
-                        urgencyPhoneMessage.getId(), urgencyPhoneMessage.getFromNumber(), urgencyPhoneMessage.getMessage(), urgencyPhoneMessage.getService()
+                        urgencyPhoneMessage.getId(), urgencyPhoneMessage.getFromNumber(), urgencyPhoneMessage.getMessage(),
+                        urgencyPhoneMessage.getService(),
+                        urgencyPhoneMessage.getPosition().getX(), urgencyPhoneMessage.getPosition().getY(), urgencyPhoneMessage.getPosition().getZ()
                 )));
                 UIStateManager.sendNotification(wPlayer, ToastTypeEnum.SUCCESS, "Vous avez reçu une nouvelle urgence");
                 SoundManager.playSound3D("sounds/notif_1.mp3", wPlayer.getLocation(), 350, 2);
@@ -306,7 +309,9 @@ public class PhoneManager {
         Collections.reverse(urgencyPhoneMessages); // Reverse to get the newest before
         for(UrgencyPhoneMessage urgencyPhoneMessage : urgencyPhoneMessages) {
             player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new AddPhoneUrgencyPayload(
-                    urgencyPhoneMessage.getId(), urgencyPhoneMessage.getFromNumber(), urgencyPhoneMessage.getMessage(), urgencyPhoneMessage.getService()
+                    urgencyPhoneMessage.getId(), urgencyPhoneMessage.getFromNumber(), urgencyPhoneMessage.getMessage(),
+                    urgencyPhoneMessage.getService(),
+                    urgencyPhoneMessage.getPosition().getX(), urgencyPhoneMessage.getPosition().getY(), urgencyPhoneMessage.getPosition().getZ()
             )));
         }
     }

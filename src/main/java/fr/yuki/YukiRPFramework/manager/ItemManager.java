@@ -177,8 +177,8 @@ public class ItemManager {
         Vehicle vehicle = VehicleManager.getNearestVehicle(player.getLocation());
         if(vehicle == null) return;
         if(vehicle.getLocation().distance(player.getLocation()) > 500) return;
-        Inventory inventory = InventoryManager.getMainInventory(player);
-        inventory.removeItem(inventoryItem, 1);
+        //Inventory inventory = InventoryManager.getMainInventory(player);
+        //inventory.removeItem(inventoryItem, 1);
 
         CharacterLoopAnimation characterLoopAnimation = new CharacterLoopAnimation(player, Animation.COMBINE,
                 5000, 2, "sounds/car_repair_1.mp3");

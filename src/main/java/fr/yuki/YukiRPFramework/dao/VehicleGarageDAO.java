@@ -32,6 +32,8 @@ public class VehicleGarageDAO {
         } else {
             return null;
         }
+        returnId.close();
+        preparedStatement.close();
         return vehicleGarage;
     }
 
@@ -57,6 +59,8 @@ public class VehicleGarageDAO {
 
             vehicleGarages.add(vehicleGarage);
         }
+        preparedStatement.close();
+        resultSet.close();
         return vehicleGarages;
     }
 
@@ -71,5 +75,6 @@ public class VehicleGarageDAO {
         preparedStatement.setDouble(6, vehicleGarage.getHealth());
         preparedStatement.setInt(7, vehicleGarage.getVehicleGarageId());
         preparedStatement.execute();
+        preparedStatement.close();
     }
 }

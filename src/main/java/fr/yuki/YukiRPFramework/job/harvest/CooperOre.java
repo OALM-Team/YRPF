@@ -57,7 +57,7 @@ public class CooperOre implements HarvestableObject {
 
     @Override
     public int distanceToInteract() {
-        return 400;
+        return 300;
     }
 
     @Override
@@ -67,6 +67,11 @@ public class CooperOre implements HarvestableObject {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public Vector getScale() {
+        return new Vector(1, 1, 1);
     }
 
     @Override

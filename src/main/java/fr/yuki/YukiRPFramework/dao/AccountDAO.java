@@ -2,6 +2,7 @@ package fr.yuki.YukiRPFramework.dao;
 
 import com.google.gson.Gson;
 import fr.yuki.YukiRPFramework.Database;
+import fr.yuki.YukiRPFramework.manager.PhoneManager;
 import fr.yuki.YukiRPFramework.manager.WeaponManager;
 import fr.yuki.YukiRPFramework.manager.WorldManager;
 import fr.yuki.YukiRPFramework.model.Account;
@@ -28,6 +29,8 @@ public class AccountDAO {
         if(resultSet.next()) {
             account = fetchResultSet(resultSet);
         }
+        resultSet.close();
+        preparedStatement.close();
         return account;
     }
 
@@ -40,6 +43,8 @@ public class AccountDAO {
         if(resultSet.next()) {
             account = fetchResultSet(resultSet);
         }
+        resultSet.close();
+        preparedStatement.close();
         return account;
     }
 
@@ -101,6 +106,8 @@ public class AccountDAO {
         account.setIsInService(0);
         account.setHealth(100);
         account.setCommandLevel(0);
+        account.setBankMoney(4000);
+        account.setPhoneNumber(PhoneManager.generateRandomPhoneNumber());
         account.setSaveX(serverConfig.getSpawnPointX());
         account.setSaveY(serverConfig.getSpawnPointY());
         account.setSaveZ(serverConfig.getSpawnPointZ());
@@ -112,8 +119,8 @@ public class AccountDAO {
         PreparedStatement preparedStatement = Database.getConnection()
                 .prepareStatement("INSERT INTO tbl_account " +
                         "(steam_account_name, steam_id, is_banned, created_at, updated_at, character_creation_request," +
-                        " character_style, character_name, save_x, save_y, save_z, save_h, id_compagny, health) VALUES " +
-                        "(?,?,?,?,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+                        " character_style, character_name, save_x, save_y, save_z, save_h, id_compagny, health, bank_money, phone_number) VALUES " +
+                        "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
 
         preparedStatement.setString(1, account.getSteamName());
         preparedStatement.setString(2, account.getSteamId());
@@ -129,6 +136,8 @@ public class AccountDAO {
         preparedStatement.setDouble(12, account.getSaveH());
         preparedStatement.setInt(13, account.getCompagnyId());
         preparedStatement.setDouble(14, account.getHealth());
+        preparedStatement.setInt(15, account.getBankMoney());
+        preparedStatement.setString(16, account.getPhoneNumber());
         preparedStatement.executeUpdate();
 
         ResultSet returnId = preparedStatement.getGeneratedKeys();
@@ -137,6 +146,8 @@ public class AccountDAO {
         } else {
             return null;
         }
+        returnId.close();
+        preparedStatement.close();
         return account;
     }
 
@@ -190,5 +201,6 @@ public class AccountDAO {
         preparedStatement.setDouble(23, account.getCommandLevel());
         preparedStatement.setDouble(24, account.getId());
         preparedStatement.execute();
+        preparedStatement.close();
     }
 }

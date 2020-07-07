@@ -1,8 +1,11 @@
 package fr.yuki.YukiRPFramework.phone;
 
+import net.onfirenetwork.onsetjava.data.Vector;
+
 public class UrgencyPhoneMessage extends PhoneMessage {
     private int id;
     private String service;
+    private Vector position;
 
     public int getId() {
         return id;
@@ -18,5 +21,13 @@ public class UrgencyPhoneMessage extends PhoneMessage {
 
     public void setService(String service) {
         this.service = service;
+    }
+
+    public Vector getPosition() {
+        return position;
+    }
+
+    public void setPosition(Vector position) {
+        this.position = position;
     }
 }

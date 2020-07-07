@@ -2,6 +2,7 @@ package fr.yuki.YukiRPFramework.job.tools;
 
 import com.google.gson.Gson;
 import fr.yuki.YukiRPFramework.character.CharacterState;
+import fr.yuki.YukiRPFramework.dao.GrowboxDAO;
 import fr.yuki.YukiRPFramework.enums.ItemTemplateEnum;
 import fr.yuki.YukiRPFramework.enums.JobEnum;
 import fr.yuki.YukiRPFramework.enums.ToastTypeEnum;
@@ -13,6 +14,7 @@ import fr.yuki.YukiRPFramework.job.tools.growbox.Pot;
 import fr.yuki.YukiRPFramework.manager.*;
 import fr.yuki.YukiRPFramework.modding.LoopSound3D;
 import fr.yuki.YukiRPFramework.model.Account;
+import fr.yuki.YukiRPFramework.model.GrowboxModel;
 import fr.yuki.YukiRPFramework.model.JobTool;
 import fr.yuki.YukiRPFramework.net.payload.AddGrowboxMenuItemPayload;
 import fr.yuki.YukiRPFramework.net.payload.AddToastPayload;
@@ -22,6 +24,7 @@ import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Vector;
 import net.onfirenetwork.onsetjava.entity.Player;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -30,6 +33,7 @@ public class GrowBox implements JobToolHandler {
     private ArrayList<Pot> pots;
     private ArrayList<StoreLayoutTransform> layoutTransforms;
     private LoopSound3D loopSound3D;
+    private GrowboxModel growboxModel;
 
     public GrowBox(JobTool jobTool) {
         this.jobTool = jobTool;
@@ -118,6 +122,11 @@ public class GrowBox implements JobToolHandler {
 
         // Destroy growbox
         this.jobTool.destroy();
+        try {
+            GrowboxDAO.deleteGrowbox(this.growboxModel);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
     }
 
     public boolean addPot(Player player, WearableWorldObject wearableWorldObject) {
@@ -182,7 +191,7 @@ public class GrowBox implements JobToolHandler {
             return;
         }
         if(pot.getState() < 100) return;
-        if(InventoryManager.addItemToPlayer(player, ItemTemplateEnum.WEED.id, 1) == null) {
+        if(InventoryManager.addItemToPlayer(player, ItemTemplateEnum.WEED.id, 1, true) == null) {
             return;
         }
         pot.removeSeed();
@@ -197,7 +206,7 @@ public class GrowBox implements JobToolHandler {
         if(pot == null) {
             return;
         }
-        if(InventoryManager.addItemToPlayer(player, ItemTemplateEnum.POT.id, 1) == null) {
+        if(InventoryManager.addItemToPlayer(player, ItemTemplateEnum.POT.id, 1, true) == null) {
             return;
         }
         pot.destroyWorldObject();
@@ -226,5 +235,13 @@ public class GrowBox implements JobToolHandler {
 
     public LoopSound3D getLoopSound3D() {
         return loopSound3D;
+    }
+
+    public GrowboxModel getGrowboxModel() {
+        return growboxModel;
+    }
+
+    public void setGrowboxModel(GrowboxModel growboxModel) {
+        this.growboxModel = growboxModel;
     }
 }

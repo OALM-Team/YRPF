@@ -1,11 +1,15 @@
 package fr.yuki.YukiRPFramework.job.deliveryPackage;
 
+import fr.yuki.YukiRPFramework.dao.GrowboxDAO;
 import fr.yuki.YukiRPFramework.enums.JobEnum;
 import fr.yuki.YukiRPFramework.job.tools.GrowBox;
 import fr.yuki.YukiRPFramework.manager.JobManager;
+import fr.yuki.YukiRPFramework.model.GrowboxModel;
 import fr.yuki.YukiRPFramework.model.JobTool;
 import net.onfirenetwork.onsetjava.data.Vector;
 import net.onfirenetwork.onsetjava.entity.Player;
+
+import java.sql.SQLException;
 
 public class GrowBoxDeliveryPackage extends DeliveryPackage {
     public GrowBoxDeliveryPackage(Player player, Vector position, Vector rotation) {
@@ -50,5 +54,21 @@ public class GrowBoxDeliveryPackage extends DeliveryPackage {
         jobTool.setJobToolType("GROWBOX");
         JobManager.getJobTools().add(jobTool);
         jobTool.spawn(JobManager.getJobs().get(JobEnum.WEED));
+
+        // Insert new growbox
+        GrowBox growBox = (GrowBox)jobTool.getJobToolHandler();
+        GrowboxModel growboxModel = new GrowboxModel();
+        growboxModel.setX(this.position.getX());
+        growboxModel.setY(this.position.getY());
+        growboxModel.setZ(this.position.getZ());
+        growboxModel.setRx(this.rotation.getX());
+        growboxModel.setRy(this.rotation.getY());
+        growboxModel.setRz(this.rotation.getZ());
+        growBox.setGrowboxModel(growboxModel);
+        try {
+            GrowboxDAO.insertGrowbox(growboxModel);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
     }
 }

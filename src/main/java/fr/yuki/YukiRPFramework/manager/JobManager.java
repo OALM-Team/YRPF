@@ -74,6 +74,18 @@ public class JobManager {
         spawnJobOutfitsPoint();
         spawnVehicleRentalSpawns();
         initPaycheck();
+        //initWorldWearableObjectExpiration();
+    }
+
+    public static void initWorldWearableObjectExpiration() {
+        Onset.timer(60000, () -> {
+            for(WearableWorldObject wearableWorldObject : wearableWorldObjects.stream().filter(x -> !x.isWeared() && x.getVehicleUUID().equals(""))
+                    .collect(Collectors.toList())) {
+                try {
+                    if(wearableWorldObject.isExpired()) wearableWorldObject.deleteObject();
+                }catch (Exception ex) {}
+            }
+        });
     }
 
     public static void initPaycheck() {
@@ -87,7 +99,6 @@ public class JobManager {
                             .findFirst().orElse(null);
                     if(accountJobWhitelist != null){
                         UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, "Salaire +" + paycheckAmount + "$ !");
-                        //InventoryManager.addItemToPlayer(player, ItemTemplateEnum.CASH.id, paycheckAmount);
                         account.setBankMoney(account.getBankMoney() + paycheckAmount);
                     }
                 } catch (Exception ex) {}
@@ -231,6 +242,13 @@ public class JobManager {
         return true;
     }
 
+    public static int getJobLevelForPlayer(Player player, String job) {
+        Account account = WorldManager.getPlayerAccount(player);
+        ArrayList<CharacterJobLevel> characterJobLevels = account.decodeCharacterJob();
+        CharacterJobLevel characterJobLevel = characterJobLevels.stream().filter(x -> x.getJobId().equals(job)).findFirst().orElse(null);
+        return characterJobLevel.getJobLevel().getLevel();
+    }
+
     /**
      * Try to find a object to harvest for the player
      * @param player The player
@@ -244,16 +262,18 @@ public class JobManager {
         Account account = WorldManager.getPlayerAccount(player);
         for(Map.Entry<String, Job> job : jobs.entrySet()) {
             for(WorldHarvestObject worldHarvestObject : job.getValue().getWorldHarvestObjects()) {
-                if(worldHarvestObject.isNear(player)) {
-                    if(CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject() != null) {
-                        UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "action.vehicle.wearSomething"));
+                try {
+                    if(worldHarvestObject.isNear(player)) {
+                        if(CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject() != null) {
+                            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "action.vehicle.wearSomething"));
+                            return true;
+                        }
+
+
+                        worldHarvestObject.harvest(player);
                         return true;
                     }
-
-
-                    worldHarvestObject.harvest(player);
-                    return true;
-                }
+                } catch (Exception ex) {}
             }
         }
         return false;
@@ -316,7 +336,7 @@ public class JobManager {
             //UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, "Vous avez vendu votre " + inventoryItem.getTemplate().getName() +
             //        " pour " + sellListItem.getPrice() + "$");
             jobNPCNearby.getNpc().setAnimation(Animation.THUMBSUP);
-            InventoryManager.addItemToPlayer(player, ItemTemplateEnum.CASH.id, sellListItem.getPrice());
+            InventoryManager.addItemToPlayer(player, ItemTemplateEnum.CASH.id, sellListItem.getPrice(), false);
         }
         return true;
     }
@@ -331,7 +351,7 @@ public class JobManager {
             JobNPCListItem jobNPCListItem = jobNPCNearby.getBuyItemByWearableItem(CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject());
             if(jobNPCListItem != null) {
                 Onset.print("Selling item to the npc price=" + jobNPCListItem.getPrice());
-                InventoryManager.addItemToPlayer(player, ItemTemplateEnum.CASH.id, jobNPCListItem.getPrice());
+                InventoryManager.addItemToPlayer(player, ItemTemplateEnum.CASH.id, jobNPCListItem.getPrice(), false);
                 CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject().requestUnwear(player, true);
                 jobNPCNearby.getNpc().setAnimation(Animation.THUMBSUP);
                 SoundManager.playSound3D("sounds/cash_register.mp3", player.getLocation(), 200, 1);

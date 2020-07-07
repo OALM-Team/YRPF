@@ -34,6 +34,7 @@ public class WearableWorldObject {
     private int vehicleStorageLayoutIndex;
     private DeliveryPointGoal deliveryPointGoal;
     private Vector originPosition;
+    private long lastInteractionAt;
 
     public WearableWorldObject(int modelId, boolean isPhysicEnable, Animation wearAnimation, CharacterToolAnimation toolAnimation, Vector position) {
         this.uuid = UUID.randomUUID().toString();
@@ -42,7 +43,9 @@ public class WearableWorldObject {
         this.wearAnimation = wearAnimation;
         this.toolAnimation = toolAnimation;
         this.position = position;
+        this.vehicleUUID = "";
         this.originPosition = position;
+        this.lastInteractionAt = System.currentTimeMillis();
         this.createWorldObject();
     }
 
@@ -57,6 +60,10 @@ public class WearableWorldObject {
         this.worldObject.setProperty("canBeWear", 1, true);
     }
 
+    public boolean isWeared() {
+        return this.worldObject == null;
+    }
+
     /**
      * Wear the object on the player and play the animation
      * @param player The player
@@ -67,6 +74,8 @@ public class WearableWorldObject {
         player.setAnimation(this.wearAnimation);
         this.worldObject.destroy();
         Account account = WorldManager.getPlayerAccount(player);
+
+        this.lastInteractionAt = System.currentTimeMillis();
 
         // Set the delivery location
         if(deliveryPointGoal != null) {
@@ -124,7 +133,7 @@ public class WearableWorldObject {
                     CharacterJobLevel characterJobLevel = characterJobLevels.stream().filter(x -> x.getJobId().equals(JobEnum.DELIVERY.type)).findFirst().orElse(null);
 
                     int rewardPerDistance = (int)Math.floor(((originPosition.distance(player.getLocation()) / 1000) / 2.5));
-                    InventoryManager.addItemToPlayer(player, ItemTemplateEnum.CASH.id, rewardPerDistance);
+                    InventoryManager.addItemToPlayer(player, ItemTemplateEnum.CASH.id, rewardPerDistance, false);
                     SoundManager.playSound3D("sounds/cash_register.mp3", player.getLocation(), 200, 1);
                     delete = true;
                     JobManager.addExp(player, JobEnum.DELIVERY.type, 15);
@@ -140,6 +149,7 @@ public class WearableWorldObject {
             if(!delete) this.createWorldObject();
             player.setAnimation(Animation.STOP);
             CharacterManager.getCharacterStateByPlayer(player).setWearableWorldObject(player, null);
+            this.lastInteractionAt = System.currentTimeMillis();
 
             if(delete) JobManager.getWearableWorldObjects().remove(this);
         }
@@ -147,6 +157,18 @@ public class WearableWorldObject {
             ex.printStackTrace();
             CharacterManager.getCharacterStateByPlayer(player).setWearableWorldObject(player, null);
         }
+    }
+
+    public void deleteObject() {
+        if(this.worldObject != null)  this.worldObject.destroy();
+        JobManager.getWearableWorldObjects().remove(this);
+    }
+
+    public boolean isExpired() {
+        if(lastInteractionAt + (60000*5) < System.currentTimeMillis()) {
+            return true;
+        }
+        return false;
     }
 
     /**

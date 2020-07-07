@@ -32,6 +32,8 @@ import net.onfirenetwork.onsetjava.enums.Animation;
 import java.io.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 
 public class WorldManager {
@@ -118,6 +120,14 @@ public class WorldManager {
                 pickup.setProperty("color", "02e630", true);
                 atm.setPickup(pickup);
                 Onset.getServer().createText3D("ATM [" + I18n.t(WorldManager.getServerConfig().getServerLanguage(), "ui.common.use") + "]", 15, atm.getX(), atm.getY(), atm.getZ() + 150, 0 , 0 ,0);
+
+                GameMapMarker mapMarker = new GameMapMarker();
+                mapMarker.setType("atm");
+                mapMarker.setIcon("icon_atm");
+                mapMarker.setPosition(new ArrayList<>());
+                mapMarker.getPosition().add((int)atm.getY());
+                mapMarker.getPosition().add((int)atm.getX());
+                MapManager.getMapConfig().getMarkers().add(mapMarker);
             }
             catch(Exception ex) {
                 Onset.print("Can't spawn the atm: " + ex.toString());
@@ -184,11 +194,14 @@ public class WorldManager {
      */
     public static Player findPlayerByAccountId(int accountId) {
         for (Player p : Onset.getPlayers()) {
-            if(CharacterManager.getCharacterStateByPlayer(p) == null) continue;
-            if(p.getProperty("accountId") == null) continue;
-            if(p.getPropertyInt("accountId") == accountId) {
-                return p;
+            try {
+                if(CharacterManager.getCharacterStateByPlayer(p) == null) continue;
+                if(p.getProperty("accountId") == null) continue;
+                if(p.getPropertyInt("accountId") == accountId) {
+                    return p;
+                }
             }
+            catch (Exception ex) {}
         }
         return null;
     }
@@ -198,42 +211,46 @@ public class WorldManager {
      * @param player The player
      */
     public static void handleInteract(Player player) {
-        if(CharacterManager.getCharacterStateByPlayer(player).isDead()) {
-            return;
-        }
-
-        CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
-        if(!state.canInteract()) return;
-
-        // Check weared object
-        if(CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject() != null && player.getVehicle() == null) {
-            JobManager.handleUnwearObject(player);
-            return;
-        }
-
-        if(ATMManager.handleATMInteract(player)) return;
-        if(handleOutfitPointsInteract(player)) return;
-        if(GarageManager.handleVSellerInteract(player)) return;
-        if(player.getVehicle() == null)
-            if(handlePickupGroundItem(player)) return;
-        if(FuelManager.interactFuelPoint(player, false)) return;
-        if(JobManager.tryToHarvest(player)) return;
-        if(player.getVehicle() == null) {
-            if(VehicleManager.handleVehicleChestStorageRequest(player)) return;
-        }
-        if(GarageManager.handleGarageInteract(player)) return;
-        if(player.getVehicle() == null){
-            if(JobManager.requestVehicleRental(player)) return;
-        } else {
-            if(JobManager.getNearbyVehicleRental(player) != null) {
-                JobManager.destroyRentalVehiclesForPlayer(player);
+        try {
+            if(CharacterManager.getCharacterStateByPlayer(player).isDead()) {
                 return;
             }
+
+            CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
+            if(!state.canInteract()) return;
+
+            // Check weared object
+            if(CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject() != null && player.getVehicle() == null) {
+                JobManager.handleUnwearObject(player);
+                return;
+            }
+
+            if(ATMManager.handleATMInteract(player)) return;
+            if(handleOutfitPointsInteract(player)) return;
+            if(GarageManager.handleVSellerInteract(player)) return;
+            if(player.getVehicle() == null)
+                if(handlePickupGroundItem(player)) return;
+            if(FuelManager.interactFuelPoint(player, false)) return;
+            if(JobManager.tryToHarvest(player)) return;
+            if(player.getVehicle() == null) {
+                if(VehicleManager.handleVehicleChestStorageRequest(player)) return;
+            }
+            if(GarageManager.handleGarageInteract(player)) return;
+            if(player.getVehicle() == null){
+                if(JobManager.requestVehicleRental(player)) return;
+            } else {
+                if(JobManager.getNearbyVehicleRental(player) != null) {
+                    JobManager.destroyRentalVehiclesForPlayer(player);
+                    return;
+                }
+            }
+            if(player.getVehicle() == null)
+                if(JobManager.handleSellJobNpcInventoryItem(player)) return;
+            if(player.getVehicle() == null) if(JobManager.handleJobOutfitRequest(player)) return;
+            if(player.getVehicle() == null) if(handleSellerInteract(player)) return;
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
-        if(player.getVehicle() == null)
-            if(JobManager.handleSellJobNpcInventoryItem(player)) return;
-        if(player.getVehicle() == null) if(JobManager.handleJobOutfitRequest(player)) return;
-        if(player.getVehicle() == null) if(handleSellerInteract(player)) return;
     }
 
     public static boolean handleOutfitPointsInteract(Player player) {
@@ -278,12 +295,17 @@ public class WorldManager {
     }
 
     public static boolean handlePickupGroundItem(Player player) {
-        GroundItem groundItem = getNearestGroundItem(player.getLocation());
-        if(groundItem == null) return false;
-        CharacterState characterState = CharacterManager.getCharacterStateByPlayer(player);
-        if(!characterState.canInteract()) return false;
-        groundItem.pickByPlayer(player);
-        return true;
+        try {
+            GroundItem groundItem = getNearestGroundItem(player.getLocation());
+            if(groundItem == null) return false;
+            CharacterState characterState = CharacterManager.getCharacterStateByPlayer(player);
+            if(!characterState.canInteract()) return false;
+            groundItem.pickByPlayer(player);
+            return true;
+        } catch (Exception ex) {
+            Onset.print("Can't pick up the object on the ground: " + ex.toString());
+            return false;
+        }
     }
 
     public static boolean handleSellerInteract(Player player) {
@@ -378,7 +400,7 @@ public class WorldManager {
                         I18n.t(account.getLang(), "toast.seller.no_enought_money_on_me", String.valueOf(payload.getQuantity()),itemTemplate.getName()));
                 return;
             }
-            if(InventoryManager.addItemToPlayer(player, String.valueOf(itemTemplate.getId()), payload.getQuantity()) == null) {
+            if(InventoryManager.addItemToPlayer(player, String.valueOf(itemTemplate.getId()), payload.getQuantity(), true) == null) {
                 return;
             }
             inventory.removeItem(inventory.getItemByType(ItemTemplateEnum.CASH.id), totalPrice);
@@ -394,7 +416,7 @@ public class WorldManager {
             }
             int totalPrice = (-(sellerItem.getPrice())) * payload.getQuantity();
             inventory.removeItem(inventoryItem, payload.getQuantity());
-            InventoryManager.addItemToPlayer(player, ItemTemplateEnum.CASH.id, totalPrice);
+            InventoryManager.addItemToPlayer(player, ItemTemplateEnum.CASH.id, totalPrice, false);
             UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS,
                     I18n.t(account.getLang(), "toast.seller.sell_success", String.valueOf(payload.getQuantity()),itemTemplate.getName()));
         }

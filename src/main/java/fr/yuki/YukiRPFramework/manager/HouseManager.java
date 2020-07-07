@@ -134,6 +134,19 @@ public class HouseManager {
         objectPlacementInstance.setEditableBy(player);
     }
 
+    public static void handleGiveHouseKey(Player player, int target) {
+        Player playerTarget = Onset.getPlayers().stream().filter(x -> x.getId() == target)
+                .findFirst().orElse(null);
+        if(playerTarget == null) return;
+        House house = HouseManager.getHouseAtLocation(player.getLocation());
+        if(house == null) return;
+        if(!HouseManager.canBuildInHouse(player, house)) return;
+        Account targetAccount = WorldManager.getPlayerAccount(playerTarget);
+        if(house.getAllowedPlayers().contains(targetAccount) || playerTarget.getId() == house.getAccountId()) return;
+        house.getAllowedPlayers().add(targetAccount.getId());
+        UIStateManager.sendNotification(playerTarget, ToastTypeEnum.SUCCESS, "Vous avez désormais les clés de la maison");
+    }
+
     public static boolean canBuildInHouse(Player player, House house) {
         try {
             Account account = WorldManager.getPlayerAccount(player);

@@ -40,6 +40,7 @@ public class YukiRPFrameworkPlugin {
             Database.init();
             Onset.registerListener(this);
             ModdingManager.init();
+            MapManager.init();
             InventoryManager.init();
             ItemManager.init();
             CharacterManager.init();
@@ -49,7 +50,6 @@ public class YukiRPFrameworkPlugin {
             WorldManager.init();
             JobManager.init();
             AccountManager.init();
-            MapManager.init();
             GrowboxManager.init();
             FuelManager.init();
             PhoneManager.init();
@@ -89,6 +89,16 @@ public class YukiRPFrameworkPlugin {
             Onset.registerCommand("settime", new SetTimeCommand());
             Onset.registerCommand("getid", new GetIdCommand());
             Onset.registerCommand("setcommandlevel", new SetCommandLevelCommand());
+            Onset.registerCommand("requestcreation", new RequestCharacterCreationCommand());
+            Onset.registerCommand("invis", new InvisCommand());
+            Onset.registerCommand("regenphone", new RegenPhoneNumberCommand());
+            Onset.registerCommand("ann", new AnnCommand());
+            Onset.registerCommand("itemall", new AddItemAllCommand());
+            Onset.registerCommand("fgc", new ForceGarbageCommand());
+            Onset.registerCommand("debugtest", new DebugTestCommand());
+            Onset.registerCommand("kick", new KickCommand());
+            Onset.registerCommand("setclothe", new SetClotheCommand());
+            Onset.registerCommand("setcharacterscale", new SetCharacterScaleCommand());
 
             // Register remote events
             Onset.registerRemoteEvent("GlobalUI:ToogleWindow");
@@ -144,13 +154,11 @@ public class YukiRPFrameworkPlugin {
             Onset.registerRemoteEvent("Character:Interact");
             Onset.registerRemoteEvent("Character:InspectCharacter");
             Onset.registerRemoteEvent("GenericMenu:Dismiss");
+            Onset.registerRemoteEvent("Character:GiveHouseKey");
         } catch (Exception ex) {
             ex.printStackTrace();
             Onset.print("Can't start the plugin because : " + ex.toString());
         }
-    }
-
-    private void initTebex() throws Exception {
     }
 
     @EventHandler
@@ -160,6 +168,14 @@ public class YukiRPFrameworkPlugin {
             Onset.print("Player joining steamId=" + evt.getPlayer().getSteamId());
             Account account = AccountDAO.findAccountBySteamId(evt.getPlayer().getSteamId());
             ServerConfig serverConfig = WorldManager.getServerConfig();
+
+            // Clear state
+            CharacterState state = CharacterManager.getCharacterStateByPlayer(evt.getPlayer());
+            if(state != null) {
+                state.setCurrentPhoneCall(null);
+                state.setCurrentObjectPlacementInstance(null);
+                state.setCuffed(false);
+            }
 
             // Create the account if doesnt exist
             if(account == null) {
@@ -186,10 +202,6 @@ public class YukiRPFrameworkPlugin {
 
                 // Set properties for the player
                 evt.getPlayer().setProperty("accountId", account.getId(), true);
-
-                // Start money
-                InventoryManager.addItemToPlayer(evt.getPlayer(), ItemTemplateEnum.CASH.id, 500);
-                account.setBankMoney(3500);
             }
             else {
                 if(account.getIsBanned()==1) {
@@ -200,13 +212,26 @@ public class YukiRPFrameworkPlugin {
                 // Set properties for the player
                 evt.getPlayer().setProperty("accountId", account.getId(), true);
 
-                evt.getPlayer().setSpawnLocation(new Vector(account.getSaveX(), account.getSaveY(), account.getSaveZ()), 0);
                // evt.getPlayer().setLocation(new Vector(account.getSaveX(), account.getSaveY(), account.getSaveZ()));
                 CharacterManager.teleportWithLevelLoading(evt.getPlayer(), new Location(account.getSaveX(),
                         account.getSaveY(),
                         account.getSaveZ() + 50,
                         account.getSaveH()));
-                Onset.broadcast("<span color=\"#ffee00\">" + account.getCharacterName() + " est de retour !</>");
+
+                if(account.getCharacterName().equals("Unknown")) { // Recovery
+                    account.setCharacterCreationRequest(1);
+                    account.setPhoneNumber(PhoneManager.generateRandomPhoneNumber());
+                    account.setBankMoney(4000);
+                    Onset.print("Phone number generated : " + account.getPhoneNumber());
+
+                    evt.getPlayer().setSpawnLocation(new Vector(serverConfig.getSpawnPointX(),
+                            serverConfig.getSpawnPointY(), serverConfig.getSpawnPointZ()), 0);
+                    CharacterManager.teleportWithLevelLoading(evt.getPlayer(), new Location(serverConfig.getSpawnPointX(),
+                            serverConfig.getSpawnPointY(), serverConfig.getSpawnPointZ(), serverConfig.getSpawnPointH()));
+                } else {
+                    evt.getPlayer().setSpawnLocation(new Vector(account.getSaveX(), account.getSaveY(), account.getSaveZ()), 0);
+                    //Onset.broadcast("<span color=\"#ffee00\">" + account.getCharacterName() + " est de retour !</>");
+                }
 
                 if(account.getOriginalStyle().equals("")) {
                     account.setOriginalStyle(account.getCharacterStyle());
@@ -239,7 +264,6 @@ public class YukiRPFrameworkPlugin {
                 Account finalAccount = account;
                 Bag bag = ItemManager.bags.stream().filter(x -> x.getModelId() == finalAccount.getBagId())
                         .findFirst().orElse(null);
-                CharacterState state = CharacterManager.getCharacterStateByPlayer(evt.getPlayer());
                 state.attachBag(bag, evt.getPlayer());
             }
 
@@ -516,6 +540,10 @@ public class YukiRPFrameworkPlugin {
 
                 case "Character:InspectCharacter":
                     CharacterManager.handleInspectCharacter(evt.getPlayer(), Integer.parseInt((evt.getArgs()[0]).toString()));
+                    break;
+
+                case "Character:GiveHouseKey":
+                    HouseManager.handleGiveHouseKey(evt.getPlayer(), Integer.parseInt((evt.getArgs()[0]).toString()));
                     break;
             }
         }

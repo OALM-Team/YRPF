@@ -1,19 +1,48 @@
 package fr.yuki.YukiRPFramework.manager;
 
+import fr.yuki.YukiRPFramework.dao.GrowboxDAO;
+import fr.yuki.YukiRPFramework.enums.JobEnum;
 import fr.yuki.YukiRPFramework.job.tools.Generator;
 import fr.yuki.YukiRPFramework.job.tools.GrowBox;
+import fr.yuki.YukiRPFramework.model.GrowboxModel;
 import fr.yuki.YukiRPFramework.model.JobTool;
 import fr.yuki.YukiRPFramework.net.payload.GrowboxFillWaterPotPayload;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Vector;
 import net.onfirenetwork.onsetjava.entity.Player;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.stream.Collectors;
 
 public class GrowboxManager {
-    public static void init() {
+    public static void init() throws SQLException {
+        // Load growboxes
+        for(GrowboxModel growboxModel : GrowboxDAO.loadGrowbox()) {
+            JobTool jobTool = new JobTool();
+            jobTool.setId(-1);
+            jobTool.setModelId(50007);
+            jobTool.setName("GrowBox");
+            jobTool.setJobType("WEED");
+            jobTool.setLevelRequired(1);
+            jobTool.setReward(0);
+            jobTool.setX(growboxModel.getX());
+            jobTool.setY(growboxModel.getY());
+            jobTool.setZ(growboxModel.getZ());
+            jobTool.setRx(growboxModel.getRx());
+            jobTool.setRy(growboxModel.getRy());
+            jobTool.setRz(growboxModel.getRz());
+            jobTool.setSx(1);
+            jobTool.setSy(1);
+            jobTool.setSz(1);
+            jobTool.setJobToolType("GROWBOX");
+            ((GrowBox)jobTool.getJobToolHandler()).setGrowboxModel(growboxModel);
+            JobManager.getJobTools().add(jobTool);
+            jobTool.spawn(JobManager.getJobs().get(JobEnum.WEED));
+        }
+
         Onset.timer(10000, () -> {
             tickGrow();
         });

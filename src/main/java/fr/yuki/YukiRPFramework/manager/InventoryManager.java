@@ -51,9 +51,11 @@ public class InventoryManager {
     public static ArrayList<Inventory> getInventoriesForAccount(int accountId) {
         ArrayList<Inventory> playerInventories = new ArrayList<>();
         for(Map.Entry<Integer, Inventory> inventoryEntry : inventories.entrySet()) {
-            if(accountId == inventoryEntry.getValue().getCharacterId()) {
-                playerInventories.add(inventoryEntry.getValue());
-            }
+            try {
+                if(accountId == inventoryEntry.getValue().getCharacterId()) {
+                    playerInventories.add(inventoryEntry.getValue());
+                }
+            }catch (Exception ex) {}
         }
         return playerInventories;
     }
@@ -65,7 +67,7 @@ public class InventoryManager {
      * @param quantity The quantity
      * @return The fresh or existing item
      */
-    public static InventoryItem addItemToPlayer(Player player, String templateId, int quantity) {
+    public static InventoryItem addItemToPlayer(Player player, String templateId, int quantity, boolean checkWeight) {
         Onset.print("Add item=" + templateId + " to size=" + getInventoriesForAccount(player.getPropertyInt("accountId")).size());
         Inventory inventory = getInventoriesForAccount(player.getPropertyInt("accountId")).get(0);
         InventoryItem inventoryItem = new InventoryItem();
@@ -75,9 +77,11 @@ public class InventoryManager {
         inventoryItem.setExtraProperties(new HashMap<>());
 
         Account account = WorldManager.getPlayerAccount(player);
-        if(!checkInventoryWeight(player, inventoryItem)) {
-            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.inventory.no_space_left"));
-            return null;
+        if(checkWeight) {
+            if(!checkInventoryWeight(player, inventoryItem)) {
+                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.inventory.no_space_left"));
+                return null;
+            }
         }
         inventoryItem = inventory.addItem(inventoryItem);
         inventory.save();

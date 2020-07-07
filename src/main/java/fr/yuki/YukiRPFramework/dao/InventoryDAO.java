@@ -43,6 +43,8 @@ public class InventoryDAO {
         } else {
             return null;
         }
+        returnId.close();
+        preparedStatement.close();
         return inventory;
     }
 
@@ -62,6 +64,8 @@ public class InventoryDAO {
         preparedStatement.setString(5, inventory.getContent());
         preparedStatement.setInt(6, inventory.getId());
         preparedStatement.execute();
+
+        preparedStatement.close();
     }
 
     public static HashMap<Integer, Inventory> loadInventories() throws SQLException {
@@ -79,6 +83,8 @@ public class InventoryDAO {
             inventory.parseContent();
             inventoryHashMap.put(inventory.getId(), inventory);
         }
+        resultSet.close();
+        preparedStatement.close();
         return inventoryHashMap;
     }
 }

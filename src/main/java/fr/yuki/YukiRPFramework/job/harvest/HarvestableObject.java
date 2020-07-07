@@ -16,6 +16,7 @@ public interface HarvestableObject {
     int getLevelRequired();
     boolean needItemToHarvest();
     int getModelId();
+    Vector getScale();
     ItemTemplateEnum getItemRequired();
     int distanceToInteract();
     boolean checkRequirements(Player player);

@@ -18,7 +18,7 @@ public class ItemCommand implements CommandExecutor {
             return true;
         }
         ItemTemplate itemTemplate = InventoryManager.getItemTemplates().get(Integer.parseInt(args[0]));
-        InventoryManager.addItemToPlayer(player, String.valueOf(itemTemplate.getId()), Integer.parseInt(args[1]));
+        InventoryManager.addItemToPlayer(player, String.valueOf(itemTemplate.getId()), Integer.parseInt(args[1]), true);
         player.sendMessage("Add item " + itemTemplate.getName() + " to your inventory");
         return true;
     }

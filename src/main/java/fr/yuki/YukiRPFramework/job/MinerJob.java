@@ -3,6 +3,7 @@ package fr.yuki.YukiRPFramework.job;
 import fr.yuki.YukiRPFramework.enums.JobEnum;
 import fr.yuki.YukiRPFramework.job.harvest.CooperOre;
 import fr.yuki.YukiRPFramework.job.harvest.DeliveryPackage;
+import fr.yuki.YukiRPFramework.job.harvest.IronOre;
 
 import java.util.ArrayList;
 
@@ -11,6 +12,7 @@ public class MinerJob extends Job {
         super();
         this.harvestableObjectsTemplate = new ArrayList<>();
         this.harvestableObjectsTemplate.add(new CooperOre());
+        this.harvestableObjectsTemplate.add(new IronOre());
 
         if(this.setup()) {
             this.load();

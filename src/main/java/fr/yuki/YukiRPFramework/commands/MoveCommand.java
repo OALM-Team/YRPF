@@ -2,6 +2,7 @@ package fr.yuki.YukiRPFramework.commands;
 
 import fr.yuki.YukiRPFramework.manager.VehicleManager;
 import fr.yuki.YukiRPFramework.manager.WorldManager;
+import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Vector;
 import net.onfirenetwork.onsetjava.entity.Player;
 import net.onfirenetwork.onsetjava.entity.Vehicle;
@@ -14,6 +15,7 @@ public class MoveCommand implements CommandExecutor {
         if(WorldManager.getPlayerAccount(player).getAdminLevel() == 0) return false;
         Vehicle vehicle = VehicleManager.getNearestVehicle(player.getLocation());
         vehicle.setLocation(new Vector(player.getLocation().getX() + 250, player.getLocation().getY() + 250, player.getLocation().getZ()));
+        Onset.print("Vehicle positon moved");
         return true;
     }
 }

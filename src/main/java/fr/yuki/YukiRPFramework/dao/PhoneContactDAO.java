@@ -44,5 +44,7 @@ public class PhoneContactDAO {
         if(returnId.next()) {
             phoneContact.setId(returnId.getInt(1));
         }
+        returnId.close();
+        preparedStatement.close();
     }
 }

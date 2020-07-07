@@ -22,6 +22,7 @@ public class TimeManager {
 
     public static void tickHour() {
         currentHour += 1f / 60f;
+        if(currentHour > 18 || currentHour < 8) currentHour += (1f / 60f) * 4;
         if(currentHour > 24) currentHour = 0;
         //Onset.print("Time changed, current hour: " + currentHour);
         for(Player player : Onset.getPlayers()) {

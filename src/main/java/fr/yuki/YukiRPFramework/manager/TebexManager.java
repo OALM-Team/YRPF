@@ -63,7 +63,7 @@ public class TebexManager {
         if(!CharacterManager.getCharacterStateByPlayer(player).isHasUIReady()) return false;
 
         ItemTemplate itemTemplate = InventoryManager.getItemTemplates().get(itemId);
-        InventoryManager.addItemToPlayer(player, String.valueOf(itemTemplate.getId()), quantity);
+        InventoryManager.addItemToPlayer(player, String.valueOf(itemTemplate.getId()), quantity, false);
 
         return true;
     }

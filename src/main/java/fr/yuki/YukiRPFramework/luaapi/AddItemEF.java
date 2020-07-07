@@ -15,7 +15,7 @@ public class AddItemEF implements ExportFunction {
         if(player == null) return false;
         Account account = WorldManager.getPlayerAccount(player);
         if(account == null) return false;
-        InventoryManager.addItemToPlayer(player, objects[1].toString(), Integer.parseInt(objects[2].toString()));
+        InventoryManager.addItemToPlayer(player, objects[1].toString(), Integer.parseInt(objects[2].toString()), true);
         return true;
     }
 }

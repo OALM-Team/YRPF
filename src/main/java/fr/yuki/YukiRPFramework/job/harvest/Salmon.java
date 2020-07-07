@@ -79,6 +79,11 @@ public class Salmon implements HarvestableObject {
 
     @Override
     public void onHarvestDone(Player player, WorldHarvestObject worldHarvestObject) {
-        InventoryManager.addItemToPlayer(player, ItemTemplateEnum.SALMON.id, Basic.randomNumber(1, 4));
+        InventoryManager.addItemToPlayer(player, ItemTemplateEnum.SALMON.id, Basic.randomNumber(1, 4), true);
+    }
+
+    @Override
+    public Vector getScale() {
+        return new Vector(1, 1, 1);
     }
 }

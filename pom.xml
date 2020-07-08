@@ -25,7 +25,7 @@
         <dependency>
             <groupId>com.github.JanHolger</groupId>
             <artifactId>AJORM</artifactId>
-            <version>72cbe225fe</version>
+            <version>e71b857e35</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

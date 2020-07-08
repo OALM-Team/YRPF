@@ -15,7 +15,7 @@ public class ItemTemplate extends Model {
     @Column
     private String description;
     @Column
-    private float weight;
+    private Float weight;
     @Column
     private String pictureName;
     @Column

@@ -17,7 +17,7 @@ import java.util.ArrayList;
 @Getter @Setter @Dates @Table("tbl_vehicle_garage")
 public class VehicleGarage extends Model {
     @Column(column = "id_vehicle_garage")
-    private int vehicleGarageId;
+    private int id;
     @Column
     private String uuid;
     @Column
@@ -26,7 +26,7 @@ public class VehicleGarage extends Model {
     private int garageId;
     @Column(column = "id_last_garage")
     private int garageLastId;
-    @Column
+    @Column(column = "id_model")
     private int modelId;
     @Column
     private String damage;

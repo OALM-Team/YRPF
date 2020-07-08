@@ -25,7 +25,6 @@ public class Database {
         try {
             ServerConfig serverConfig = WorldManager.getServerConfig();
             sql = new MySQL(serverConfig.getSqlHost(), 3306, serverConfig.getSqlDb(), serverConfig.getSqlUsername(), serverConfig.getSqlPassword());
-            sql.setDebugMode(true);
             AJORMConfig config = new AJORMConfig()
                     .setDefaultSize(255);
             // @Yuki you can optionally add .migrate() behind the register calls to enable migration

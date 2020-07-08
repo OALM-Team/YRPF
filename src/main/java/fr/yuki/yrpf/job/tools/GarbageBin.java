@@ -26,7 +26,7 @@ public class GarbageBin implements JobToolHandler {
 
     @Override
     public boolean onUnwear(Player player, WearableWorldObject wearableWorldObject) {
-        JobManager.addExp(player, JobEnum.GARBAGE.type, 20);
+        JobManager.addExp(player, JobEnum.GARBAGE.name(), 20);
 
         int reward = this.jobTool.getReward();
         if(JobManager.getJobLevelForPlayer(player, this.jobTool.getJobType()) == 2) {

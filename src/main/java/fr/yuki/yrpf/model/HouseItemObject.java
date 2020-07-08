@@ -1,23 +1,39 @@
 package fr.yuki.yrpf.model;
 
+import eu.bebendorf.ajorm.Model;
+import eu.bebendorf.ajorm.annotation.Column;
+import eu.bebendorf.ajorm.annotation.Table;
 import fr.yuki.yrpf.house.itembehavior.ATMBehavior;
 import fr.yuki.yrpf.house.itembehavior.ItemBehavior;
 import fr.yuki.yrpf.house.itembehavior.RadioBehavior;
 import fr.yuki.yrpf.manager.ModdingManager;
+import lombok.Getter;
+import lombok.Setter;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Vector;
 import net.onfirenetwork.onsetjava.entity.WorldObject;
 
-public class HouseItemObject {
+@Getter @Setter @Table("tbl_house_item")
+public class HouseItemObject extends Model {
+    @Column(column = "id_house_item")
     private int id;
+    @Column
     private int modelId;
+    @Column
     private int functionId;
+    @Column
     private double x;
+    @Column
     private double y;
+    @Column
     private double z;
+    @Column
     private double rx;
+    @Column
     private double ry;
+    @Column
     private double rz;
+
     private WorldObject worldObject;
     private House house;
     private ItemBehavior itemBehavior;
@@ -54,78 +70,6 @@ public class HouseItemObject {
         }
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public int getModelId() {
-        return modelId;
-    }
-
-    public void setModelId(int modelId) {
-        this.modelId = modelId;
-    }
-
-    public int getFunctionId() {
-        return functionId;
-    }
-
-    public void setFunctionId(int functionId) {
-        this.functionId = functionId;
-    }
-
-    public double getX() {
-        return x;
-    }
-
-    public void setX(double x) {
-        this.x = x;
-    }
-
-    public double getY() {
-        return y;
-    }
-
-    public void setY(double y) {
-        this.y = y;
-    }
-
-    public double getZ() {
-        return z;
-    }
-
-    public void setZ(double z) {
-        this.z = z;
-    }
-
-    public double getRx() {
-        return rx;
-    }
-
-    public void setRx(double rx) {
-        this.rx = rx;
-    }
-
-    public double getRy() {
-        return ry;
-    }
-
-    public void setRy(double ry) {
-        this.ry = ry;
-    }
-
-    public double getRz() {
-        return rz;
-    }
-
-    public void setRz(double rz) {
-        this.rz = rz;
-    }
-
     public WorldObject getWorldObject() {
         return worldObject;
     }
@@ -136,6 +80,18 @@ public class HouseItemObject {
 
     public Vector getRotation() {
         return new Vector(this.rx, this.ry, this.rz);
+    }
+
+    public void setPosition(Vector position){
+        x = position.getX();
+        y = position.getY();
+        z = position.getZ();
+    }
+
+    public void setRotation(Vector rotation){
+        rx = rotation.getX();
+        ry = rotation.getY();
+        rz = rotation.getZ();
     }
 
     public House getHouse() {

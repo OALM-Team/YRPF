@@ -1,130 +1,39 @@
 package fr.yuki.yrpf.model;
 
-public class ItemTemplate {
+import eu.bebendorf.ajorm.Model;
+import eu.bebendorf.ajorm.annotation.Column;
+import eu.bebendorf.ajorm.annotation.Table;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter @Setter @Table("tbl_item_template")
+public class ItemTemplate extends Model {
+    @Column(column = "id_item_template")
     private int id;
+    @Column
     private String name;
+    @Column
     private String description;
+    @Column
     private float weight;
+    @Column
     private String pictureName;
+    @Column
     private int itemType;
+    @Column
     private int modelId;
+    @Column
     private double modelScale;
+    @Column
     private int foodValue;
+    @Column
     private int drinkValue;
+    @Column(column = "id_weapon")
     private int weaponId;
+    @Column
     private int ammoPerRecharge;
+    @Column(column = "id_mask")
     private int maskId;
+    @Column(column = "id_bag")
     private int bagId;
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public float getWeight() {
-        return weight;
-    }
-
-    public void setWeight(float weight) {
-        this.weight = weight;
-    }
-
-    public String getPictureName() {
-        return pictureName;
-    }
-
-    public void setPictureName(String pictureName) {
-        this.pictureName = pictureName;
-    }
-
-    public int getItemType() {
-        return itemType;
-    }
-
-    public void setItemType(int itemType) {
-        this.itemType = itemType;
-    }
-
-    public int getModelId() {
-        return modelId;
-    }
-
-    public void setModelId(int modelId) {
-        this.modelId = modelId;
-    }
-
-    public double getModelScale() {
-        return modelScale;
-    }
-
-    public void setModelScale(double modelScale) {
-        this.modelScale = modelScale;
-    }
-
-    public int getFoodValue() {
-        return foodValue;
-    }
-
-    public void setFoodValue(int foodValue) {
-        this.foodValue = foodValue;
-    }
-
-    public int getDrinkValue() {
-        return drinkValue;
-    }
-
-    public void setDrinkValue(int drinkValue) {
-        this.drinkValue = drinkValue;
-    }
-
-    public int getWeaponId() {
-        return weaponId;
-    }
-
-    public void setWeaponId(int weaponId) {
-        this.weaponId = weaponId;
-    }
-
-    public int getAmmoPerRecharge() {
-        return ammoPerRecharge;
-    }
-
-    public void setAmmoPerRecharge(int ammoPerRecharge) {
-        this.ammoPerRecharge = ammoPerRecharge;
-    }
-
-    public int getMaskId() {
-        return maskId;
-    }
-
-    public void setMaskId(int maskId) {
-        this.maskId = maskId;
-    }
-
-    public int getBagId() {
-        return bagId;
-    }
-
-    public void setBagId(int bagId) {
-        this.bagId = bagId;
-    }
 }

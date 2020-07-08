@@ -1,53 +1,25 @@
 package fr.yuki.yrpf.model;
 
-public class JobLevel {
+import eu.bebendorf.ajorm.Model;
+import eu.bebendorf.ajorm.annotation.Column;
+import eu.bebendorf.ajorm.annotation.Table;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter @Setter @Table("tbl_job_level")
+public class JobLevel extends Model {
+    @Column(column = "id_job_level")
     private int id;
+    @Column(column = "id_job")
     private String jobId;
+    @Column
     private String name;
+    @Column
     private int level;
+    @Column
     private int expFloor;
 
     public String getTranslateName() {
         return name.toLowerCase().replaceAll(" ", "_");
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getJobId() {
-        return jobId;
-    }
-
-    public void setJobId(String jobId) {
-        this.jobId = jobId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public int getLevel() {
-        return level;
-    }
-
-    public void setLevel(int level) {
-        this.level = level;
-    }
-
-    public int getExpFloor() {
-        return expFloor;
-    }
-
-    public void setExpFloor(int expFloor) {
-        this.expFloor = expFloor;
     }
 }

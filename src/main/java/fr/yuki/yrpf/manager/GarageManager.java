@@ -1,13 +1,14 @@
 package fr.yuki.yrpf.manager;
 
 import com.google.gson.Gson;
-import fr.yuki.yrpf.dao.VehicleGarageDAO;
+import eu.bebendorf.ajorm.Repo;
 import fr.yuki.yrpf.enums.ItemTemplateEnum;
 import fr.yuki.yrpf.enums.ToastTypeEnum;
 import fr.yuki.yrpf.i18n.I18n;
 import fr.yuki.yrpf.inventory.Inventory;
 import fr.yuki.yrpf.model.*;
 import fr.yuki.yrpf.net.payload.*;
+import lombok.Getter;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Color;
 import net.onfirenetwork.onsetjava.data.Vector;
@@ -16,20 +17,22 @@ import net.onfirenetwork.onsetjava.entity.Vehicle;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class GarageManager {
 
-    private static ArrayList<VehicleGarage> vehicleGarages;
+    @Getter
+    private static List<VehicleGarage> vehicleGarages;
 
     public static void init() throws SQLException {
-        vehicleGarages = VehicleGarageDAO.loadVehiclesGarage();
+        vehicleGarages = Repo.get(VehicleGarage.class).all();
         Onset.print("Loaded " + vehicleGarages.size() + " vehicle(s) from the database");
 
         // Reset last garage to vehicle
         for(VehicleGarage vehicleGarage : vehicleGarages) {
             vehicleGarage.setGarageId(vehicleGarage.getGarageLastId());
-            VehicleGarageDAO.saveVehicleGarage(vehicleGarage);
+            vehicleGarage.save();
         }
     }
 
@@ -174,10 +177,6 @@ public class GarageManager {
                 player, vehicleGarage, false);
         vehicleGarage.applyDamages(createVehicleResult.getVehicle());
         vehicleGarage.save();
-    }
-
-    public static ArrayList<VehicleGarage> getVehicleGarages() {
-        return vehicleGarages;
     }
 
     public static boolean handleVSellerInteract(Player player) {

@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import eu.bebendorf.ajorm.Repo;
 import fr.yuki.yrpf.character.CharacterState;
-import fr.yuki.yrpf.dao.HouseItemDAO;
 import fr.yuki.yrpf.enums.ItemTemplateEnum;
 import fr.yuki.yrpf.enums.ToastTypeEnum;
 import fr.yuki.yrpf.i18n.I18n;
@@ -49,8 +48,8 @@ public class HouseManager {
         }
     }
 
-    public static void spawnHouseItems() throws SQLException {
-        for(HouseItemObject houseItemObject : HouseItemDAO.loadHouseItems()) {
+    public static void spawnHouseItems() {
+        for(HouseItemObject houseItemObject : Repo.get(HouseItemObject.class).all()) {
             House house = getHouseAtLocation(houseItemObject.getPosition());
             if(house == null) {
                 Onset.print("Can't find the house for item: " + houseItemObject.getId());

@@ -1,15 +1,11 @@
 package fr.yuki.yrpf.job.deliveryPackage;
 
-import fr.yuki.yrpf.dao.HouseItemDAO;
 import fr.yuki.yrpf.manager.HouseManager;
 import fr.yuki.yrpf.model.House;
 import fr.yuki.yrpf.model.HouseItemObject;
 import fr.yuki.yrpf.model.ItemShopObject;
-import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Vector;
 import net.onfirenetwork.onsetjava.entity.Player;
-
-import java.sql.SQLException;
 
 public class GenericDeliveryPackage extends DeliveryPackage {
     private int modelId;
@@ -43,21 +39,13 @@ public class GenericDeliveryPackage extends DeliveryPackage {
         houseItemObject.setId(-1);
         houseItemObject.setModelId(this.modelId);
         houseItemObject.setFunctionId(itemShopObject == null ? -1 : itemShopObject.getFunctionId());
-        houseItemObject.setX(this.position.getX());
-        houseItemObject.setY(this.position.getY());
-        houseItemObject.setZ(this.position.getZ());
-        houseItemObject.setRx(this.rotation.getX());
-        houseItemObject.setRy(this.rotation.getY());
-        houseItemObject.setRz(this.rotation.getZ());
+        houseItemObject.setPosition(position);
+        houseItemObject.setRotation(rotation);
         House house = HouseManager.getHouseAtLocation(this.position);
         house.getHouseItemObjects().add(houseItemObject);
         houseItemObject.setHouse(house);
 
-        try {
-            HouseItemDAO.insertHouseItem(houseItemObject);
-        } catch (SQLException ex) {
-            Onset.print("Can't insert the house item: " + ex.toString());
-        }
+        houseItemObject.save();
 
         houseItemObject.spawn();
     }

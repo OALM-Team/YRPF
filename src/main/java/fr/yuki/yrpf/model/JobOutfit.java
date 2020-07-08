@@ -2,91 +2,42 @@ package fr.yuki.yrpf.model;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import eu.bebendorf.ajorm.Model;
+import eu.bebendorf.ajorm.annotation.Column;
+import eu.bebendorf.ajorm.annotation.Table;
+import lombok.Getter;
+import lombok.Setter;
 import net.onfirenetwork.onsetjava.data.Vector;
 import net.onfirenetwork.onsetjava.entity.Player;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class JobOutfit {
+@Getter @Setter @Table("tbl_job_outfit")
+public class JobOutfit extends Model {
+    @Column(column = "id_job_outfit")
     private int id;
+    @Column(column = "id_job")
     private String jobId;
+    @Column
     private int levelRequired;
+    @Column
     private String name;
+    @Column
     private String outfit;
+    @Column
     private double x;
+    @Column
     private double y;
+    @Column
     private double z;
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getJobId() {
-        return jobId;
-    }
-
-    public void setJobId(String jobId) {
-        this.jobId = jobId;
-    }
-
-    public int getLevelRequired() {
-        return levelRequired;
-    }
-
-    public void setLevelRequired(int levelRequired) {
-        this.levelRequired = levelRequired;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getOutfit() {
-        return outfit;
-    }
-
-    public void setOutfit(String outfit) {
-        this.outfit = outfit;
-    }
-
-    public double getX() {
-        return x;
-    }
-
-    public void setX(double x) {
-        this.x = x;
-    }
-
-    public double getY() {
-        return y;
-    }
-
-    public void setY(double y) {
-        this.y = y;
-    }
-
-    public double getZ() {
-        return z;
-    }
-
-    public void setZ(double z) {
-        this.z = z;
-    }
 
     public boolean isNear(Player player) {
         if(player.getLocation().distance(new Vector(this.x, this.y, this.z)) < 250) return true;
         return false;
     }
 
-    public ArrayList<JobOutfitItem> decodeOutfit() {
+    public List<JobOutfitItem> decodeOutfit() {
         return new Gson().fromJson(this.outfit, new TypeToken<ArrayList<JobOutfitItem>>(){}.getType());
     }
 }

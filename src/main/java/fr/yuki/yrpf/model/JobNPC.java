@@ -1,100 +1,74 @@
 package fr.yuki.yrpf.model;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import eu.bebendorf.ajorm.Model;
+import eu.bebendorf.ajorm.annotation.Column;
+import eu.bebendorf.ajorm.annotation.Table;
 import fr.yuki.yrpf.job.WearableWorldObject;
+import lombok.Getter;
+import lombok.Setter;
 import net.onfirenetwork.onsetjava.data.Vector;
 import net.onfirenetwork.onsetjava.entity.NPC;
 import net.onfirenetwork.onsetjava.entity.Player;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class JobNPC {
+@Getter @Setter @Table("tbl_job_npc")
+public class JobNPC extends Model {
+    @Column(column = "id_job_npc")
     private int id;
+    @Column(column = "id_job")
     private String jobId;
+    @Column
     private String name;
+    @Column
     private double x;
+    @Column
     private double y;
+    @Column
     private double z;
+    @Column
     private double h;
+    @Column
     private int npcClothing;
-    private ArrayList<JobNPCListItem> buyList;
-    private ArrayList<JobNPCListItem> sellList;
+    @Column(size = 0)
+    private String buyList;
+    @Column(size = 0)
+    private String sellList;
+
+    private List<JobNPCListItem> buyListCache;
+    private List<JobNPCListItem> sellListCache;
     private NPC npc;
 
-    public int getId() {
-        return id;
+    public List<JobNPCListItem> getBuyList() {
+        if(buyListCache == null){
+            buyListCache = new Gson().fromJson(buyList, new TypeToken<ArrayList<JobNPCListItem>>(){}.getType());
+        }
+        return buyListCache;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setBuyList(List<JobNPCListItem> buyList) {
+        this.buyList = new Gson().toJson(buyList);
+        buyListCache = buyList;
     }
 
-    public String getJobId() {
-        return jobId;
+    public List<JobNPCListItem> getSellList() {
+        if(sellListCache == null){
+            sellListCache = new Gson().fromJson(sellList, new TypeToken<ArrayList<JobNPCListItem>>(){}.getType());
+        }
+        return sellListCache;
     }
 
-    public void setJobId(String jobId) {
-        this.jobId = jobId;
-    }
-
-    public double getX() {
-        return x;
-    }
-
-    public void setX(double x) {
-        this.x = x;
-    }
-
-    public double getY() {
-        return y;
-    }
-
-    public void setY(double y) {
-        this.y = y;
-    }
-
-    public double getZ() {
-        return z;
-    }
-
-    public void setZ(double z) {
-        this.z = z;
-    }
-
-    public ArrayList<JobNPCListItem> getBuyList() {
-        return buyList;
-    }
-
-    public void setBuyList(ArrayList<JobNPCListItem> buyList) {
-        this.buyList = buyList;
-    }
-
-    public ArrayList<JobNPCListItem> getSellList() {
-        return sellList;
-    }
-
-    public void setSellList(ArrayList<JobNPCListItem> sellList) {
-        this.sellList = sellList;
-    }
-
-    public double getH() {
-        return h;
-    }
-
-    public void setH(double h) {
-        this.h = h;
-    }
-
-    public int getNpcClothing() {
-        return npcClothing;
-    }
-
-    public void setNpcClothing(int npcClothing) {
-        this.npcClothing = npcClothing;
+    public void setSellList(List<JobNPCListItem> sellList) {
+        this.sellList = new Gson().toJson(sellList);
+        sellListCache = sellList;
     }
 
     public JobNPCListItem getBuyItemByWearableItem(WearableWorldObject wearableWorldObject) {
         JobNPCListItem jobNPCListItem = null;
-        for(JobNPCListItem item : this.buyList) {
+        for(JobNPCListItem item : getBuyList()) {
             if(item.getType().toLowerCase().equals("worlditem") && item.getItemId() == wearableWorldObject.getModelId()) {
                 return item;
             }
@@ -104,21 +78,5 @@ public class JobNPC {
 
     public boolean isNear(Player player) {
         return new Vector(x,y,z).distance(player.getLocation()) < 200;
-    }
-
-    public NPC getNpc() {
-        return npc;
-    }
-
-    public void setNpc(NPC npc) {
-        this.npc = npc;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 }

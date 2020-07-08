@@ -40,12 +40,12 @@ public class GeneratorDeliveryPackage extends DeliveryPackage {
         jobTool.setX(this.position.getX());
         jobTool.setY(this.position.getY());
         jobTool.setZ(this.position.getZ());
-        jobTool.setRx(this.rotation.getX());
-        jobTool.setRy(this.rotation.getY());
-        jobTool.setRz(this.rotation.getZ());
-        jobTool.setSx(1);
-        jobTool.setSy(1);
-        jobTool.setSz(1);
+        jobTool.setRX(this.rotation.getX());
+        jobTool.setRY(this.rotation.getY());
+        jobTool.setRZ(this.rotation.getZ());
+        jobTool.setSX(1);
+        jobTool.setSY(1);
+        jobTool.setSZ(1);
         jobTool.setJobToolType("GENERATOR");
         JobManager.getJobTools().add(jobTool);
         jobTool.spawn(JobManager.getJobs().get(JobEnum.WEED));

@@ -6,7 +6,6 @@ import eu.bebendorf.ajorm.Repo;
 import fr.yuki.yrpf.luaapi.LuaAPIManager;
 import fr.yuki.yrpf.character.CharacterState;
 import fr.yuki.yrpf.commands.*;
-import fr.yuki.yrpf.dao.InventoryDAO;
 import fr.yuki.yrpf.enums.ToastTypeEnum;
 import fr.yuki.yrpf.i18n.I18n;
 import fr.yuki.yrpf.inventory.Inventory;
@@ -201,7 +200,8 @@ public class YukiRPFrameworkPlugin {
                         serverConfig.getSpawnPointY(), serverConfig.getSpawnPointZ(), serverConfig.getSpawnPointH()));
 
                 // Create the default inventory for character
-                Inventory inventory = InventoryDAO.createInventory();
+                Inventory inventory = new Inventory();
+                inventory.save();
                 Onset.print("Inventory created id=" + inventory.getId());
                 inventory.setInventoryType(1);
                 inventory.setCharacterId(account.getId());

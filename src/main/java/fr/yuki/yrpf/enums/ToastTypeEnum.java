@@ -9,7 +9,7 @@ public enum ToastTypeEnum {
 
     public final String type;
 
-    private ToastTypeEnum(String type) {
+    ToastTypeEnum(String type) {
         this.type = type;
     }
 }

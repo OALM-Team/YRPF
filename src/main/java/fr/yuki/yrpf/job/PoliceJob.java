@@ -16,7 +16,7 @@ public class PoliceJob extends Job {
 
     @Override
     public String getJobType() {
-        return JobEnum.POLICE.type;
+        return JobEnum.POLICE.name();
     }
 
     @Override

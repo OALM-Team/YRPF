@@ -31,7 +31,7 @@ public class WeedJob extends Job {
 
     @Override
     public String getJobType() {
-        return JobEnum.WEED.type;
+        return JobEnum.WEED.name();
     }
 
     @Override

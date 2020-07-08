@@ -30,7 +30,7 @@ public enum ItemTemplateEnum {
 
     public final String id;
 
-    private ItemTemplateEnum(String id) {
+    ItemTemplateEnum(String id) {
         this.id = id;
     }
 }

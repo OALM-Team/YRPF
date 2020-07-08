@@ -1,10 +1,10 @@
 package fr.yuki.yrpf.manager;
 
 import com.google.gson.Gson;
+import eu.bebendorf.ajorm.Repo;
 import fr.yuki.yrpf.character.CharacterJobLevel;
 import fr.yuki.yrpf.character.CharacterState;
 import fr.yuki.yrpf.character.CharacterStyle;
-import fr.yuki.yrpf.dao.*;
 import fr.yuki.yrpf.enums.ItemTemplateEnum;
 import fr.yuki.yrpf.enums.JobEnum;
 import fr.yuki.yrpf.enums.ToastTypeEnum;
@@ -15,6 +15,7 @@ import fr.yuki.yrpf.job.*;
 import fr.yuki.yrpf.model.*;
 import fr.yuki.yrpf.net.payload.AddCharacterJobPayload;
 import fr.yuki.yrpf.net.payload.AddXpBarItemPayload;
+import lombok.Getter;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Color;
 import net.onfirenetwork.onsetjava.data.Vector;
@@ -31,43 +32,51 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class JobManager {
-    private static LinkedHashMap<String, Job> jobs;
-    private static ArrayList<WearableWorldObject> wearableWorldObjects;
-    private static ArrayList<JobNPC> jobNPCS;
-    private static ArrayList<JobTool> jobTools;
-    private static ArrayList<JobLevel> jobLevels;
-    private static ArrayList<JobVehicleRental> jobVehicleRentals;
+    @Getter
+    private static Map<String, Job> jobs;
+    @Getter
+    private static List<WearableWorldObject> wearableWorldObjects;
+    @Getter
+    private static List<JobNPC> jobNPCS;
+    @Getter
+    private static List<JobTool> jobTools;
+    @Getter
+    private static List<JobLevel> jobLevels;
+    @Getter
+    private static List<JobVehicleRental> jobVehicleRentals;
+    @Getter
     private static DeliveryPointConfig deliveryPointConfig;
-    private static ArrayList<JobOutfit> jobOutfits;
+    @Getter
+    private static List<JobOutfit> jobOutfits;
 
     public static void init() throws SQLException, IOException {
-        jobNPCS = JobNPCDAO.loadJobNPCS();
+        jobNPCS = Repo.get(JobNPC.class).all();
         Onset.print("Loaded " + jobNPCS.size() + " job npc(s) from the database");
 
-        jobOutfits = JobOutfitDAO.loadJobOutfits();
+        jobOutfits = Repo.get(JobOutfit.class).all();
         Onset.print("Loaded " + jobOutfits.size() + " job outfit(s) from the database");
 
-        jobTools = JobToolDAO.loadJobTools();
+        jobTools = Repo.get(JobTool.class).all();
         Onset.print("Loaded " + jobTools.size() + " job tool(s) from the database");
 
-        jobLevels = JobLevelDAO.loadJobLevels();
+        jobLevels = Repo.get(JobLevel.class).all();
         Onset.print("Loaded " + jobLevels.size() + " job level(s) from the database");
 
-        jobVehicleRentals = JobVehicleRentalDAO.loadJobVehicleRental();
+        jobVehicleRentals = Repo.get(JobVehicleRental.class).all();
         Onset.print("Loaded " + jobVehicleRentals.size() + " job vehicle(s) from the database");
 
         loadDeliveryPoints();
 
         wearableWorldObjects = new ArrayList<>();
         jobs = new LinkedHashMap<>();
-        jobs.put(JobEnum.LUMBERJACK.type, new LumberjackJob());
-        jobs.put(JobEnum.GARBAGE.type, new GarbageJob());
-        jobs.put(JobEnum.DELIVERY.type, new DeliveryJob());
-        jobs.put(JobEnum.MINER.type, new MinerJob());
-        jobs.put(JobEnum.FISHER.type, new FisherJob());
-        jobs.put(JobEnum.POLICE.type, new PoliceJob());
-        jobs.put(JobEnum.WEED.type, new WeedJob());
-        jobs.put(JobEnum.EMS.type, new EMSJob());
+        jobs.put(JobEnum.LUMBERJACK.name(), new LumberjackJob());
+        jobs.put(JobEnum.GARBAGE.name(), new GarbageJob());
+        jobs.put(JobEnum.DELIVERY.name(), new DeliveryJob());
+        jobs.put(JobEnum.MINER.name(), new MinerJob());
+        jobs.put(JobEnum.FISHER.name(), new FisherJob());
+        jobs.put(JobEnum.POLICE.name(), new PoliceJob());
+        jobs.put(JobEnum.WEED.name(), new WeedJob());
+        jobs.put(JobEnum.EMS.name(), new EMSJob());
 
         spawnJobOutfitsPoint();
         spawnVehicleRentalSpawns();
@@ -472,7 +481,7 @@ public class JobManager {
             try {
                 Account account = WorldManager.getPlayerAccount(player);
                 AccountJobWhitelist accountJobWhitelist = AccountManager.getAccountJobWhitelists().stream()
-                        .filter(x -> x.getAccountId() == account.getId() && x.getJobId().equals(jobEnum.type))
+                        .filter(x -> x.getAccountId() == account.getId() && x.getJobId().equals(jobEnum.name()))
                         .findFirst().orElse(null);
                 if(accountJobWhitelist != null) {
                     players.add(player);
@@ -503,31 +512,4 @@ public class JobManager {
         return null;
     }
 
-    public static LinkedHashMap<String, Job> getJobs() {
-        return jobs;
-    }
-
-    public static ArrayList<WearableWorldObject> getWearableWorldObjects() {
-        return wearableWorldObjects;
-    }
-
-    public static ArrayList<JobNPC> getJobNPCS() {
-        return jobNPCS;
-    }
-
-    public static ArrayList<JobTool> getJobTools() {
-        return jobTools;
-    }
-
-    public static ArrayList<JobLevel> getJobLevels() {
-        return jobLevels;
-    }
-
-    public static ArrayList<JobVehicleRental> getJobVehicleRentals() {
-        return jobVehicleRentals;
-    }
-
-    public static DeliveryPointConfig getDeliveryPointConfig() {
-        return deliveryPointConfig;
-    }
 }

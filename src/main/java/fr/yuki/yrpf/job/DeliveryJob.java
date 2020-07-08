@@ -20,7 +20,7 @@ public class DeliveryJob extends Job {
 
     @Override
     public String getJobType() {
-        return JobEnum.DELIVERY.type;
+        return JobEnum.DELIVERY.name();
     }
 
     @Override

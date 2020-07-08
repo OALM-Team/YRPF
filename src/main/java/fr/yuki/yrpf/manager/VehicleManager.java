@@ -1,7 +1,6 @@
 package fr.yuki.yrpf.manager;
 
 import com.google.gson.Gson;
-import fr.yuki.yrpf.dao.VehicleGarageDAO;
 import fr.yuki.yrpf.enums.ItemTemplateEnum;
 import fr.yuki.yrpf.enums.ToastTypeEnum;
 import fr.yuki.yrpf.i18n.I18n;
@@ -85,7 +84,7 @@ public class VehicleManager {
                 vehicleGarage.setRental(isRental);
                 vehicleGarage.setLicencePlate(vehicle.getLicensePlate());
                 vehicleGarage.setColor("#" + Integer.toHexString(vehicle.getColor().getRed()) + Integer.toHexString(vehicle.getColor().getGreen()) + Integer.toHexString(vehicle.getColor().getBlue()));
-                if(!isRental) VehicleGarageDAO.createVehicleGarage(vehicleGarage);
+                vehicleGarage.save();
                 GarageManager.getVehicleGarages().add(vehicleGarage);
             }
             else {

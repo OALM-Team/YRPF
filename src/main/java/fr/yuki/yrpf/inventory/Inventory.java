@@ -2,8 +2,10 @@ package fr.yuki.yrpf.inventory;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import eu.bebendorf.ajorm.Model;
+import eu.bebendorf.ajorm.annotation.Column;
+import eu.bebendorf.ajorm.annotation.Table;
 import fr.yuki.yrpf.character.CharacterState;
-import fr.yuki.yrpf.dao.InventoryDAO;
 import fr.yuki.yrpf.enums.ItemTemplateEnum;
 import fr.yuki.yrpf.enums.ToastTypeEnum;
 import fr.yuki.yrpf.i18n.I18n;
@@ -17,24 +19,30 @@ import fr.yuki.yrpf.net.payload.AddItemInventoryPayload;
 import fr.yuki.yrpf.net.payload.RemoteItemInventoryPayload;
 import fr.yuki.yrpf.net.payload.UpdateInventoryWeightPayload;
 import fr.yuki.yrpf.net.payload.UpdateItemInventoryPayload;
-import net.onfirenetwork.onsetjava.Onset;
+import lombok.Getter;
+import lombok.Setter;
 import net.onfirenetwork.onsetjava.entity.Player;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
-public class Inventory {
+@Getter @Setter @Table("tbl_inventory")
+public class Inventory extends Model {
+    @Column(column = "id_inventory")
     private int id;
-    private int inventoryType;
-    private int inventoryItemType;
-    private int characterId;
-    private int vehicleId;
-    private String content;
-    private ArrayList<InventoryItem> inventoryItems;
+    @Column
+    private int inventoryType = -1;
+    @Column
+    private int inventoryItemType = -1;
+    @Column
+    private int characterId = -1;
+    @Column
+    private int vehicleId = -1;
+    @Column(size = 0)
+    private String content = "[]";
 
-    public Inventory() {
-        this.inventoryItems = new ArrayList<InventoryItem>();
-    }
+    private ArrayList<InventoryItem> inventoryItems = new ArrayList<>();
 
     /**
      * Try to add the inventory item to the inventory, return a existing item if its stacked
@@ -103,13 +111,9 @@ public class Inventory {
      * Compute the content and save it into the database
      */
     public void save() {
-        try {
-            if(this.getId() <= 0) return;
-            this.content = new Gson().toJson(this.inventoryItems);
-            InventoryDAO.updateInventory(this);
-        } catch (Exception ex) {
-            Onset.print("Can't save the inventory: " + ex.toString());
-        }
+        if(this.getId() < 0) return;
+        this.content = new Gson().toJson(this.inventoryItems);
+        super.save();
     }
 
     /**
@@ -186,7 +190,7 @@ public class Inventory {
         return this.inventoryItems.stream().filter(x -> x.getId().equals(id)).findFirst().orElse(null);
     }
 
-    public ArrayList<InventoryItem> getItemsByType(String type) {
+    public List<InventoryItem> getItemsByType(String type) {
         return new ArrayList<>(this.inventoryItems.stream().filter(x -> x.getTemplateId().equals(type)).collect(Collectors.toList()));
     }
 
@@ -235,62 +239,7 @@ public class Inventory {
     }
 
     public void throwItem(InventoryItem item, int quantity) {
-
+        // TODO
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public int getInventoryType() {
-        return inventoryType;
-    }
-
-    public void setInventoryType(int inventoryType) {
-        this.inventoryType = inventoryType;
-    }
-
-    public int getInventoryItemType() {
-        return inventoryItemType;
-    }
-
-    public void setInventoryItemType(int inventoryItemType) {
-        this.inventoryItemType = inventoryItemType;
-    }
-
-    public int getCharacterId() {
-        return characterId;
-    }
-
-    public void setCharacterId(int characterId) {
-        this.characterId = characterId;
-    }
-
-    public int getVehicleId() {
-        return vehicleId;
-    }
-
-    public void setVehicleId(int vehicleId) {
-        this.vehicleId = vehicleId;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public ArrayList<InventoryItem> getInventoryItems() {
-        return inventoryItems;
-    }
-
-    public void setInventoryItems(ArrayList<InventoryItem> inventoryItems) {
-        this.inventoryItems = inventoryItems;
-    }
 }

@@ -2,130 +2,49 @@ package fr.yuki.yrpf.model;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import fr.yuki.yrpf.dao.VehicleGarageDAO;
+import eu.bebendorf.ajorm.Model;
+import eu.bebendorf.ajorm.annotation.Column;
+import eu.bebendorf.ajorm.annotation.Dates;
+import eu.bebendorf.ajorm.annotation.Table;
+import lombok.Getter;
+import lombok.Setter;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.entity.Vehicle;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
 
-public class VehicleGarage {
+@Getter @Setter @Dates @Table("tbl_vehicle_garage")
+public class VehicleGarage extends Model {
+    @Column(column = "id_vehicle_garage")
     private int vehicleGarageId;
+    @Column
     private String uuid;
+    @Column
     private int owner;
+    @Column(column = "id_garage")
     private int garageId;
+    @Column(column = "id_last_garage")
     private int garageLastId;
+    @Column
     private int modelId;
+    @Column
     private String damage;
+    @Column
     private double health;
+    @Column
     private String licencePlate;
+    @Column
     private String color;
-    private Date createdAt;
-    private Date updateAt;
-    private boolean isRental;
+    @Column
+    private Timestamp createdAt;
+    @Column
+    private Timestamp updatedAt;
 
-    public int getVehicleGarageId() {
-        return vehicleGarageId;
-    }
-
-    public void setVehicleGarageId(int vehicleGarageId) {
-        this.vehicleGarageId = vehicleGarageId;
-    }
-
-    public int getGarageId() {
-        return garageId;
-    }
-
-    public void setGarageId(int garageId) {
-        this.garageId = garageId;
-    }
-
-    public int getGarageLastId() {
-        return garageLastId;
-    }
-
-    public void setGarageLastId(int garageLastId) {
-        this.garageLastId = garageLastId;
-    }
-
-    public int getModelId() {
-        return modelId;
-    }
-
-    public void setModelId(int modelId) {
-        this.modelId = modelId;
-    }
-
-    public String getDamage() {
-        return damage;
-    }
-
-    public void setDamage(String damage) {
-        this.damage = damage;
-    }
-
-    public String getLicencePlate() {
-        return licencePlate;
-    }
-
-    public void setLicencePlate(String licencePlate) {
-        this.licencePlate = licencePlate;
-    }
-
-    public String getColor() {
-        return color;
-    }
-
-    public void setColor(String color) {
-        this.color = color;
-    }
-
-    public Date getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public Date getUpdateAt() {
-        return updateAt;
-    }
-
-    public void setUpdateAt(Date updateAt) {
-        this.updateAt = updateAt;
-    }
-
-    public String getUuid() {
-        return uuid;
-    }
-
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
-    }
-
-    public int getOwner() {
-        return owner;
-    }
-
-    public void setOwner(int owner) {
-        this.owner = owner;
-    }
+    private boolean rental;
 
     public void save() {
-        try {
-            if(!isRental) VehicleGarageDAO.saveVehicleGarage(this);
-        } catch (Exception ex) {
-            Onset.print("Can't save vehicle: " + ex.toString());
-        }
-    }
-
-    public boolean isRental() {
-        return isRental;
-    }
-
-    public void setRental(boolean rental) {
-        isRental = rental;
+        if(!rental) super.save();
     }
 
     public void destroy() {
@@ -163,11 +82,4 @@ public class VehicleGarage {
         this.damage = new Gson().toJson(damages);
     }
 
-    public double getHealth() {
-        return health;
-    }
-
-    public void setHealth(double health) {
-        this.health = health;
-    }
 }

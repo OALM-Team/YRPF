@@ -1,6 +1,6 @@
 package fr.yuki.yrpf.manager;
 
-import fr.yuki.yrpf.dao.GrowboxDAO;
+import eu.bebendorf.ajorm.Repo;
 import fr.yuki.yrpf.enums.JobEnum;
 import fr.yuki.yrpf.job.tools.Generator;
 import fr.yuki.yrpf.job.tools.GrowBox;
@@ -11,13 +11,12 @@ import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Vector;
 import net.onfirenetwork.onsetjava.entity.Player;
 
-import java.sql.SQLException;
 import java.util.stream.Collectors;
 
 public class GrowboxManager {
-    public static void init() throws SQLException {
+    public static void init() {
         // Load growboxes
-        for(GrowboxModel growboxModel : GrowboxDAO.loadGrowbox()) {
+        for(GrowboxModel growboxModel : Repo.get(GrowboxModel.class).all()) {
             JobTool jobTool = new JobTool();
             jobTool.setId(-1);
             jobTool.setModelId(50007);
@@ -28,12 +27,12 @@ public class GrowboxManager {
             jobTool.setX(growboxModel.getX());
             jobTool.setY(growboxModel.getY());
             jobTool.setZ(growboxModel.getZ());
-            jobTool.setRx(growboxModel.getRx());
-            jobTool.setRy(growboxModel.getRy());
-            jobTool.setRz(growboxModel.getRz());
-            jobTool.setSx(1);
-            jobTool.setSy(1);
-            jobTool.setSz(1);
+            jobTool.setRX(growboxModel.getRx());
+            jobTool.setRY(growboxModel.getRy());
+            jobTool.setRY(growboxModel.getRz());
+            jobTool.setSX(1);
+            jobTool.setSY(1);
+            jobTool.setSZ(1);
             jobTool.setJobToolType("GROWBOX");
             ((GrowBox)jobTool.getJobToolHandler()).setGrowboxModel(growboxModel);
             JobManager.getJobTools().add(jobTool);

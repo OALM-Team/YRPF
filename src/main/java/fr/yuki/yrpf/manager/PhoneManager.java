@@ -1,9 +1,9 @@
 package fr.yuki.yrpf.manager;
 
 import com.google.gson.Gson;
+import eu.bebendorf.ajorm.Repo;
 import fr.yuki.yrpf.character.CharacterState;
 import fr.yuki.yrpf.character.CharacterToolAnimation;
-import fr.yuki.yrpf.dao.PhoneContactDAO;
 import fr.yuki.yrpf.enums.JobEnum;
 import fr.yuki.yrpf.enums.ToastTypeEnum;
 import fr.yuki.yrpf.i18n.I18n;
@@ -24,14 +24,14 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class PhoneManager {
-    private static ArrayList<PhoneContact> phoneContacts;
-    private static ArrayList<PhoneMessage> phoneMessages;
-    private static HashMap<String, ArrayList<UrgencyPhoneMessage>> urgencyMessages;
+    private static List<PhoneContact> phoneContacts;
+    private static List<PhoneMessage> phoneMessages;
+    private static Map<String, ArrayList<UrgencyPhoneMessage>> urgencyMessages;
 
     private static int urgencyPhoneMessageCurrentId = 1;
 
     public static void init() throws SQLException {
-        phoneContacts = PhoneContactDAO.loadPhoneContacts();
+        phoneContacts = Repo.get(PhoneContact.class).all();
         Onset.print("Loaded " + phoneContacts.size() + " phone contact(s) from the database");
 
         phoneMessages = new ArrayList<>();
@@ -67,7 +67,7 @@ public class PhoneManager {
         phoneContact.setName(payload.getName());
         phoneContact.setNumber(payload.getNumber());
         phoneContact.setAccountId(account.getId());
-        PhoneContactDAO.insertPhoneContact(phoneContact);
+        phoneContact.save();
         phoneContacts.add(phoneContact);
         Onset.print("Phone contact created");
     }
@@ -291,10 +291,10 @@ public class PhoneManager {
     private static void refreshUrgencyMessages(Player player) {
         Account account = WorldManager.getPlayerAccount(player);
         boolean isPolice = AccountManager.getAccountJobWhitelists().stream()
-                .filter(x -> x.getAccountId() == account.getId() && x.getJobId().equals(JobEnum.POLICE.type))
+                .filter(x -> x.getAccountId() == account.getId() && x.getJobId().equals(JobEnum.POLICE.name()))
                 .findFirst().orElse(null) != null;
         boolean isEMS = AccountManager.getAccountJobWhitelists().stream()
-                .filter(x -> x.getAccountId() == account.getId() && x.getJobId().equals(JobEnum.EMS.type))
+                .filter(x -> x.getAccountId() == account.getId() && x.getJobId().equals(JobEnum.EMS.name()))
                 .findFirst().orElse(null) != null;
         ArrayList<UrgencyPhoneMessage> urgencyPhoneMessages = new ArrayList<>();
 

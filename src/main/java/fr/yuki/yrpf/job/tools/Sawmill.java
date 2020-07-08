@@ -47,7 +47,7 @@ public class Sawmill implements JobToolHandler {
         if(ModdingManager.isCustomModelId(wearableWorldObject.getModelId()))
             ModdingManager.assignCustomModel(worldObject, wearableWorldObject.getModelId());
         SoundManager.playSound3D("sounds/saw_mill_cut.mp3", player.getLocation(), 1000, 0.8);
-        JobManager.addExp(player, JobEnum.LUMBERJACK.type, 20);
+        JobManager.addExp(player, JobEnum.LUMBERJACK.name(), 20);
         worldObject.attach(this.jobTool.getWorldObject(), new Vector(0, 0,160), new Vector(0, 0, 0), "");
         Onset.delay(8000, () -> {
             worldObject.destroy();
@@ -68,7 +68,7 @@ public class Sawmill implements JobToolHandler {
     public boolean hasLevelRequired(Player player) {
         Account account = WorldManager.getPlayerAccount(player);
         ArrayList<CharacterJobLevel> characterJobLevels = account.decodeCharacterJob();
-        CharacterJobLevel characterJobLevel = characterJobLevels.stream().filter(x -> x.getJobId().equals(JobEnum.LUMBERJACK.type))
+        CharacterJobLevel characterJobLevel = characterJobLevels.stream().filter(x -> x.getJobId().equals(JobEnum.LUMBERJACK.name()))
                 .findFirst().orElse(null);
         if(characterJobLevel == null) return false;
         if(characterJobLevel.getJobLevel().getLevel() < 2) return false;

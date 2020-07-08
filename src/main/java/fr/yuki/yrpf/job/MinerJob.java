@@ -23,7 +23,7 @@ public class MinerJob extends Job {
 
     @Override
     public String getJobType() {
-        return JobEnum.MINER.type;
+        return JobEnum.MINER.name();
     }
 
     @Override

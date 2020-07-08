@@ -1,6 +1,5 @@
 package fr.yuki.yrpf.job.deliveryPackage;
 
-import fr.yuki.yrpf.dao.GrowboxDAO;
 import fr.yuki.yrpf.enums.JobEnum;
 import fr.yuki.yrpf.job.tools.GrowBox;
 import fr.yuki.yrpf.manager.JobManager;
@@ -8,8 +7,6 @@ import fr.yuki.yrpf.model.GrowboxModel;
 import fr.yuki.yrpf.model.JobTool;
 import net.onfirenetwork.onsetjava.data.Vector;
 import net.onfirenetwork.onsetjava.entity.Player;
-
-import java.sql.SQLException;
 
 public class GrowBoxDeliveryPackage extends DeliveryPackage {
     public GrowBoxDeliveryPackage(Player player, Vector position, Vector rotation) {
@@ -45,15 +42,15 @@ public class GrowBoxDeliveryPackage extends DeliveryPackage {
         jobTool.setX(this.position.getX());
         jobTool.setY(this.position.getY());
         jobTool.setZ(this.position.getZ());
-        jobTool.setRx(this.rotation.getX());
-        jobTool.setRy(this.rotation.getY());
-        jobTool.setRz(this.rotation.getZ());
-        jobTool.setSx(1);
-        jobTool.setSy(1);
-        jobTool.setSz(1);
+        jobTool.setRX(this.rotation.getX());
+        jobTool.setRY(this.rotation.getY());
+        jobTool.setRZ(this.rotation.getZ());
+        jobTool.setSX(1);
+        jobTool.setSY(1);
+        jobTool.setSZ(1);
         jobTool.setJobToolType("GROWBOX");
         JobManager.getJobTools().add(jobTool);
-        jobTool.spawn(JobManager.getJobs().get(JobEnum.WEED));
+        jobTool.spawn(JobManager.getJobs().get(JobEnum.WEED.name()));
 
         // Insert new growbox
         GrowBox growBox = (GrowBox)jobTool.getJobToolHandler();
@@ -65,10 +62,6 @@ public class GrowBoxDeliveryPackage extends DeliveryPackage {
         growboxModel.setRy(this.rotation.getY());
         growboxModel.setRz(this.rotation.getZ());
         growBox.setGrowboxModel(growboxModel);
-        try {
-            GrowboxDAO.insertGrowbox(growboxModel);
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
+        growboxModel.save();
     }
 }

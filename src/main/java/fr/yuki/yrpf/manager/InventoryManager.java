@@ -1,8 +1,7 @@
 package fr.yuki.yrpf.manager;
 
 import com.google.gson.Gson;
-import fr.yuki.yrpf.dao.InventoryDAO;
-import fr.yuki.yrpf.dao.ItemTemplateDAO;
+import eu.bebendorf.ajorm.Repo;
 import fr.yuki.yrpf.enums.ToastTypeEnum;
 import fr.yuki.yrpf.i18n.I18n;
 import fr.yuki.yrpf.inventory.Inventory;
@@ -14,6 +13,7 @@ import fr.yuki.yrpf.net.payload.RemoteItemInventoryPayload;
 import fr.yuki.yrpf.net.payload.RequestInventoryContentPayload;
 import fr.yuki.yrpf.net.payload.RequestThrowItemPayload;
 import fr.yuki.yrpf.utils.Basic;
+import lombok.Getter;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Vector;
 import net.onfirenetwork.onsetjava.entity.Player;
@@ -22,14 +22,18 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class InventoryManager {
-    private static HashMap<Integer, ItemTemplate> itemTemplates;
-    private static HashMap<Integer, Inventory> inventories;
+    @Getter
+    private static Map<Integer, ItemTemplate> itemTemplates;
+    @Getter
+    private static Map<Integer, Inventory> inventories;
 
     public static void init() throws SQLException {
-        itemTemplates = ItemTemplateDAO.getItemTemplates();
+        itemTemplates = new HashMap<>();
+        Repo.get(ItemTemplate.class).all().forEach(it -> itemTemplates.put(it.getId(), it));
         Onset.print("Loaded " + itemTemplates.size() + " item template(s) from the database");
 
-        inventories = InventoryDAO.loadInventories();
+        inventories = new HashMap<>();
+        Repo.get(Inventory.class).all().forEach(it -> inventories.put(it.getId(), it));
         Onset.print("Loaded " + inventories.size() + " inventorie(s) from the database");
     }
 
@@ -150,11 +154,4 @@ public class InventoryManager {
         inventory.updateWeightView();
     }
 
-    public static HashMap<Integer, ItemTemplate> getItemTemplates() {
-        return itemTemplates;
-    }
-
-    public static HashMap<Integer, Inventory> getInventories() {
-        return inventories;
-    }
 }

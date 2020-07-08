@@ -5,7 +5,6 @@ import eu.bebendorf.ajorm.Repo;
 import fr.yuki.yrpf.character.CharacterJobLevel;
 import fr.yuki.yrpf.character.CharacterLoopAnimation;
 import fr.yuki.yrpf.character.CharacterState;
-import fr.yuki.yrpf.dao.*;
 import fr.yuki.yrpf.enums.ItemTemplateEnum;
 import fr.yuki.yrpf.enums.ToastTypeEnum;
 import fr.yuki.yrpf.i18n.I18n;
@@ -75,12 +74,12 @@ public class WorldManager {
         spawnVehicleSellers();
 
         // Load sellers
-        sellers = SellerDAO.loadSellers();
+        sellers = Repo.get(Seller.class).all();
         Onset.print("Loaded " + sellers.size() + " seller(s) from the database");
         spawnSellers();
 
         // Load outfit points
-        outfitPoints = OutfitPointDAO.loadOutfitPoint();
+        outfitPoints = Repo.get(OutfitPoint.class).all();
         Onset.print("Loaded " + outfitPoints.size() + " outfit point(s) from the database");
         spawnOutfitPoints();
     }
@@ -489,7 +488,7 @@ public class WorldManager {
         if(houseItemObject == null) return;
 
         houseItemObject.destroy();
-        HouseItemDAO.deleteHouseItem(houseItemObject);
+        houseItemObject.delete();
 
         ObjectPlacementInstance objectPlacementInstance = new GenericPlacementInstance(houseItemObject.getPosition(),
                 houseItemObject.getModelId(), 0);

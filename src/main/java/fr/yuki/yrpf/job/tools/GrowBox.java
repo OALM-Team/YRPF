@@ -2,7 +2,6 @@ package fr.yuki.yrpf.job.tools;
 
 import com.google.gson.Gson;
 import fr.yuki.yrpf.character.CharacterState;
-import fr.yuki.yrpf.dao.GrowboxDAO;
 import fr.yuki.yrpf.enums.ItemTemplateEnum;
 import fr.yuki.yrpf.enums.JobEnum;
 import fr.yuki.yrpf.enums.ToastTypeEnum;
@@ -23,7 +22,6 @@ import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Vector;
 import net.onfirenetwork.onsetjava.entity.Player;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class GrowBox implements JobToolHandler {
@@ -120,11 +118,7 @@ public class GrowBox implements JobToolHandler {
 
         // Destroy growbox
         this.jobTool.destroy();
-        try {
-            GrowboxDAO.deleteGrowbox(this.growboxModel);
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
+        this.growboxModel.delete();
     }
 
     public boolean addPot(Player player, WearableWorldObject wearableWorldObject) {
@@ -179,7 +173,7 @@ public class GrowBox implements JobToolHandler {
         inventory.removeItem(seedItem, 1);
         player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new AddGrowboxMenuItemPayload(pot.getUuid(),
                 554, pot.getWater(), pot.getState(), pot.isSeed())));
-        JobManager.addExp(player, JobEnum.WEED.type, 15);
+        JobManager.addExp(player, JobEnum.WEED.name(), 15);
     }
 
     public void harvestPot(Player player, String potId) {

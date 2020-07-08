@@ -129,13 +129,13 @@ public class WearableWorldObject {
             if(deliveryPointGoal != null) {
                 if(deliveryPointGoal.isNear(player)) {
                     ArrayList<CharacterJobLevel> characterJobLevels = account.decodeCharacterJob();
-                    CharacterJobLevel characterJobLevel = characterJobLevels.stream().filter(x -> x.getJobId().equals(JobEnum.DELIVERY.type)).findFirst().orElse(null);
+                    CharacterJobLevel characterJobLevel = characterJobLevels.stream().filter(x -> x.getJobId().equals(JobEnum.DELIVERY.name())).findFirst().orElse(null);
 
                     int rewardPerDistance = (int)Math.floor(((originPosition.distance(player.getLocation()) / 1000) / 2.5));
                     InventoryManager.addItemToPlayer(player, ItemTemplateEnum.CASH.id, rewardPerDistance, false);
                     SoundManager.playSound3D("sounds/cash_register.mp3", player.getLocation(), 200, 1);
                     delete = true;
-                    JobManager.addExp(player, JobEnum.DELIVERY.type, 15);
+                    JobManager.addExp(player, JobEnum.DELIVERY.name(), 15);
                     UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, I18n.t(account.getLang(), "toast.delivery.shipped",
                             String.valueOf(rewardPerDistance), String.valueOf(Math.floor(originPosition.distance(player.getLocation()) / 100))));
                 }

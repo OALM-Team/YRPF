@@ -1,40 +1,19 @@
 package fr.yuki.yrpf.model;
 
-public class PhoneContact {
+import eu.bebendorf.ajorm.Model;
+import eu.bebendorf.ajorm.annotation.Column;
+import eu.bebendorf.ajorm.annotation.Table;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter @Setter @Table("tbl_phone_contact")
+public class PhoneContact extends Model {
+    @Column(column = "id_phone_contact")
     private int id;
+    @Column(column = "id_account")
     private int accountId;
+    @Column
     private String name;
+    @Column
     private String number;
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public int getAccountId() {
-        return accountId;
-    }
-
-    public void setAccountId(int accountId) {
-        this.accountId = accountId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getNumber() {
-        return number;
-    }
-
-    public void setNumber(String number) {
-        this.number = number;
-    }
 }

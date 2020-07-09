@@ -2,6 +2,7 @@ package fr.yuki.yrpf.manager;
 
 import com.google.gson.Gson;
 import eu.bebendorf.ajorm.Repo;
+import fr.yuki.yrpf.character.CharacterState;
 import fr.yuki.yrpf.enums.ToastTypeEnum;
 import fr.yuki.yrpf.i18n.I18n;
 import fr.yuki.yrpf.inventory.Inventory;
@@ -9,9 +10,7 @@ import fr.yuki.yrpf.inventory.InventoryItem;
 import fr.yuki.yrpf.model.Account;
 import fr.yuki.yrpf.model.GroundItem;
 import fr.yuki.yrpf.model.ItemTemplate;
-import fr.yuki.yrpf.net.payload.RemoteItemInventoryPayload;
-import fr.yuki.yrpf.net.payload.RequestInventoryContentPayload;
-import fr.yuki.yrpf.net.payload.RequestThrowItemPayload;
+import fr.yuki.yrpf.net.payload.*;
 import fr.yuki.yrpf.utils.Basic;
 import lombok.Getter;
 import net.onfirenetwork.onsetjava.Onset;
@@ -29,11 +28,16 @@ public class InventoryManager {
 
     public static void init() throws SQLException {
         itemTemplates = new HashMap<>();
-        Repo.get(ItemTemplate.class).all().forEach(it -> itemTemplates.put(it.getId(), it));
+        Repo.get(ItemTemplate.class).all().forEach(it -> {
+            itemTemplates.put(it.getId(), it);
+        });
         Onset.print("Loaded " + itemTemplates.size() + " item template(s) from the database");
 
         inventories = new HashMap<>();
-        Repo.get(Inventory.class).all().forEach(it -> inventories.put(it.getId(), it));
+        Repo.get(Inventory.class).all().forEach(it -> {
+            it.parseContent();
+            inventories.put(it.getId(), it);
+        });
         Onset.print("Loaded " + inventories.size() + " inventorie(s) from the database");
     }
 
@@ -72,25 +76,31 @@ public class InventoryManager {
      * @return The fresh or existing item
      */
     public static InventoryItem addItemToPlayer(Player player, String templateId, int quantity, boolean checkWeight) {
-        Onset.print("Add item=" + templateId + " to size=" + getInventoriesForAccount(player.getPropertyInt("accountId")).size());
-        Inventory inventory = getInventoriesForAccount(player.getPropertyInt("accountId")).get(0);
-        InventoryItem inventoryItem = new InventoryItem();
-        inventoryItem.setId(UUID.randomUUID().toString());
-        inventoryItem.setTemplateId(templateId);
-        inventoryItem.setAmount(quantity);
-        inventoryItem.setExtraProperties(new HashMap<>());
+        try {
+            Onset.print("Add item=" + templateId + " to size=" + getInventoriesForAccount(player.getPropertyInt("accountId")).size());
+            Inventory inventory = getInventoriesForAccount(player.getPropertyInt("accountId")).get(0);
+            InventoryItem inventoryItem = new InventoryItem();
+            inventoryItem.setId(UUID.randomUUID().toString());
+            inventoryItem.setTemplateId(templateId);
+            inventoryItem.setAmount(quantity);
+            inventoryItem.setExtraProperties(new HashMap<>());
 
-        Account account = WorldManager.getPlayerAccount(player);
-        if(checkWeight) {
-            if(!checkInventoryWeight(player, inventoryItem)) {
-                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.inventory.no_space_left"));
-                return null;
+            Account account = WorldManager.getPlayerAccount(player);
+            if(checkWeight) {
+                if(!checkInventoryWeight(player, inventoryItem)) {
+                    UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.inventory.no_space_left"));
+                    return null;
+                }
             }
+            inventoryItem = inventory.addItem(inventoryItem);
+            inventory.save();
+            Onset.print("Inventory weight is now " + inventory.getCurrentWeight() + "/" + inventory.getMaxWeight());
+            return inventoryItem;
         }
-        inventoryItem = inventory.addItem(inventoryItem);
-        inventory.save();
-        Onset.print("Inventory weight is now " + inventory.getCurrentWeight() + "/" + inventory.getMaxWeight());
-        return inventoryItem;
+        catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
     }
 
     public static Inventory getMainInventory(Player player) {
@@ -154,4 +164,51 @@ public class InventoryManager {
         inventory.updateWeightView();
     }
 
+    public static void openTransfertInventory(Player player, Inventory inventory, Inventory chest) {
+        CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
+        if(!UIStateManager.handleUIToogle(player, "transfertInventory")) {
+            state.setCurrentChest(null);
+            return;
+        }
+        state.setCurrentChest(chest);
+        updateChestView(player, chest);
+    }
+
+    public static void updateChestView(Player player, Inventory chest) {
+        // Clear chest content
+        player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new ClearChestContentPayload()));
+
+        // Add items to chest
+        for(InventoryItem inventoryItem : chest.getInventoryItems()) {
+            player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new AddItemChestPayload(inventoryItem)));
+        }
+        player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new UpdateChestWeightPayload(chest.getCurrentWeight(), chest.getMaxWeight())));
+    }
+
+    public static void handleTransfertToChest(Player player, String itemId) {
+        CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
+        if(state.getCurrentChest() == null) return;
+        InventoryItem inventoryItem = InventoryManager.getMainInventory(player)
+                .getItem(itemId);
+        if(inventoryItem == null) return;
+        InventoryItem copyItem = inventoryItem.copy();
+        copyItem.setAmount(1);
+        InventoryManager.getMainInventory(player).removeItem(inventoryItem, 1);
+        state.getCurrentChest().addItem(copyItem);
+        updateChestView(player, state.getCurrentChest());
+        state.getCurrentChest().save();
+    }
+
+    public static void handleTransfertToInventory(Player player, String itemId) {
+        CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
+        if(state.getCurrentChest() == null) return;
+        InventoryItem inventoryItem = state.getCurrentChest().getItem(itemId);
+        if(inventoryItem == null) return;
+        InventoryItem copyItem = inventoryItem.copy();
+        copyItem.setAmount(1);
+        state.getCurrentChest().removeItem(inventoryItem, 1);
+        InventoryManager.getMainInventory(player).addItem(copyItem);
+        updateChestView(player, state.getCurrentChest());
+        state.getCurrentChest().save();
+    }
 }

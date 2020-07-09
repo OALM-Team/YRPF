@@ -97,6 +97,7 @@ public class YukiRPFrameworkPlugin {
             Onset.registerCommand("kick", new KickCommand());
             Onset.registerCommand("setclothe", new SetClotheCommand());
             Onset.registerCommand("setcharacterscale", new SetCharacterScaleCommand());
+            Onset.registerCommand("unban", new UnbanCommand());
 
             // Register remote events
             Onset.registerRemoteEvent("GlobalUI:ToogleWindow");
@@ -153,6 +154,10 @@ public class YukiRPFrameworkPlugin {
             Onset.registerRemoteEvent("Character:InspectCharacter");
             Onset.registerRemoteEvent("GenericMenu:Dismiss");
             Onset.registerRemoteEvent("Character:GiveHouseKey");
+            Onset.registerRemoteEvent("Chest:TransfertToChest");
+            Onset.registerRemoteEvent("Chest:TransfertToInventory");
+            Onset.registerRemoteEvent("Police:KickDoor");
+            Onset.registerRemoteEvent("Vehicle:OnHornCasted");
         } catch (Exception ex) {
             ex.printStackTrace();
             Onset.print("Can't start the plugin because : " + ex.toString());
@@ -227,7 +232,7 @@ public class YukiRPFrameworkPlugin {
                         account.getSaveH()));
 
                 if(account.getCharacterName().equals("Unknown")) { // Recovery
-                    account.setCharacterCreationRequest(true);
+                    account.setCharacterCreationRequest(1);
                     account.setPhoneNumber(PhoneManager.generateRandomPhoneNumber());
                     account.setBankMoney(4000);
                     Onset.print("Phone number generated : " + account.getPhoneNumber());
@@ -552,6 +557,22 @@ public class YukiRPFrameworkPlugin {
 
                 case "Character:GiveHouseKey":
                     HouseManager.handleGiveHouseKey(evt.getPlayer(), Integer.parseInt((evt.getArgs()[0]).toString()));
+                    break;
+
+                case "Chest:TransfertToChest":
+                    InventoryManager.handleTransfertToChest(evt.getPlayer(), (evt.getArgs()[0]).toString());
+                    break;
+
+                case "Chest:TransfertToInventory":
+                    InventoryManager.handleTransfertToInventory(evt.getPlayer(), (evt.getArgs()[0]).toString());
+                    break;
+
+                case "Police:KickDoor":
+                    PoliceManager.handleKickDoor(evt.getPlayer());
+                    break;
+
+                case "Vehicle:OnHornCasted":
+                    VehicleManager.handleVehicleHorn(evt.getPlayer());
                     break;
             }
         }

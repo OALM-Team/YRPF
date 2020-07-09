@@ -1,5 +1,6 @@
 package fr.yuki.yrpf.character;
 
+import fr.yuki.yrpf.inventory.Inventory;
 import fr.yuki.yrpf.job.ObjectPlacementInstance;
 import fr.yuki.yrpf.job.WearableWorldObject;
 import fr.yuki.yrpf.manager.ModdingManager;
@@ -37,6 +38,7 @@ public class CharacterState {
     private CharacterToolAnimation currentPhoneAttached = null;
     private GenericMenu currentGenericMenu = null;
     private boolean isInvisible = false;
+    private Inventory currentChest = null;
 
     public CharacterState() {
         this.uiState = new UIState();
@@ -221,5 +223,13 @@ public class CharacterState {
 
     public void setInvisible(boolean invisible) {
         isInvisible = invisible;
+    }
+
+    public Inventory getCurrentChest() {
+        return currentChest;
+    }
+
+    public void setCurrentChest(Inventory currentChest) {
+        this.currentChest = currentChest;
     }
 }

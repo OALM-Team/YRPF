@@ -1,10 +1,9 @@
 package fr.yuki.yrpf.model;
 
+import fr.yuki.yrpf.enums.ToastTypeEnum;
+import fr.yuki.yrpf.i18n.I18n;
 import fr.yuki.yrpf.inventory.InventoryItem;
-import fr.yuki.yrpf.manager.CharacterManager;
-import fr.yuki.yrpf.manager.InventoryManager;
-import fr.yuki.yrpf.manager.ModdingManager;
-import fr.yuki.yrpf.manager.WorldManager;
+import fr.yuki.yrpf.manager.*;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Vector;
 import net.onfirenetwork.onsetjava.entity.Pickup;
@@ -45,6 +44,9 @@ public class GroundItem {
         CharacterManager.setCharacterFreeze(player, true);
         player.setAnimation(Animation.PICKUP_LOWER);
         if(InventoryManager.getMainInventory(player).addItem(inventoryItem) == null)  {
+            this.isAvailable = true;
+            Account account = WorldManager.getPlayerAccount(player);
+            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.inventory.no_space_left"));
             Onset.delay(1000, () -> {
                 CharacterManager.setCharacterFreeze(player, false);
             });

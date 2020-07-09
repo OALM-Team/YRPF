@@ -39,8 +39,8 @@ public class Account extends Model {
     private double saveZ;
     @Column
     private double saveH;
-    @Column
-    private boolean characterCreationRequest = true;
+    @Column(column = "character_creation_request")
+    private int characterCreationRequest = 1;
     @Column
     private String characterStyle = "";
     @Column
@@ -52,17 +52,17 @@ public class Account extends Model {
     @Column
     private String lang = "fr";
     @Column
-    private int foodState = 100;
+    private Integer foodState = 100;
     @Column
-    private int drinkState = 100;
-    @Column
+    private Integer drinkState = 100;
+    @Column(column = "phone_number")
     private String phoneNumber;
     @Column
     private String weapons = "[]";
-    @Column
-    private int bagId = -1;
-    @Column
-    private int companyId = -1;
+    @Column(column = "id_bag")
+    private Integer bagId = -1;
+    @Column(column = "id_compagny")
+    private Integer companyId = -1;
     @Column
     private boolean isInService = false;
     @Column

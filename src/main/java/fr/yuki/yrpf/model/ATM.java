@@ -14,11 +14,11 @@ public class ATM extends Model {
     @Column(column = "id_atm")
     private int id;
     @Column
-    private float x;
+    private double x;
     @Column
-    private float y;
+    private double y;
     @Column
-    private float z;
+    private double z;
     private Pickup pickup;
 
     public boolean isNear(Player player) {

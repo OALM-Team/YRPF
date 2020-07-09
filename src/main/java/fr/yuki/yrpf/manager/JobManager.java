@@ -57,6 +57,9 @@ public class JobManager {
         Onset.print("Loaded " + jobOutfits.size() + " job outfit(s) from the database");
 
         jobTools = Repo.get(JobTool.class).all();
+        jobTools.forEach(it -> {
+            it.setJobToolType(it.getJobToolType());
+        });
         Onset.print("Loaded " + jobTools.size() + " job tool(s) from the database");
 
         jobLevels = Repo.get(JobLevel.class).all();
@@ -81,7 +84,7 @@ public class JobManager {
         spawnJobOutfitsPoint();
         spawnVehicleRentalSpawns();
         initPaycheck();
-        //initWorldWearableObjectExpiration();
+        initWorldWearableObjectExpiration();
     }
 
     public static void initWorldWearableObjectExpiration() {
@@ -391,6 +394,19 @@ public class JobManager {
 
         // Unwear the item
         CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject().requestUnwear(player, false);
+    }
+
+    public static boolean isWhitelistForThisJob(Player player, String jobType) {
+        Account account = WorldManager.getPlayerAccount(player);
+        Job job = jobs.values().stream().filter(x -> x.getJobType().equals(jobType)).findFirst().orElse(null);
+        if(job == null) return false;
+        AccountJobWhitelist accountJobWhitelist = AccountManager.getAccountJobWhitelists().stream()
+                .filter(x -> x.getAccountId() == account.getId() && x.getJobId().equals(job.getJobType()))
+                .findFirst().orElse(null);
+        if(accountJobWhitelist == null) {
+            return false;
+        }
+        return true;
     }
 
     public static boolean requestVehicleRental(Player player) {

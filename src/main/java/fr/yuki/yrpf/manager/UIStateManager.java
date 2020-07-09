@@ -139,6 +139,13 @@ public class UIStateManager {
                         ("customOutfit", uiState.isCustomOutfit())));
                 break;
 
+            case "transfertInventory":
+                uiState.setTransfertInventory(!uiState.isTransfertInventory());
+                r = uiState.isTransfertInventory();
+                player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new SetWindowStatePayload
+                        ("transfertInventory", uiState.isTransfertInventory())));
+                break;
+
         }
         return r;
     }
@@ -200,7 +207,7 @@ public class UIStateManager {
         }
 
         // Apply style to character if there is one saved
-        if(!account.isCharacterCreationRequest()) {
+        if(account.getCharacterCreationRequest() == 0) {
             CharacterManager.setCharacterStyle(player);
 
             if(!account.isDead()) {
@@ -230,7 +237,7 @@ public class UIStateManager {
                     WorldManager.savePlayer(player);
                 });
             }
-        } else if(account.isCharacterCreationRequest()) { // Request character creation if no style set
+        } else if(account.getCharacterCreationRequest() == 1) { // Request character creation if no style set
             CharacterManager.teleportWithLevelLoading(player, new Location(WorldManager.getServerConfig().getSpawnPointX() +  Basic.randomNumber(-30,30),
                     WorldManager.getServerConfig().getSpawnPointY() +  Basic.randomNumber(-30,30), WorldManager.getServerConfig().getSpawnPointZ(),
                     WorldManager.getServerConfig().getSpawnPointH()));

@@ -6,6 +6,7 @@ import eu.bebendorf.ajorm.annotation.Table;
 import fr.yuki.yrpf.modding.Line3D;
 import lombok.Getter;
 import lombok.Setter;
+import net.onfirenetwork.onsetjava.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +37,15 @@ public class House extends Model {
     private boolean locked = true;
     private List<Integer> allowedPlayers = new ArrayList<>();
     private List<HouseItemObject> houseItemObjects = new ArrayList<>();
+
+    public HouseItemObject getNearbyHouseItem(Player player) {
+        for(HouseItemObject houseItemObject : houseItemObjects) {
+            if(houseItemObject.getPosition().distance(player.getLocation()) < 180) {
+                return houseItemObject;
+            }
+        }
+        return null;
+    }
 
     public Line3D getLine3D() {
        return new Line3D(this.sx, this.sy, this.sz, this.ex, this.ey, this.ez, 5);

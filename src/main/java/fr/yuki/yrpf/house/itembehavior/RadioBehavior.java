@@ -2,6 +2,7 @@ package fr.yuki.yrpf.house.itembehavior;
 
 import fr.yuki.yrpf.manager.SoundManager;
 import fr.yuki.yrpf.model.HouseItemObject;
+import net.onfirenetwork.onsetjava.entity.Player;
 import net.onfirenetwork.onsetjava.entity.WorldObject;
 
 import java.util.UUID;
@@ -39,7 +40,7 @@ public class RadioBehavior extends ItemBehavior {
     }
 
     @Override
-    public void onInteract() {
+    public void onInteract(Player player) {
 
     }
 }

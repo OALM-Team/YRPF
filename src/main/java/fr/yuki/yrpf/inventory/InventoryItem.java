@@ -2,6 +2,7 @@ package fr.yuki.yrpf.inventory;
 
 import fr.yuki.yrpf.manager.InventoryManager;
 import fr.yuki.yrpf.model.ItemTemplate;
+import net.onfirenetwork.onsetjava.Onset;
 
 import java.util.HashMap;
 import java.util.UUID;

@@ -6,6 +6,7 @@ import fr.yuki.yrpf.character.CharacterLoopAnimation;
 import fr.yuki.yrpf.character.CharacterState;
 import fr.yuki.yrpf.character.CharacterToolAnimation;
 import fr.yuki.yrpf.enums.ToastTypeEnum;
+import fr.yuki.yrpf.house.itembehavior.HouseChestBehavior;
 import fr.yuki.yrpf.i18n.I18n;
 import fr.yuki.yrpf.inventory.Inventory;
 import fr.yuki.yrpf.inventory.InventoryItem;
@@ -14,9 +15,7 @@ import fr.yuki.yrpf.job.WearableWorldObject;
 import fr.yuki.yrpf.job.placementObject.GeneratorPlacementInstance;
 import fr.yuki.yrpf.job.placementObject.GrowBoxPlacementInstance;
 import fr.yuki.yrpf.job.tools.Generator;
-import fr.yuki.yrpf.model.Account;
-import fr.yuki.yrpf.model.Bag;
-import fr.yuki.yrpf.model.Mask;
+import fr.yuki.yrpf.model.*;
 import fr.yuki.yrpf.net.payload.RequestUseItemPayload;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Vector;
@@ -160,10 +159,41 @@ public class ItemManager {
             case "33": // Bandage
                 useBandage(player, inventoryItem);
                 break;
-                
+
             case "34": // Jack
                 useJack(player, inventoryItem);
                 break;
+
+            case "35": // Drill
+                useDrill(player, inventoryItem);
+                break;
+        }
+    }
+
+    private static void useDrill(Player player, InventoryItem inventoryItem) {
+        if(player.getVehicle() != null) return;
+        CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
+        if(!state.canInteract()) return;
+        Inventory inventory = InventoryManager.getMainInventory(player);
+        inventory.removeItem(inventoryItem, 1);
+
+        House house = HouseManager.getHouseAtLocation(player.getLocation());
+        if(house == null) return;
+        HouseItemObject houseItemObject = house.getNearbyHouseItem(player);
+        if(houseItemObject == null) return;
+        if(houseItemObject.getItemBehavior() == null) return;
+
+        // Open chest
+        if(houseItemObject.getFunctionId() == 3) {
+            CharacterLoopAnimation characterLoopAnimation = new CharacterLoopAnimation(player, Animation.COMBINE,
+                    5000, 3, "sounds/drill.mp3");
+            characterLoopAnimation.start();
+            CharacterManager.setCharacterFreeze(player, true);
+            Onset.delay(20000, () -> {
+                CharacterManager.setCharacterFreeze(player, false);
+                ((HouseChestBehavior)houseItemObject.getItemBehavior()).setOpen(true);
+                UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, "Le coffre est désormais ouvert");
+            });
         }
     }
 

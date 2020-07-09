@@ -13,6 +13,7 @@ import fr.yuki.yrpf.model.VehicleGarage;
 import fr.yuki.yrpf.net.payload.AddVChestItemPayload;
 import fr.yuki.yrpf.utils.Basic;
 import fr.yuki.yrpf.vehicle.storeLayout.*;
+import fr.yuki.yrpf.world.RestrictedZone;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Color;
 import net.onfirenetwork.onsetjava.data.Vector;
@@ -351,5 +352,23 @@ public class VehicleManager {
 
         wearableWorldObject.removeFromVehicle();
         wearableWorldObject.requestWear(player);
+    }
+
+    public static void handleVehicleHorn(Player player) {
+        if(player.getVehicle() == null) return;
+        // Check Restricted Zone
+        Door nearestDoor = WorldManager.getNearestDoor(player.getLocation());
+        if(nearestDoor == null) return;
+        if(nearestDoor.getLocation().distance(player.getLocation()) > 750) return;
+        RestrictedZone zone = null;
+        for(RestrictedZone restrictedZone : WorldManager.getRestrictedZones()) {
+            if(restrictedZone.isDoorInside(nearestDoor)) {
+                zone = restrictedZone;
+                break;
+            }
+        }
+        if(zone == null) return;
+        if(!zone.canInteractWithDoor(player, nearestDoor)) return;
+        nearestDoor.setOpen(!nearestDoor.isOpen());
     }
 }

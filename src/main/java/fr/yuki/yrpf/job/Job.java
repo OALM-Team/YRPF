@@ -37,6 +37,7 @@ public abstract class Job {
                 refillHarvestResources();
             });
         }
+
     }
 
     /**

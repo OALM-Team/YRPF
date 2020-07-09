@@ -81,7 +81,6 @@ public class PhoneCall {
             SoundManager.playSound2D(this.receiver, "call_end", "sounds/call_end.mp3", 0.2);
             SoundManager.playSound2D(this.caller, "call_end", "sounds/call_end.mp3", 0.2);
 
-
             SoundManager.stopSound2D(this.receiver, "ringtone");
             SoundManager.stopSound2D(this.caller, "beep");
         } else if(this.state == 2) { // In call
@@ -91,6 +90,7 @@ public class PhoneCall {
                     "")));
             this.caller.setVoiceChannel(this.id, false);
             this.receiver.setVoiceChannel(this.id, false);
+
             SoundManager.playSound2D(this.receiver, "call_end", "sounds/call_end.mp3", 0.2);
             SoundManager.playSound2D(this.caller, "call_end", "sounds/call_end.mp3", 0.2);
         }

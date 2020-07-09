@@ -14,6 +14,9 @@ public class CharacterStyle {
 
     public void attachStyleToPlayer(Player player) {
         Onset.print("Attach player style to character");
+        if(this.gender == null || this.body == null || this.hair == null ||
+                this.hairColor == null || this.top == null || this.pant == null
+            || this.shoes == null) return;
         player.setProperty("gender", this.gender, true);
         player.setProperty("body", this.body, true);
         player.setProperty("hair", this.hair, true);

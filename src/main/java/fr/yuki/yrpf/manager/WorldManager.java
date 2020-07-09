@@ -250,6 +250,9 @@ public class WorldManager {
                 if(JobManager.handleSellJobNpcInventoryItem(player)) return;
             if(player.getVehicle() == null) if(JobManager.handleJobOutfitRequest(player)) return;
             if(player.getVehicle() == null) if(handleSellerInteract(player)) return;
+            if(player.getVehicle() == null) {
+                if(HouseManager.handleInteractWithHouseItems(player)) return;
+            }
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -335,6 +338,13 @@ public class WorldManager {
     }
 
     public static void openSeller(Player player, Seller seller) {
+        if(seller.getName().equals("Dealer")) {
+            if(TimeManager.getCurrentHour() > 7 && TimeManager.getCurrentHour() < 20) {
+                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Ce vendeur est seulement disponible la nuit");
+                return;
+            }
+        }
+
         // Check job
         if(!seller.getJobRequired().equals("")) {
             Account account = WorldManager.getPlayerAccount(player);
@@ -564,8 +574,11 @@ public class WorldManager {
 
     public static Player getPlayerByPhoneNumber(String phoneNumber) {
         for(Player player : Onset.getPlayers()) {
-            Account account = getPlayerAccount(player);
-            if(account.getPhoneNumber().equals(phoneNumber)) return player;
+            try {
+                Account account = getPlayerAccount(player);
+                if(account.getPhoneNumber().equals(phoneNumber)) return player;
+            }
+            catch (Exception ex) {}
         }
         return null;
     }

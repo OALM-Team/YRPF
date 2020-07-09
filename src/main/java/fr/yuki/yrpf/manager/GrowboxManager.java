@@ -29,7 +29,7 @@ public class GrowboxManager {
             jobTool.setZ(growboxModel.getZ());
             jobTool.setRX(growboxModel.getRx());
             jobTool.setRY(growboxModel.getRy());
-            jobTool.setRY(growboxModel.getRz());
+            jobTool.setRZ(growboxModel.getRz());
             jobTool.setSX(1);
             jobTool.setSY(1);
             jobTool.setSZ(1);

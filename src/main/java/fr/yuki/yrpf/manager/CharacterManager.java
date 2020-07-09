@@ -4,10 +4,12 @@ import com.google.gson.Gson;
 import fr.yuki.yrpf.character.CharacterState;
 import fr.yuki.yrpf.character.CharacterStyle;
 import fr.yuki.yrpf.enums.ItemTemplateEnum;
+import fr.yuki.yrpf.enums.JobEnum;
 import fr.yuki.yrpf.enums.ToastTypeEnum;
 import fr.yuki.yrpf.i18n.I18n;
 import fr.yuki.yrpf.inventory.Inventory;
 import fr.yuki.yrpf.inventory.InventoryItem;
+import fr.yuki.yrpf.job.Job;
 import fr.yuki.yrpf.model.Account;
 import fr.yuki.yrpf.net.payload.RequestThrowItemPayload;
 import fr.yuki.yrpf.net.payload.SetFoodPayload;
@@ -136,7 +138,7 @@ public class CharacterManager {
 
         player.setName(account.getCharacterName());
         player.setProperty("characterName", account.getCharacterName(), true);
-        account.setCharacterCreationRequest(true);
+        account.setCharacterCreationRequest(0);
         WorldManager.savePlayer(player);
         if(type.equals("character")) {
             UIStateManager.handleUIToogle(player, "customCharacter");
@@ -247,8 +249,27 @@ public class CharacterManager {
 
     public static void handleCharacterInteract(Player player) {
         Player nearestPlayer = WorldManager.getNearestPlayer(player);
-        //nearestPlayer = player; // Temp test
-        if(nearestPlayer == null) return;
+
+        if(nearestPlayer != null) {
+            if(nearestPlayer.getLocation().distance(player.getLocation()) > 200) {
+                nearestPlayer = null;
+            }
+        }
+
+        if(nearestPlayer == null) {
+            // Police Menu
+            if(JobManager.isWhitelistForThisJob(player, JobEnum.POLICE.name())) {
+                CharacterState characterState = CharacterManager.getCharacterStateByPlayer(player);
+                GenericMenu genericMenu = new GenericMenu(player);
+                genericMenu.getItems().add(new GenericMenuItem("Enfoncer la porte", "window.CallEvent(\"RemoteCallInterface\"," +
+                        " \"Police:KickDoor\");"));
+                genericMenu.addCloseItem();
+                genericMenu.show();
+                characterState.setCurrentGenericMenu(genericMenu);
+            }
+            return;
+        }
+
         if(nearestPlayer.getLocation().distance(player.getLocation()) < 200) {
             // Build generic menu
             CharacterState characterState = CharacterManager.getCharacterStateByPlayer(player);

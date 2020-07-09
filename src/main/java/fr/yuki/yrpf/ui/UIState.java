@@ -17,6 +17,7 @@ public class UIState {
     private boolean houseBuy = false;
     private boolean genericMenu = false;
     private boolean customOutfit = false;
+    private boolean transfertInventory = false;
 
     public boolean isInventory() {
         return inventory;
@@ -144,5 +145,13 @@ public class UIState {
 
     public void setCustomOutfit(boolean customOutfit) {
         this.customOutfit = customOutfit;
+    }
+
+    public boolean isTransfertInventory() {
+        return transfertInventory;
+    }
+
+    public void setTransfertInventory(boolean transfertInventory) {
+        this.transfertInventory = transfertInventory;
     }
 }

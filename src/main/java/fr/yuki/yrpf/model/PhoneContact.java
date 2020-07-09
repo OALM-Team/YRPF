@@ -14,6 +14,6 @@ public class PhoneContact extends Model {
     private int accountId;
     @Column
     private String name;
-    @Column
+    @Column(column = "phone_number")
     private String number;
 }

@@ -21,6 +21,7 @@ import fr.yuki.yrpf.net.payload.UpdateInventoryWeightPayload;
 import fr.yuki.yrpf.net.payload.UpdateItemInventoryPayload;
 import lombok.Getter;
 import lombok.Setter;
+import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.entity.Player;
 
 import java.util.ArrayList;
@@ -39,8 +40,11 @@ public class Inventory extends Model {
     private int characterId = -1;
     @Column
     private int vehicleId = -1;
+    @Column
+    private int houseItemId = -1;
     @Column(size = 0)
     private String content = "[]";
+    private int maxWeight = 55;
 
     private ArrayList<InventoryItem> inventoryItems = new ArrayList<>();
 
@@ -50,8 +54,12 @@ public class Inventory extends Model {
      * @return The inventory item affected
      */
     public InventoryItem addItem(InventoryItem inventoryItem) {
+        double itemWeight = inventoryItem.getTemplate().getWeight() * inventoryItem.getAmount();
         for(InventoryItem inventoryItemEntry : this.inventoryItems) {
             if(inventoryItemEntry.canStack(inventoryItem)) {
+                if(itemWeight + this.getCurrentWeight() > this.getMaxWeight()) {
+                    return null;
+                }
                 inventoryItemEntry.setAmount
                         (inventoryItemEntry.getAmount() + inventoryItem.getAmount());
                 this.updateItemPlayerView(inventoryItemEntry);
@@ -153,13 +161,18 @@ public class Inventory extends Model {
      * @return The max weight
      */
     public float getMaxWeight() {
+        float baseMaxWeight = this.maxWeight;
+
         Player player = WorldManager.findPlayerByAccountId(this.getCharacterId());
-        CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
-        float baseMaxWeight = 55;
-        if(state.getCurrentBag() != null) {
-            Bag bag = ItemManager.bags.stream().filter(x -> x.getModelId() == state.getCurrentBag().getModelId())
-                    .findFirst().orElse(null);
-            return (float) (baseMaxWeight + bag.getBonusWeight());
+        if(player != null) {
+            CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
+            if(state.getCurrentBag() != null) {
+                Bag bag = ItemManager.bags.stream().filter(x -> x.getModelId() == state.getCurrentBag().getModelId())
+                        .findFirst().orElse(null);
+                return (float) (baseMaxWeight + bag.getBonusWeight());
+            } else {
+                return baseMaxWeight;
+            }
         } else {
             return baseMaxWeight;
         }

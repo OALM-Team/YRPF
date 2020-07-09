@@ -6,6 +6,7 @@ import eu.bebendorf.ajorm.Repo;
 import fr.yuki.yrpf.character.CharacterState;
 import fr.yuki.yrpf.enums.ItemTemplateEnum;
 import fr.yuki.yrpf.enums.ToastTypeEnum;
+import fr.yuki.yrpf.house.itembehavior.HouseChestBehavior;
 import fr.yuki.yrpf.i18n.I18n;
 import fr.yuki.yrpf.inventory.Inventory;
 import fr.yuki.yrpf.job.ObjectPlacementInstance;
@@ -144,6 +145,32 @@ public class HouseManager {
         if(house.getAllowedPlayers().contains(targetAccount) || playerTarget.getId() == house.getAccountId()) return;
         house.getAllowedPlayers().add(targetAccount.getId());
         UIStateManager.sendNotification(playerTarget, ToastTypeEnum.SUCCESS, "Vous avez désormais les clés de la maison");
+    }
+
+    public static boolean handleInteractWithHouseItems(Player player) {
+        House house = HouseManager.getHouseAtLocation(player.getLocation());
+        if(house == null) return false;
+        HouseItemObject houseItemObject = house.getNearbyHouseItem(player);
+        if(houseItemObject == null) return false;
+        if(houseItemObject.getItemBehavior() == null) return false;
+        Account account = WorldManager.getPlayerAccount(player);
+        if(houseItemObject.getFunctionId() == 3) {
+            HouseChestBehavior chest = ((HouseChestBehavior)houseItemObject.getItemBehavior());
+            if(!chest.isOpen()) {
+                if(!HouseManager.canBuildInHouse(player, house)) {
+                    UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Le coffre n'est pas ouvert");
+                    return true;
+                }
+            }
+        } else {
+            if(!HouseManager.canBuildInHouse(player, house)) {
+                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.house.need_to_be_inside"));
+                return true;
+            }
+        }
+
+        houseItemObject.getItemBehavior().onInteract(player);
+        return true;
     }
 
     public static boolean canBuildInHouse(Player player, House house) {

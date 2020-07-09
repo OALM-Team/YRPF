@@ -4,6 +4,7 @@ import eu.bebendorf.ajorm.Model;
 import eu.bebendorf.ajorm.annotation.Column;
 import eu.bebendorf.ajorm.annotation.Table;
 import fr.yuki.yrpf.house.itembehavior.ATMBehavior;
+import fr.yuki.yrpf.house.itembehavior.HouseChestBehavior;
 import fr.yuki.yrpf.house.itembehavior.ItemBehavior;
 import fr.yuki.yrpf.house.itembehavior.RadioBehavior;
 import fr.yuki.yrpf.manager.ModdingManager;
@@ -53,6 +54,10 @@ public class HouseItemObject extends Model {
 
                 case 2: // ATM
                     this.itemBehavior = new ATMBehavior(this);
+                    break;
+
+                case 3: // Chest
+                    this.itemBehavior = new HouseChestBehavior(this);
                     break;
             }
 

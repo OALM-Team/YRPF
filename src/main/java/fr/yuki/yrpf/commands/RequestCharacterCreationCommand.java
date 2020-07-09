@@ -19,7 +19,7 @@ public class RequestCharacterCreationCommand implements CommandExecutor {
                 .findFirst().orElse(null);
         if(playerTarget == null) return true;
         Account account = WorldManager.getPlayerAccount(playerTarget);
-        account.setCharacterCreationRequest(true);
+        account.setCharacterCreationRequest(1);
         account.save();
 
         UIStateManager.handleUIToogle(playerTarget, "customCharacter");

@@ -3,6 +3,7 @@ package fr.yuki.yrpf.house.itembehavior;
 import fr.yuki.yrpf.manager.WorldManager;
 import fr.yuki.yrpf.model.ATM;
 import fr.yuki.yrpf.model.HouseItemObject;
+import net.onfirenetwork.onsetjava.entity.Player;
 
 public class ATMBehavior extends ItemBehavior {
     private ATM atm;
@@ -26,7 +27,7 @@ public class ATMBehavior extends ItemBehavior {
     }
 
     @Override
-    public void onInteract() {
+    public void onInteract(Player player) {
 
     }
 }

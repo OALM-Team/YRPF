@@ -35,4 +35,11 @@ public class RestrictedZone {
 
         return true;
     }
+
+    public boolean isDoorInside(Door door) {
+        if(this.line3D.getDoorsInside().stream().filter(x -> x.getId() == door.getId()).findFirst().orElse(null) == null) {
+            return false;
+        }
+        return true;
+    }
 }

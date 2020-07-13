@@ -38,10 +38,10 @@ public class Pot {
         if(this.worldObject != null) {
             this.worldObject.destroy();
             this.worldObject = null;
-            if(this.seedObject != null) {
-                this.seedObject.destroy();
-                this.seedObject = null;
-            }
+        }
+        if(this.seedObject != null) {
+            this.seedObject.destroy();
+            this.seedObject = null;
         }
     }
 

@@ -46,6 +46,7 @@ public class GeneratorDeliveryPackage extends DeliveryPackage {
         jobTool.setSX(1);
         jobTool.setSY(1);
         jobTool.setSZ(1);
+        jobTool.setCanShowText(false);
         jobTool.setJobToolType("GENERATOR");
         JobManager.getJobTools().add(jobTool);
         jobTool.spawn(JobManager.getJobs().get(JobEnum.WEED));

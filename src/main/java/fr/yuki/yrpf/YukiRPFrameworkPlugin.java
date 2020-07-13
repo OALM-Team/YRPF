@@ -312,6 +312,15 @@ public class YukiRPFrameworkPlugin {
         account.setSaveH(location.getHeading());
         CharacterState state = CharacterManager.getCharacterStateByPlayer(evt.getPlayer());
         if(state != null) {
+            if(state.getCurrentPhoneAttached() != null) {
+                state.getCurrentPhoneAttached().unAttach();
+            }
+            if(state.getCurrentMask() != null) {
+                state.unattachMask();
+            }
+            if(state.getWearableWorldObject() != null) {
+                state.getWearableWorldObject().deleteObject();
+            }
             if(state.getCurrentPhoneCall() != null ){
                 state.getCurrentPhoneCall().end();
             }

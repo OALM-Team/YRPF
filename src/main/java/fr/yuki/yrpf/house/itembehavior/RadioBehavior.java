@@ -43,4 +43,9 @@ public class RadioBehavior extends ItemBehavior {
     public void onInteract(Player player) {
 
     }
+
+    @Override
+    public boolean canBeMove() {
+        return true;
+    }
 }

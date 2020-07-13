@@ -49,6 +49,7 @@ public class GrowBoxDeliveryPackage extends DeliveryPackage {
         jobTool.setSY(1);
         jobTool.setSZ(1);
         jobTool.setJobToolType("GROWBOX");
+        jobTool.setCanShowText(false);
         JobManager.getJobTools().add(jobTool);
         jobTool.spawn(JobManager.getJobs().get(JobEnum.WEED.name()));
 

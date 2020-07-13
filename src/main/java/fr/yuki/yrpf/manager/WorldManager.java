@@ -496,6 +496,12 @@ public class WorldManager {
         HouseItemObject houseItemObject = house.getHouseItemObjects().stream()
                 .filter(x -> x.getId() == houseItemId).findFirst().orElse(null);
         if(houseItemObject == null) return;
+        if(houseItemObject.getItemBehavior() != null) {
+            if(!houseItemObject.getItemBehavior().canBeMove()) {
+                UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Vous ne pouvez pas bouger cet objet pour le moment");
+                return;
+            }
+        }
 
         houseItemObject.destroy();
         houseItemObject.delete();

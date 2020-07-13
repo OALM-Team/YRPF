@@ -39,12 +39,22 @@ public class House extends Model {
     private List<HouseItemObject> houseItemObjects = new ArrayList<>();
 
     public HouseItemObject getNearbyHouseItem(Player player) {
+        HouseItemObject item = null;
+        double distance = 999999;
         for(HouseItemObject houseItemObject : houseItemObjects) {
             if(houseItemObject.getPosition().distance(player.getLocation()) < 180) {
-                return houseItemObject;
+                if(item != null) {
+                    if(houseItemObject.getPosition().distance(player.getLocation()) < distance) {
+                        item = houseItemObject;
+                        distance = houseItemObject.getPosition().distance(player.getLocation());
+                    }
+                } else {
+                    distance = houseItemObject.getPosition().distance(player.getLocation());
+                    item = houseItemObject;
+                }
             }
         }
-        return null;
+        return item;
     }
 
     public Line3D getLine3D() {

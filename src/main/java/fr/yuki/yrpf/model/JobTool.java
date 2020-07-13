@@ -52,6 +52,7 @@ public class JobTool extends Model {
     private double sY;
     @Column
     private double sZ;
+    private boolean canShowText = true;
 
     private WorldObject worldObject;
     private JobToolHandler jobToolHandler;
@@ -94,6 +95,10 @@ public class JobTool extends Model {
         this.worldObject = worldObject;
     }
 
+    public Vector getPosition() {
+        return new Vector(this.x, this.y, this.z);
+    }
+
     public boolean isNear(Player player) {
         return new Vector(this.x, this.y, this.z).distance(player.getLocation()) < 250;
     }
@@ -103,7 +108,7 @@ public class JobTool extends Model {
         if(ModdingManager.isCustomModelId(this.modelId)) ModdingManager.assignCustomModel(this.worldObject, this.modelId);
         this.worldObject.setRotation(new Vector(this.rX, this.rY, this.rZ));
         this.worldObject.setScale(new Vector(this.sX, this.sY, this.sZ));
-        this.text3d = Onset.getServer().createText3D(this.name + " [Utiliser]", 20, this.x, this.y, this.z + 200, 0 , 0 ,0);
+        if(this.canShowText) this.text3d = Onset.getServer().createText3D(this.name + " [Utiliser]", 20, this.x, this.y, this.z + 200, 0 , 0 ,0);
         if(this.jobToolHandler != null) {
             if(this.jobToolHandler.canBeUse()) {
                 this.setUsable();
@@ -126,7 +131,7 @@ public class JobTool extends Model {
 
     public void destroy() {
         this.worldObject.destroy();
-        this.text3d.destroy();
+        if(this.canShowText) this.text3d.destroy();
         JobManager.getJobTools().remove(this);
     }
 }

@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import fr.yuki.yrpf.enums.ItemTemplateEnum;
 import fr.yuki.yrpf.enums.ToastTypeEnum;
 import fr.yuki.yrpf.i18n.I18n;
+import fr.yuki.yrpf.inventory.Inventory;
 import fr.yuki.yrpf.inventory.InventoryItem;
 import fr.yuki.yrpf.job.WearableWorldObject;
 import fr.yuki.yrpf.job.customGoal.DeliveryPointGoal;
@@ -11,7 +12,10 @@ import fr.yuki.yrpf.model.Account;
 import fr.yuki.yrpf.model.House;
 import fr.yuki.yrpf.model.VehicleGarage;
 import fr.yuki.yrpf.net.payload.AddVChestItemPayload;
+import fr.yuki.yrpf.net.payload.ClearChestContentPayload;
+import fr.yuki.yrpf.net.payload.UpdateChestWeightPayload;
 import fr.yuki.yrpf.utils.Basic;
+import fr.yuki.yrpf.vehicle.ChestSize;
 import fr.yuki.yrpf.vehicle.storeLayout.*;
 import fr.yuki.yrpf.world.RestrictedZone;
 import net.onfirenetwork.onsetjava.Onset;
@@ -35,6 +39,16 @@ public class VehicleManager {
         vehicleStoreLayouts.add(new GarbageTruckStoreLayout());
         vehicleStoreLayouts.add(new MiniPickupStoreLayout());
         vehicleStoreLayouts.add(new TruckStoreLayout());
+
+        Onset.timer(30000, ()  -> {
+            for(VehicleGarage vehicleGarage : GarageManager.getVehicleGarages().stream()
+                .filter(x -> x.isRental()).collect(Collectors.toList())) {
+                if(!vehicleGarage.isExpired()) continue;
+                vehicleGarage.destroy();
+                GarageManager.getVehicleGarages().remove(vehicleGarage);
+                Onset.print("Vehicle expired id="+vehicleGarage.getUuid());
+            }
+        });
     }
 
     public static class CreateVehicleResult {
@@ -85,6 +99,7 @@ public class VehicleManager {
                 vehicleGarage.setRental(isRental);
                 vehicleGarage.setLicencePlate(vehicle.getLicensePlate());
                 vehicleGarage.setColor("#" + Integer.toHexString(vehicle.getColor().getRed()) + Integer.toHexString(vehicle.getColor().getGreen()) + Integer.toHexString(vehicle.getColor().getBlue()));
+                vehicleGarage.setLastInteractionAt(System.currentTimeMillis());
                 vehicleGarage.save();
                 GarageManager.getVehicleGarages().add(vehicleGarage);
             }
@@ -94,6 +109,30 @@ public class VehicleManager {
                 vehicle.setProperty("uuid", vehicleGarage.getUuid(), true);
                 java.awt.Color color = java.awt.Color.decode(vehicleGarage.getColor());
                 vehicle.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue()));
+            }
+
+            // Create or fetch the inventory of the car
+            VehicleGarage finalVehicleGarage = vehicleGarage;
+            Inventory inventory = null;
+            if(!isRental) {
+                if(InventoryManager.getInventories().entrySet().stream().filter
+                        (x -> x.getValue().getVehicleId() == finalVehicleGarage.getId()).findFirst().orElse(null) == null) {
+                    inventory = new Inventory();
+                    inventory.setInventoryType(1);
+                    inventory.setInventoryType(0);
+                    inventory.setCharacterId(-1);
+                    inventory.setVehicleId(finalVehicleGarage.getId());
+                    inventory.setHouseItemId(-1);
+                    inventory.save();
+                    InventoryManager.getInventories().put(inventory.getId(), inventory);
+                    Onset.print("Create new inventory for this vehicle id="+finalVehicleGarage.getId());
+                } else {
+                    inventory = InventoryManager.getInventories().entrySet().stream().filter
+                            (x -> x.getValue().getVehicleId() == finalVehicleGarage.getId()).findFirst().orElse(null).getValue();
+                    Onset.print("Inventory already exist for chest id="+finalVehicleGarage.getId());
+                }
+                inventory.setMaxWeight(ChestSize.getChestSizeByModelId(vehicle.getModel()));
+                inventory.parseContent();
             }
 
             vehicle.setProperty("owner", player.getSteamId(), true);
@@ -218,6 +257,11 @@ public class VehicleManager {
         }
     }
 
+    public static VehicleGarage getVehicleGarageByVehicle(Vehicle vehicle) {
+        return GarageManager.getVehicleGarages().stream()
+                .filter(x -> x.getVehicle() != null).filter(x -> x.getVehicle().getId() == vehicle.getId()).findFirst().orElse(null);
+    }
+
     /**
      * Get a random licence plate
      * @return A random licence plate
@@ -233,6 +277,16 @@ public class VehicleManager {
             }
         }
 
+        // Set last interaction
+        try {
+            VehicleGarage vehicleGarage = getVehicleGarageByVehicle(vehicle);
+            if(vehicleGarage != null) {
+                vehicleGarage.setLastInteractionAt(System.currentTimeMillis());
+            }
+        } catch (Exception ex) {
+          Onset.print(ex.toString());
+        }
+
         Account account = WorldManager.getPlayerAccount(player);
         // Show waypoints for items in storage
         for(WearableWorldObject wearableWorldObject : getVehicleWearableObjects(vehicle)) {
@@ -246,6 +300,16 @@ public class VehicleManager {
 
     public static void onPlayerVehicleExit(Player player, Vehicle vehicle, int seatId) {
         if(seatId == 1) vehicle.setEngineOn(false);
+
+        // Set last interaction
+        try {
+            VehicleGarage vehicleGarage = getVehicleGarageByVehicle(vehicle);
+            if(vehicleGarage != null) {
+                vehicleGarage.setLastInteractionAt(System.currentTimeMillis());
+            }
+        } catch (Exception ex) {
+            Onset.print(ex.toString());
+        }
 
         // Remove waypoints for items in storage
         for(WearableWorldObject wearableWorldObject : getVehicleWearableObjects(vehicle)) {
@@ -326,6 +390,22 @@ public class VehicleManager {
                         new Gson().toJson(new AddVChestItemPayload(wearableWorldObject.getUuid(), wearableWorldObject.getModelId(), "")));
             }catch (Exception ex) {
 
+            }
+        }
+
+        // Send vehicle chest
+        VehicleGarage vehicleGarage = getVehicleGarageByVehicle(vehicle);
+        CharacterManager.getCharacterStateByPlayer(player).setCurrentChest(null);
+        player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new ClearChestContentPayload()));
+        player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new UpdateChestWeightPayload(0, 0)));
+        if(vehicleGarage != null) {
+            Onset.print("Fetch inventory for vehicle id=" + vehicleGarage.getId());
+            if(!vehicleGarage.isRental()) {
+                Inventory chest = InventoryManager.getVehicleInventory(vehicleGarage);
+                if(chest != null) {
+                    CharacterManager.getCharacterStateByPlayer(player).setCurrentChest(chest);
+                    InventoryManager.updateChestView(player, chest);
+                }
             }
         }
         return true;

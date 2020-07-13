@@ -55,4 +55,9 @@ public class HouseChestBehavior extends ItemBehavior {
     public void setOpen(boolean open) {
         isOpen = open;
     }
+
+    @Override
+    public boolean canBeMove() {
+        return this.inventory.getInventoryItems().size() == 0;
+    }
 }

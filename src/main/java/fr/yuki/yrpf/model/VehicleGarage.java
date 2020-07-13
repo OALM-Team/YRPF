@@ -41,6 +41,7 @@ public class VehicleGarage extends Model {
     @Column
     private Timestamp updatedAt;
 
+    private long lastInteractionAt;
     private boolean rental;
 
     public void save() {
@@ -82,4 +83,10 @@ public class VehicleGarage extends Model {
         this.damage = new Gson().toJson(damages);
     }
 
+    public boolean isExpired() {
+        if(lastInteractionAt + (60000*30) < System.currentTimeMillis()) {
+            return true;
+        }
+        return false;
+    }
 }

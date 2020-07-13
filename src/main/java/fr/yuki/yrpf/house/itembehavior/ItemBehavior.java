@@ -13,4 +13,5 @@ public abstract class ItemBehavior {
     public abstract void onSpawn();
     public abstract void onDestroy();
     public abstract void onInteract(Player player);
+    public abstract boolean canBeMove();
 }

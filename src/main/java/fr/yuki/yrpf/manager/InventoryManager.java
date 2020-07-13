@@ -10,6 +10,7 @@ import fr.yuki.yrpf.inventory.InventoryItem;
 import fr.yuki.yrpf.model.Account;
 import fr.yuki.yrpf.model.GroundItem;
 import fr.yuki.yrpf.model.ItemTemplate;
+import fr.yuki.yrpf.model.VehicleGarage;
 import fr.yuki.yrpf.net.payload.*;
 import fr.yuki.yrpf.utils.Basic;
 import lombok.Getter;
@@ -175,6 +176,7 @@ public class InventoryManager {
     }
 
     public static void updateChestView(Player player, Inventory chest) {
+        Onset.print("Send chest data id="+chest.getId());
         // Clear chest content
         player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new ClearChestContentPayload()));
 
@@ -187,7 +189,10 @@ public class InventoryManager {
 
     public static void handleTransfertToChest(Player player, String itemId) {
         CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
-        if(state.getCurrentChest() == null) return;
+        if(state.getCurrentChest() == null) {
+            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Pas de coffre disponible");
+            return;
+        }
         InventoryItem inventoryItem = InventoryManager.getMainInventory(player)
                 .getItem(itemId);
         if(inventoryItem == null) return;
@@ -201,7 +206,10 @@ public class InventoryManager {
 
     public static void handleTransfertToInventory(Player player, String itemId) {
         CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
-        if(state.getCurrentChest() == null) return;
+        if(state.getCurrentChest() == null) {
+            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Pas de coffre disponible");
+            return;
+        }
         InventoryItem inventoryItem = state.getCurrentChest().getItem(itemId);
         if(inventoryItem == null) return;
         InventoryItem copyItem = inventoryItem.copy();
@@ -210,5 +218,10 @@ public class InventoryManager {
         InventoryManager.getMainInventory(player).addItem(copyItem);
         updateChestView(player, state.getCurrentChest());
         state.getCurrentChest().save();
+    }
+
+    public static Inventory getVehicleInventory(VehicleGarage vehicleGarage) {
+        return InventoryManager.getInventories().entrySet().stream().filter
+                (x -> x.getValue().getVehicleId() == vehicleGarage.getId()).findFirst().orElse(null).getValue();
     }
 }

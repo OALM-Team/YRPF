@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 public class WorldHarvestObject {
+    private static int _id = 10000;
     private String uuid;
     private JobSpawn spawn;
     private JobSpawnPosition jobSpawnPosition;
@@ -26,7 +27,7 @@ public class WorldHarvestObject {
     public WorldHarvestObject(JobSpawn spawn, JobSpawnPosition jobSpawnPosition,
                               HarvestableObject harvestableObject, WorldObject worldObject, Job job) {
         this.job = job;
-        this.uuid = UUID.randomUUID().toString();
+        this.uuid = UUID.randomUUID().toString() + "-" + (--_id);
         this.spawn = spawn;
         this.jobSpawnPosition = jobSpawnPosition;
         this.harvestableObject = harvestableObject;

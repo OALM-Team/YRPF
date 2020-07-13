@@ -21,6 +21,7 @@ import net.onfirenetwork.onsetjava.data.Color;
 import net.onfirenetwork.onsetjava.data.Vector;
 import net.onfirenetwork.onsetjava.entity.Pickup;
 import net.onfirenetwork.onsetjava.entity.Player;
+import net.onfirenetwork.onsetjava.entity.Vehicle;
 import net.onfirenetwork.onsetjava.enums.Animation;
 
 import java.io.File;
@@ -488,6 +489,16 @@ public class JobManager {
     public static void handleUseJobTool(Player player, String uuid) {
         JobTool jobTool = jobTools.stream().filter(x -> x.getUuid().equals(uuid)).findFirst().orElse(null);
         if(jobTool == null) return;
+        House house = HouseManager.getHouseAtLocation(jobTool.getPosition());
+        Account account = WorldManager.getPlayerAccount(player);
+        if(house != null) {
+            if(!JobManager.isWhitelistForThisJob(player, JobEnum.POLICE.name())) {
+                if(!HouseManager.canBuildInHouse(player, house)) {
+                    UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, I18n.t(account.getLang(), "toast.house.need_to_be_inside"));
+                    return;
+                }
+            }
+        }
         jobTool.getJobToolHandler().onUse(player);
     }
 

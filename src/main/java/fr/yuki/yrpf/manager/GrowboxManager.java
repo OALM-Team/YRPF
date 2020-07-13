@@ -34,6 +34,7 @@ public class GrowboxManager {
             jobTool.setSY(1);
             jobTool.setSZ(1);
             jobTool.setJobToolType("GROWBOX");
+            jobTool.setCanShowText(false);
             ((GrowBox)jobTool.getJobToolHandler()).setGrowboxModel(growboxModel);
             JobManager.getJobTools().add(jobTool);
             jobTool.spawn(JobManager.getJobs().get(JobEnum.WEED));

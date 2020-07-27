@@ -29,6 +29,23 @@ public class MiniPickupStoreLayout extends VehicleStoreLayout {
         oreTransform.add(new StoreLayoutTransform(5, new Vector(-120,-30,110), new Vector(0,90,0), new Vector(0.60,0.60,0.60)));
         oreTransform.add(new StoreLayoutTransform(6, new Vector(-160,0,115), new Vector(0,90,0), new Vector(0.60,0.60,0.60)));
         this.layoutTransforms.put(156, oreTransform);
+
+        ArrayList<StoreLayoutTransform> cooperTransform = new ArrayList<>();
+        cooperTransform.add(new StoreLayoutTransform(0, new Vector(-40,5,70),
+                new Vector(0,90,0), new Vector(0.5,0.5,0.5)));
+        cooperTransform.add(new StoreLayoutTransform(1, new Vector(-70,5,70),
+                new Vector(0,90,0), new Vector(0.5,0.5,0.5)));
+        cooperTransform.add(new StoreLayoutTransform(2, new Vector(-90,5,70),
+                new Vector(0,90,0), new Vector(0.5,0.5,0.5)));
+        cooperTransform.add(new StoreLayoutTransform(3, new Vector(-110,5,70),
+                new Vector(0,90,0), new Vector(0.5,0.5,0.5)));
+        cooperTransform.add(new StoreLayoutTransform(4, new Vector(-130,5,70),
+                new Vector(0,90,0), new Vector(0.5,0.5,0.5)));
+        cooperTransform.add(new StoreLayoutTransform(5, new Vector(-150,5,70),
+                new Vector(0,90,0), new Vector(0.5,0.5,0.5)));
+        cooperTransform.add(new StoreLayoutTransform(6, new Vector(-170,5,70),
+                new Vector(0,90,0), new Vector(0.5,0.5,0.5)));
+        this.layoutTransforms.put(50068, cooperTransform);
     }
 
     @Override

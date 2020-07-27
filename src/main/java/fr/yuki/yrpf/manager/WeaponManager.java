@@ -1,12 +1,21 @@
 package fr.yuki.yrpf.manager;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import fr.yuki.yrpf.enums.ItemTemplateEnum;
+import fr.yuki.yrpf.inventory.InventoryItem;
+import fr.yuki.yrpf.model.Account;
+import fr.yuki.yrpf.model.GroundItem;
 import fr.yuki.yrpf.model.ItemTemplate;
+import fr.yuki.yrpf.utils.Basic;
 import net.onfirenetwork.onsetjava.Onset;
+import net.onfirenetwork.onsetjava.data.Vector;
 import net.onfirenetwork.onsetjava.data.Weapon;
 import net.onfirenetwork.onsetjava.entity.Player;
 
 import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class WeaponManager {
     public static boolean requestEquipWeapon(Player player, int weaponId) {
@@ -60,6 +69,26 @@ public class WeaponManager {
         if(ammoBack == 0) return;
         if(InventoryManager.addItemToPlayer(player, ItemTemplateEnum.AMMO.id, ammoBack, false) == null) {
             return;
+        }
+    }
+
+    public static void dropWeapons(Player player) {
+        Account account = WorldManager.getPlayerAccount(player);
+        for(Map.Entry<Integer, Weapon> weaponEntry : ((HashMap<Integer, Weapon>)new Gson().fromJson(account.getWeapons(), new TypeToken<HashMap<Integer, Weapon>>(){}.getType())).entrySet()) {
+            if(weaponEntry.getValue().getModel()==1) continue;
+            ItemTemplate itemTemplate = InventoryManager.getItemTemplates().values().stream()
+                    .filter(x -> x.getWeaponId() == weaponEntry.getValue().getModel()).findFirst().orElse(null);
+            if(itemTemplate == null) return;
+            InventoryItem inventoryItem = new InventoryItem();
+            inventoryItem.setId(UUID.randomUUID().toString());
+            inventoryItem.setTemplateId(String.valueOf(itemTemplate.getId()));
+            inventoryItem.setAmount(1);
+            inventoryItem.setExtraProperties(new HashMap<>());
+            GroundItem groundItem = new GroundItem(inventoryItem, 1, new Vector(player.getLocation().getX() + Basic.randomNumber(-150, 150),
+                    player.getLocation().getY() + Basic.randomNumber(-150, 150),
+                    player.getLocation().getZ()));
+            WorldManager.getGroundItems().add(groundItem);
+            player.setWeapon(weaponEntry.getKey(), 1, 0, true, false);
         }
     }
 

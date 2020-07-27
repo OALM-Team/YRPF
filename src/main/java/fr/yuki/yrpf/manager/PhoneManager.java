@@ -325,4 +325,12 @@ public class PhoneManager {
         refreshUrgencyMessages(player);
         UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, "Urgence clôturée");
     }
+
+    public static void handleDeletePhoneContact(Player player, String number) {
+        Account account = WorldManager.getPlayerAccount(player);
+        PhoneContact contact = phoneContacts.stream().filter(x -> x.getAccountId() == account.getId()
+                && x.getNumber().equals(number)).findFirst().orElse(null);
+        if(contact == null) return;
+        phoneContacts.remove(contact);
+    }
 }

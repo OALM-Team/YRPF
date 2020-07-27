@@ -1,5 +1,6 @@
 package fr.yuki.yrpf.commands;
 
+import fr.yuki.yrpf.YukiRPFrameworkPlugin;
 import fr.yuki.yrpf.enums.ToastTypeEnum;
 import fr.yuki.yrpf.manager.SoundManager;
 import fr.yuki.yrpf.manager.UIStateManager;
@@ -22,6 +23,12 @@ public class AnnCommand implements CommandExecutor {
                         " : " + String.join(" ", strings));
                 SoundManager.playSound2D(other, "notif", "sounds/success_1.mp3", 0.8);
             }catch (Exception ex) {}
+        }
+
+        if(YukiRPFrameworkPlugin.getOnsetDiscordBot() != null) {
+            YukiRPFrameworkPlugin.getOnsetDiscordBot()
+                    .sendMessage("**ANNONCE** Par **" + WorldManager.getPlayerAccount(player).getCharacterName() +
+                            "** : " + String.join(" ", strings));
         }
         return true;
     }

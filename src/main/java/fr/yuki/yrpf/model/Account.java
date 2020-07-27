@@ -48,7 +48,7 @@ public class Account extends Model {
     @Column
     private String jobLevels = "[]";
     @Column
-    private boolean isDead = false;
+    private int isDead = 0;
     @Column
     private String lang = "fr";
     @Column

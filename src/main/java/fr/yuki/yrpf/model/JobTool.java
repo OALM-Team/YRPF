@@ -84,6 +84,10 @@ public class JobTool extends Model {
             case "generator":
                 this.jobToolHandler = new Generator(this);
                 break;
+
+            case "ore_furnace":
+                this.jobToolHandler = new OreFurnace(this);
+                break;
         }
     }
 
@@ -108,6 +112,7 @@ public class JobTool extends Model {
         if(ModdingManager.isCustomModelId(this.modelId)) ModdingManager.assignCustomModel(this.worldObject, this.modelId);
         this.worldObject.setRotation(new Vector(this.rX, this.rY, this.rZ));
         this.worldObject.setScale(new Vector(this.sX, this.sY, this.sZ));
+        this.worldObject.setProperty("isJobTool", "1", true);
         if(this.canShowText) this.text3d = Onset.getServer().createText3D(this.name + " [Utiliser]", 20, this.x, this.y, this.z + 200, 0 , 0 ,0);
         if(this.jobToolHandler != null) {
             if(this.jobToolHandler.canBeUse()) {

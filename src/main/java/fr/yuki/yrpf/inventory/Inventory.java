@@ -129,6 +129,7 @@ public class Inventory extends Model {
      */
     public void cleanUnusableItems() {
         for(InventoryItem inventoryItem : this.inventoryItems.stream().collect(Collectors.toList())) {
+            if(inventoryItem.getTemplate() == null) continue;
             if(inventoryItem.getTemplate().getId() == Integer.parseInt(ItemTemplateEnum.VKEY.id)) {
                 this.inventoryItems.remove(inventoryItem);
             }

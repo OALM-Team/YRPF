@@ -1,6 +1,7 @@
 package fr.yuki.yrpf.manager;
 
 import com.google.gson.Gson;
+import fr.yuki.yrpf.YukiRPFrameworkPlugin;
 import fr.yuki.yrpf.character.CharacterState;
 import fr.yuki.yrpf.character.CharacterStyle;
 import fr.yuki.yrpf.enums.ItemTemplateEnum;
@@ -20,6 +21,7 @@ import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Location;
 import net.onfirenetwork.onsetjava.data.Vector;
 import net.onfirenetwork.onsetjava.entity.Player;
+import net.onfirenetwork.onsetjava.enums.Animation;
 
 import java.util.HashMap;
 import java.util.stream.Collectors;
@@ -124,6 +126,11 @@ public class CharacterManager {
                 String msg = WorldManager.getServerConfig().getWelcomeMessage();
                 msg = msg.replace("%name%", account.getCharacterName());
                 Onset.broadcast("<span color=\"#ffee00\">" + msg + "</>");
+
+                if(YukiRPFrameworkPlugin.getOnsetDiscordBot() != null) {
+                    YukiRPFrameworkPlugin.getOnsetDiscordBot()
+                            .sendMessage("Bienvenue **" + account.getCharacterName() + "** sur le serveur :)");
+                }
                 break;
         }
         account.setCharacterStyle(characterStyle);
@@ -172,8 +179,9 @@ public class CharacterManager {
         }
 
         // Update account
+        WeaponManager.dropWeapons(player);
         Account account = WorldManager.getPlayerAccount(player);
-        account.setDead(true);
+        account.setIsDead(1);
         account.save();
         player.setSpawnLocation(new Vector(account.getSaveX(), account.getSaveY(), account.getSaveZ()), 0);
         UIStateManager.handleUIToogle(player, "death");
@@ -187,7 +195,6 @@ public class CharacterManager {
             throwItemPayload.setQuantity(inventoryItem.getAmount());
             InventoryManager.handleThrowItem(player, throwItemPayload);
         }
-        WeaponManager.clearWeapons(player);
     }
 
     public static void onPlayerSpawn(Player player) {
@@ -203,9 +210,9 @@ public class CharacterManager {
         } else {
             Account account = WorldManager.getPlayerAccount(player);
             if(account != null) {
-                if(account.isDead()) {
+                if(account.getIsDead() == 1) {
                     UIStateManager.handleUIToogle(player, "death");
-                    account.setDead(false);
+                    account.setIsDead(0);
                     CharacterManager.setCharacterFreeze(player, false);
                     Onset.print("Player respawned after death");
                     //UIStateManager.sendNotification(player, ToastTypeEnum.WARN,
@@ -250,38 +257,35 @@ public class CharacterManager {
     public static void handleCharacterInteract(Player player) {
         Player nearestPlayer = WorldManager.getNearestPlayer(player);
 
+        GenericMenu genericMenu = new GenericMenu(player);
+        CharacterState characterState = CharacterManager.getCharacterStateByPlayer(player);
+
+        if(characterState.isHasHandsup()) {
+            genericMenu.getItems().add(new GenericMenuItem("Baisser les mains", "window.CallEvent(\"RemoteCallInterface\"," +
+                    " \"Character:HandsUp\");"));
+        } else {
+            genericMenu.getItems().add(new GenericMenuItem("Lever les mains", "window.CallEvent(\"RemoteCallInterface\"," +
+                    " \"Character:HandsUp\");"));
+        }
+        // Police Menu
+        if(JobManager.isWhitelistForThisJob(player, JobEnum.POLICE.name())) {
+            genericMenu.getItems().add(new GenericMenuItem("Enfoncer la porte", "window.CallEvent(\"RemoteCallInterface\"," +
+                    " \"Police:KickDoor\");"));
+        }
+
         if(nearestPlayer != null) {
-            if(nearestPlayer.getLocation().distance(player.getLocation()) > 200) {
-                nearestPlayer = null;
+            if(nearestPlayer.getLocation().distance(player.getLocation()) < 200) {
+                // Build generic menu
+                genericMenu.getItems().add(new GenericMenuItem("Fouiller la personne", "window.CallEvent(\"RemoteCallInterface\"," +
+                        " \"Character:InspectCharacter\", \"" + nearestPlayer.getId() + "\");"));
+                genericMenu.getItems().add(new GenericMenuItem("Donner les clés de la maison", "window.CallEvent(\"RemoteCallInterface\"," +
+                        " \"Character:GiveHouseKey\", \"" + nearestPlayer.getId() + "\");"));
+
             }
         }
-
-        if(nearestPlayer == null) {
-            // Police Menu
-            if(JobManager.isWhitelistForThisJob(player, JobEnum.POLICE.name())) {
-                CharacterState characterState = CharacterManager.getCharacterStateByPlayer(player);
-                GenericMenu genericMenu = new GenericMenu(player);
-                genericMenu.getItems().add(new GenericMenuItem("Enfoncer la porte", "window.CallEvent(\"RemoteCallInterface\"," +
-                        " \"Police:KickDoor\");"));
-                genericMenu.addCloseItem();
-                genericMenu.show();
-                characterState.setCurrentGenericMenu(genericMenu);
-            }
-            return;
-        }
-
-        if(nearestPlayer.getLocation().distance(player.getLocation()) < 200) {
-            // Build generic menu
-            CharacterState characterState = CharacterManager.getCharacterStateByPlayer(player);
-            GenericMenu genericMenu = new GenericMenu(player);
-            genericMenu.getItems().add(new GenericMenuItem("Fouiller la personne", "window.CallEvent(\"RemoteCallInterface\"," +
-                    " \"Character:InspectCharacter\", \"" + nearestPlayer.getId() + "\");"));
-            genericMenu.getItems().add(new GenericMenuItem("Donner les clés de la maison", "window.CallEvent(\"RemoteCallInterface\"," +
-                    " \"Character:GiveHouseKey\", \"" + nearestPlayer.getId() + "\");"));
-            genericMenu.addCloseItem();
-            genericMenu.show();
-            characterState.setCurrentGenericMenu(genericMenu);
-        }
+        genericMenu.addCloseItem();
+        genericMenu.show();
+        characterState.setCurrentGenericMenu(genericMenu);
     }
 
     public static HashMap<String, CharacterState> getCharacterStates() {
@@ -319,5 +323,21 @@ public class CharacterManager {
         genericMenu.addCloseItem();
         genericMenu.show();
         characterState.setCurrentGenericMenu(genericMenu);
+    }
+
+    public static void handleHandsup(Player player) {
+        CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
+        if(!state.canInteract()) return;
+        if(state.isHasHandsup()) {
+            player.setAnimation(Animation.STOP);
+            state.setHasHandsup(false);
+        } else {
+            player.setAnimation(Animation.HANDSUP_STAND);
+            state.setHasHandsup(true);
+        }
+        if(state.getCurrentGenericMenu() != null) {
+            state.getCurrentGenericMenu().hide();
+            state.setCurrentGenericMenu(null);
+        }
     }
 }

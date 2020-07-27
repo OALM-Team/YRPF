@@ -117,11 +117,12 @@ public class WorldManager {
     private static void spawnATMs() {
         for(ATM atm : atms) {
             try  {
+                atm.setCanBeRob(true); // is a world atm so it can be rob
                 Pickup pickup = Onset.getServer().createPickup(new Vector(atm.getX(), atm.getY(), atm.getZ()-100), 336);
                 pickup.setScale(new Vector(1,1,0.1d));
                 pickup.setProperty("color", "02e630", true);
                 atm.setPickup(pickup);
-                Onset.getServer().createText3D("ATM [" + I18n.t(WorldManager.getServerConfig().getServerLanguage(), "ui.common.use") + "]", 15, atm.getX(), atm.getY(), atm.getZ() + 150, 0 , 0 ,0);
+                //Onset.getServer().createText3D("ATM [" + I18n.t(WorldManager.getServerConfig().getServerLanguage(), "ui.common.use") + "]", 15, atm.getX(), atm.getY(), atm.getZ() + 150, 0 , 0 ,0);
 
                 GameMapMarker mapMarker = new GameMapMarker();
                 mapMarker.setType("atm");
@@ -130,6 +131,11 @@ public class WorldManager {
                 mapMarker.getPosition().add((int)atm.getY());
                 mapMarker.getPosition().add((int)atm.getX());
                 MapManager.getMapConfig().getMarkers().add(mapMarker);
+
+                Pickup pickup2 = Onset.getServer().createPickup(new Vector(atm.getX(), atm.getY(),
+                        atm.getZ() + 150), 50070);
+                pickup2.setScale(new Vector(0.5, 0.5, 0.5));
+                ModdingManager.assignCustomModel(pickup2, 50070);
             }
             catch(Exception ex) {
                 Onset.print("Can't spawn the atm: " + ex.toString());
@@ -167,13 +173,17 @@ public class WorldManager {
 
     public static void spawnSellers() {
         for(Seller seller : sellers) {
-            Onset.getServer().createText3D(seller.getName() + " [" + I18n.t(WorldManager.getServerConfig().getServerLanguage(), "ui.common.use") + "]", 20, seller.getX(),
-                    seller.getY(), seller.getZ() + 150, 0 , 0 ,0);
+            //Onset.getServer().createText3D(seller.getName() + " [" + I18n.t(WorldManager.getServerConfig().getServerLanguage(), "ui.common.use") + "]", 20, seller.getX(),
+            //        seller.getY(), seller.getZ() + 150, 0 , 0 ,0);
             NPC npc = Onset.getServer().createNPC(new Location(seller.getX(), seller.getY(),
                     seller.getZ(), seller.getH()));
             npc.setRespawnTime(1);
             npc.setHealth(999999);
             npc.setProperty("clothing", seller.getNpcClothing(), true);
+            Pickup pickup = Onset.getServer().createPickup(new Vector(seller.getX(), seller.getY(),
+                    seller.getZ() + 150), 50070);
+            pickup.setScale(new Vector(0.5, 0.5, 0.5));
+            ModdingManager.assignCustomModel(pickup, 50070);
         }
     }
 
@@ -227,11 +237,11 @@ public class WorldManager {
                 return;
             }
 
+            if(player.getVehicle() == null)
+                if(handlePickupGroundItem(player)) return;
             if(ATMManager.handleATMInteract(player)) return;
             if(handleOutfitPointsInteract(player)) return;
             if(GarageManager.handleVSellerInteract(player)) return;
-            if(player.getVehicle() == null)
-                if(handlePickupGroundItem(player)) return;
             if(FuelManager.interactFuelPoint(player, false)) return;
             if(JobManager.tryToHarvest(player)) return;
             if(player.getVehicle() == null) {
@@ -545,7 +555,7 @@ public class WorldManager {
 
             targetState.setDead(false);
             Account account = WorldManager.getPlayerAccount(target);
-            account.setDead(false);
+            account.setIsDead(0);
             Location location = target.getLocationAndHeading();
             account.setSaveX(location.getX());
             account.setSaveY(location.getY());

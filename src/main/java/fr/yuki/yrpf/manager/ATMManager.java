@@ -28,12 +28,28 @@ public class ATMManager {
         return false;
     }
 
+    public static ATM getNearATM(Player player) {
+        for(ATM atm : WorldManager.getAtms()) {
+            try {
+                if(atm.isNear(player)) {
+                    return atm;
+                }
+            }catch (Exception ex) {}
+        }
+        return null;
+    }
+
     /**
      * Open the atm for the player
      * @param player The player
      * @param atm The ATM
      */
     public static void openATM(Player player, ATM atm) {
+        if(atm.getLastRobTime() + (60000 * 3) > System.currentTimeMillis()) {
+            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Cette ATM est inutilisable pour le moment");
+            return;
+        }
+
         if(UIStateManager.handleUIToogle(player, "atm")) {
             SoundManager.playSound3D("sounds/atm_sound_in.mp3", player.getLocation(), 200, 0.4);
         }

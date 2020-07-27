@@ -1,8 +1,14 @@
 package fr.yuki.yrpf.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.ArrayList;
 
 public class GameMapMarker {
+    @Setter
+    @Getter
+    private int id = -1;
     private String type;
     private String icon;
     private ArrayList<Integer> position;

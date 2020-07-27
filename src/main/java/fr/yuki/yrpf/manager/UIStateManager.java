@@ -3,6 +3,7 @@ package fr.yuki.yrpf.manager;
 import com.google.gson.Gson;
 import fr.yuki.yrpf.character.CharacterState;
 import fr.yuki.yrpf.enums.ToastTypeEnum;
+import fr.yuki.yrpf.i18n.I18n;
 import fr.yuki.yrpf.inventory.Inventory;
 import fr.yuki.yrpf.model.Account;
 import fr.yuki.yrpf.net.payload.*;
@@ -145,7 +146,6 @@ public class UIStateManager {
                 player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new SetWindowStatePayload
                         ("transfertInventory", uiState.isTransfertInventory())));
                 break;
-
         }
         return r;
     }
@@ -193,6 +193,10 @@ public class UIStateManager {
         setLang(player, account.getLang());
         CharacterManager.refreshFood(player);
 
+        // Sync custom data
+        I18n.syncCustomLangs(player);
+        ItemManager.syncCustomImages(player);
+
         // Set phone number
         player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new SetPhoneNumberPayload(account.getPhoneNumber())));
 
@@ -210,7 +214,7 @@ public class UIStateManager {
         if(account.getCharacterCreationRequest() == 0) {
             CharacterManager.setCharacterStyle(player);
 
-            if(!account.isDead()) {
+            if(account.getIsDead() == 0) {
                 player.setRagdoll(false);
                 CharacterManager.teleportWithLevelLoading(player, new Location(account.getSaveX(),
                         account.getSaveY(),
@@ -224,6 +228,7 @@ public class UIStateManager {
                         account.getSaveH()));
                 CharacterManager.setCharacterFreeze(player, true);
                 Onset.delay(1500, () -> {
+                    Onset.print("Set death");
                     player.setRagdoll(true);
                     CharacterManager.setCharacterStyle(player);
                     player.setHealth(0);

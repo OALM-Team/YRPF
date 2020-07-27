@@ -36,4 +36,6 @@ public class ItemTemplate extends Model {
     private int maskId;
     @Column(column = "id_bag")
     private int bagId;
+
+    private boolean isCustom = false;
 }

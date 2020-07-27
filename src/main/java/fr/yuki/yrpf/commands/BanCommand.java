@@ -1,5 +1,6 @@
 package fr.yuki.yrpf.commands;
 
+import fr.yuki.yrpf.YukiRPFrameworkPlugin;
 import fr.yuki.yrpf.manager.WorldManager;
 import fr.yuki.yrpf.model.Account;
 import net.onfirenetwork.onsetjava.Onset;
@@ -21,6 +22,11 @@ public class BanCommand implements CommandExecutor {
         account.setBanned(true);
         WorldManager.savePlayer(playerTarget);
         playerTarget.kick("You have been banned, bye bye");
+
+        if(YukiRPFrameworkPlugin.getOnsetDiscordBot() != null) {
+            YukiRPFrameworkPlugin.getOnsetDiscordBot()
+                    .sendMessage("Joueur **" + account.getCharacterName() + "** banni");
+        }
 
         return true;
     }

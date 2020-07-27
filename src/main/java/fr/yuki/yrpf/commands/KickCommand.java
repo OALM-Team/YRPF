@@ -1,6 +1,8 @@
 package fr.yuki.yrpf.commands;
 
+import fr.yuki.yrpf.YukiRPFrameworkPlugin;
 import fr.yuki.yrpf.manager.WorldManager;
+import fr.yuki.yrpf.model.Account;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.entity.Player;
 import net.onfirenetwork.onsetjava.plugin.CommandExecutor;
@@ -16,7 +18,13 @@ public class KickCommand implements CommandExecutor {
         Player playerTarget = Onset.getPlayers().stream().filter(x -> x.getId() == Integer.parseInt(args[0]))
                 .findFirst().orElse(null);
         if(playerTarget == null) return true;
+        Account account = WorldManager.getPlayerAccount(playerTarget);
         playerTarget.kick("Kick : " + String.join(" ", args));
+
+        if(YukiRPFrameworkPlugin.getOnsetDiscordBot() != null) {
+            YukiRPFrameworkPlugin.getOnsetDiscordBot()
+                    .sendMessage("Joueur **" + account.getCharacterName() + "** kick : " + String.join(" ", args));
+        }
 
         return true;
     }

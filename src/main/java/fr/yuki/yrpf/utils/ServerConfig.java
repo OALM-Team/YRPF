@@ -21,6 +21,7 @@ public class ServerConfig {
     private int timePerHour;
     private int startHour;
     private String welcomeMessage;
+    private String discordBotToken;
 
     public double getDeathRespawnX() {
         return deathRespawnX;
@@ -180,5 +181,13 @@ public class ServerConfig {
 
     public void setWelcomeMessage(String welcomeMessage) {
         this.welcomeMessage = welcomeMessage;
+    }
+
+    public String getDiscordBotToken() {
+        return discordBotToken;
+    }
+
+    public void setDiscordBotToken(String discordBotToken) {
+        this.discordBotToken = discordBotToken;
     }
 }

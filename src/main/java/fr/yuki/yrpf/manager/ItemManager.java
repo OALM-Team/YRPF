@@ -5,6 +5,7 @@ import com.google.gson.reflect.TypeToken;
 import fr.yuki.yrpf.character.CharacterLoopAnimation;
 import fr.yuki.yrpf.character.CharacterState;
 import fr.yuki.yrpf.character.CharacterToolAnimation;
+import fr.yuki.yrpf.enums.ItemTemplateEnum;
 import fr.yuki.yrpf.enums.ToastTypeEnum;
 import fr.yuki.yrpf.house.itembehavior.HouseChestBehavior;
 import fr.yuki.yrpf.i18n.I18n;
@@ -16,7 +17,12 @@ import fr.yuki.yrpf.job.placementObject.GeneratorPlacementInstance;
 import fr.yuki.yrpf.job.placementObject.GrowBoxPlacementInstance;
 import fr.yuki.yrpf.job.tools.Generator;
 import fr.yuki.yrpf.model.*;
+import fr.yuki.yrpf.net.payload.AddCustomItemImagePayload;
+import fr.yuki.yrpf.net.payload.AddI18NKey;
 import fr.yuki.yrpf.net.payload.RequestUseItemPayload;
+import fr.yuki.yrpf.net.payload.UrgencyRequestPayload;
+import fr.yuki.yrpf.phone.UrgencyPhoneMessage;
+import fr.yuki.yrpf.utils.Basic;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Vector;
 import net.onfirenetwork.onsetjava.entity.Player;
@@ -26,10 +32,13 @@ import net.onfirenetwork.onsetjava.enums.Animation;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ItemManager {
     public static ArrayList<Mask> masks = new ArrayList<>();
     public static ArrayList<Bag> bags = new ArrayList<>();
+    private static HashMap<Integer, String> customItemPictures = new HashMap<>();
 
     public static void init() {
         loadMasks();
@@ -56,6 +65,14 @@ public class ItemManager {
         }
     }
 
+    public static void syncCustomImages(Player player) {
+        for(Map.Entry<Integer, String> image : customItemPictures.entrySet()) {
+            player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new AddCustomItemImagePayload(
+                    image.getKey(), image.getValue()
+            )));
+        }
+    }
+
     public static void handleItemUse(Player player, RequestUseItemPayload payload) {
         Inventory inventory = InventoryManager.getMainInventory(player);
         InventoryItem inventoryItem = inventory.getItem(payload.getId());
@@ -69,7 +86,6 @@ public class ItemManager {
         // Check food item
         if(inventoryItem.getTemplate().getFoodValue() != 0 || inventoryItem.getTemplate().getDrinkValue() != 0) {
             useFood(player, inventoryItem);
-            return;
         }
 
         // Check weapon items
@@ -167,7 +183,55 @@ public class ItemManager {
             case "35": // Drill
                 useDrill(player, inventoryItem);
                 break;
+
+            case "37": // Crowbar
+                useCrowbar(player, inventoryItem);
+                break;
+
+            default:
+                Onset.getServer().callLuaEvent("YRPF:ItemAPI:OnUse", player.getId(),
+                        inventoryItem.getTemplate().getId(),
+                        inventoryItem.getId());
+                break;
         }
+    }
+
+    private static void useCrowbar(Player player, InventoryItem inventoryItem) {
+        if(player.getVehicle() != null) return;
+        CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
+        if(!state.canInteract()) return;
+        ATM atm = ATMManager.getNearATM(player);
+        if(atm == null) return;
+        if(!atm.isCanBeRob()) {
+            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Cette ATM ne contient pas d'argent");
+            return;
+        }
+        if(atm.getLastRobTime() + (60000 * 20) > System.currentTimeMillis()) {
+            UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Cette ATM ne contient pas d'argent");
+            return;
+        }
+
+        // Create urgency
+        UrgencyRequestPayload urgencyRequestPayload = new UrgencyRequestPayload();
+        urgencyRequestPayload.setService("police");
+        urgencyRequestPayload.setText("(AUTOMATIQUE) Vol d'ATM en cours");
+        PhoneManager.handleUrgencyRequest(player, urgencyRequestPayload);
+
+        atm.setLastRobTime(System.currentTimeMillis());
+        Onset.delay(2500, () -> {
+            SoundManager.playSound3D("sounds/atm_alarm.mp3", new Vector(atm.getX(), atm.getY(), atm.getZ()), 4000, 0.4);
+        });
+        CharacterManager.setCharacterFreeze(player, true);
+        CharacterLoopAnimation characterLoopAnimation = new CharacterLoopAnimation(player, Animation.PICKAXE_SWING, 5000, 5,
+                "sounds/metal_hit.mp3");
+        characterLoopAnimation.setTool(new CharacterToolAnimation(50069, new Vector(-10,4,20),
+                new Vector(0,90,0), new Vector(1.2, 1.2, 1.2), "hand_r"));
+        characterLoopAnimation.start();
+        Onset.delay(30000, () -> {
+            characterLoopAnimation.stop();
+            CharacterManager.setCharacterFreeze(player, false);
+            InventoryManager.addItemToPlayer(player, ItemTemplateEnum.CASH.id, Basic.randomNumber(100, 400), false);
+        });
     }
 
     private static void useDrill(Player player, InventoryItem inventoryItem) {
@@ -423,5 +487,9 @@ public class ItemManager {
             }
             vehicle.setHood(0);
         });
+    }
+
+    public static HashMap<Integer, String> getCustomItemPictures() {
+        return customItemPictures;
     }
 }

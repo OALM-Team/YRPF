@@ -3,6 +3,7 @@ package fr.yuki.yrpf;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import eu.bebendorf.ajorm.Repo;
+import fr.yuki.yrpf.discord.OnsetDiscordBot;
 import fr.yuki.yrpf.luaapi.LuaAPIManager;
 import fr.yuki.yrpf.character.CharacterState;
 import fr.yuki.yrpf.commands.*;
@@ -30,6 +31,12 @@ import java.util.Map;
 
 @Plugin(name = "YukiRPFramework", author = "Yuki")
 public class YukiRPFrameworkPlugin {
+
+    private static OnsetDiscordBot onsetDiscordBot;
+
+    public static OnsetDiscordBot getOnsetDiscordBot() {
+        return onsetDiscordBot;
+    }
 
     public void onEnable() {
         try {
@@ -98,6 +105,10 @@ public class YukiRPFrameworkPlugin {
             Onset.registerCommand("setclothe", new SetClotheCommand());
             Onset.registerCommand("setcharacterscale", new SetCharacterScaleCommand());
             Onset.registerCommand("unban", new UnbanCommand());
+            Onset.registerCommand("gv", new GiveVehicleCommand());
+            Onset.registerCommand("unloadaccount", new UnloadAccountCommand());
+            Onset.registerCommand("saveall", new SaveAllCommand());
+            Onset.registerCommand("addjobexp", new AddJobExpCommand());
 
             // Register remote events
             Onset.registerRemoteEvent("GlobalUI:ToogleWindow");
@@ -158,6 +169,16 @@ public class YukiRPFrameworkPlugin {
             Onset.registerRemoteEvent("Chest:TransfertToInventory");
             Onset.registerRemoteEvent("Police:KickDoor");
             Onset.registerRemoteEvent("Vehicle:OnHornCasted");
+            Onset.registerRemoteEvent("Character:HandsUp");
+            Onset.registerRemoteEvent("Phone:DeleteContact");
+
+            // Init discord bot
+            if(!WorldManager.getServerConfig().getDiscordBotToken().equals("")) {
+                onsetDiscordBot = new OnsetDiscordBot(WorldManager.getServerConfig().getDiscordBotToken());
+                Onset.timer(60000 * 15, () -> {
+                    onsetDiscordBot.sendMessage("Il y a actuellement **" + Onset.getPlayers().size() + "** joueur(s) en ligne");
+                });
+            }
         } catch (Exception ex) {
             ex.printStackTrace();
             Onset.print("Can't start the plugin because : " + ex.toString());
@@ -281,9 +302,11 @@ public class YukiRPFrameworkPlugin {
             }
 
             // If the player is dead
-            if(account.isDead()) {
+            if(account.getIsDead() == 1) {
+                Onset.print("Player is dead");
                 evt.getPlayer().setHealth(0);
             } else {
+                Onset.print("Set player health to " + account.getHealth());
                 evt.getPlayer().setHealth(account.getHealth());
             }
 
@@ -582,6 +605,14 @@ public class YukiRPFrameworkPlugin {
 
                 case "Vehicle:OnHornCasted":
                     VehicleManager.handleVehicleHorn(evt.getPlayer());
+                    break;
+
+                case "Character:HandsUp":
+                    CharacterManager.handleHandsup(evt.getPlayer());
+                    break;
+
+                case "Phone:DeleteContact":
+                    PhoneManager.handleDeletePhoneContact(evt.getPlayer(), (evt.getArgs()[0]).toString());
                     break;
             }
         }

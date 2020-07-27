@@ -4,11 +4,13 @@ import com.google.gson.Gson;
 import fr.yuki.yrpf.manager.UIStateManager;
 import fr.yuki.yrpf.net.payload.AddGenericMenuItemPayload;
 import fr.yuki.yrpf.net.payload.ClearGenericMenuPayload;
+import lombok.Getter;
 import net.onfirenetwork.onsetjava.entity.Player;
 
 import java.util.ArrayList;
 
 public class GenericMenu {
+    @Getter
     private Player player;
     private ArrayList<GenericMenuItem> items;
 

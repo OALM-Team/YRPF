@@ -193,13 +193,19 @@ public class InventoryManager {
             UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Pas de coffre disponible");
             return;
         }
+        int amount = 1;
         InventoryItem inventoryItem = InventoryManager.getMainInventory(player)
                 .getItem(itemId);
         if(inventoryItem == null) return;
+        if(inventoryItem.getTemplate().getId() == 2) { // Cash
+            amount = inventoryItem.getAmount();
+        }
         InventoryItem copyItem = inventoryItem.copy();
-        copyItem.setAmount(1);
-        InventoryManager.getMainInventory(player).removeItem(inventoryItem, 1);
-        state.getCurrentChest().addItem(copyItem);
+        copyItem.setAmount(amount);
+        if(state.getCurrentChest().addItem(copyItem) == null) {
+            return;
+        }
+        InventoryManager.getMainInventory(player).removeItem(inventoryItem, amount);
         updateChestView(player, state.getCurrentChest());
         state.getCurrentChest().save();
     }
@@ -210,12 +216,18 @@ public class InventoryManager {
             UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Pas de coffre disponible");
             return;
         }
+        int amount = 1;
         InventoryItem inventoryItem = state.getCurrentChest().getItem(itemId);
         if(inventoryItem == null) return;
+        if(inventoryItem.getTemplate().getId() == 2) { // Cash
+            amount = inventoryItem.getAmount();
+        }
         InventoryItem copyItem = inventoryItem.copy();
-        copyItem.setAmount(1);
-        state.getCurrentChest().removeItem(inventoryItem, 1);
-        InventoryManager.getMainInventory(player).addItem(copyItem);
+        copyItem.setAmount(amount);
+        if(InventoryManager.getMainInventory(player).addItem(copyItem) == null) {
+            return;
+        }
+        state.getCurrentChest().removeItem(inventoryItem, amount);
         updateChestView(player, state.getCurrentChest());
         state.getCurrentChest().save();
     }

@@ -20,6 +20,8 @@ public class ATM extends Model {
     @Column
     private double z;
     private Pickup pickup;
+    private boolean canBeRob = false;
+    private double lastRobTime = 0;
 
     public boolean isNear(Player player) {
         if(player.getLocation().distance(new Vector(this.x, this.y, this.z)) < 150) {

@@ -27,7 +27,9 @@ public class FreeHouseCommand implements CommandExecutor {
         }
         for(HouseItemObject houseItemObject : house.getHouseItemObjects()) {
             houseItemObject.destroy();
+            houseItemObject.delete();
         }
+        house.getHouseItemObjects().clear();
         house.save();
 
         player.sendMessage("This house is free now");

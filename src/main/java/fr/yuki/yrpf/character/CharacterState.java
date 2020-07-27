@@ -39,6 +39,7 @@ public class CharacterState {
     private GenericMenu currentGenericMenu = null;
     private boolean isInvisible = false;
     private Inventory currentChest = null;
+    private boolean hasHandsup = false;
 
     public CharacterState() {
         this.uiState = new UIState();
@@ -231,5 +232,13 @@ public class CharacterState {
 
     public void setCurrentChest(Inventory currentChest) {
         this.currentChest = currentChest;
+    }
+
+    public boolean isHasHandsup() {
+        return hasHandsup;
+    }
+
+    public void setHasHandsup(boolean hasHandsup) {
+        this.hasHandsup = hasHandsup;
     }
 }

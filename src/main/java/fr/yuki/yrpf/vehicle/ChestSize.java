@@ -1,7 +1,18 @@
 package fr.yuki.yrpf.vehicle;
 
+import java.util.HashMap;
+
 public class ChestSize {
+    public static HashMap<Integer, Integer> getCustomChestSize() {
+        return customChestSize;
+    }
+
+    public static HashMap<Integer, Integer> customChestSize = new HashMap<>();
+
     public static int getChestSizeByModelId(int modelId) {
+        if(customChestSize.containsKey(modelId)) {
+            return customChestSize.get(modelId);
+        }
         switch (modelId) {
             case 6:
             case 32:

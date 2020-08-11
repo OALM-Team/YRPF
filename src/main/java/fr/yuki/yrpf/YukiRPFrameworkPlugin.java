@@ -109,6 +109,7 @@ public class YukiRPFrameworkPlugin {
             Onset.registerCommand("unloadaccount", new UnloadAccountCommand());
             Onset.registerCommand("saveall", new SaveAllCommand());
             Onset.registerCommand("addjobexp", new AddJobExpCommand());
+            Onset.registerCommand("removewhitelist", new RemoveWhitelistCommand());
 
             // Register remote events
             Onset.registerRemoteEvent("GlobalUI:ToogleWindow");

@@ -143,6 +143,12 @@ public class GarageManager {
                 .collect(Collectors.toList()));
     }
 
+    public static ArrayList<VehicleGarage> getVehiclesOutsideGarageByPlayer(Player player) {
+        return new ArrayList<>(vehicleGarages.stream().filter(x -> x.getOwner() == WorldManager.getPlayerAccount(player).getId() && x.getGarageId() == -1)
+                .collect(Collectors.toList()));
+    }
+
+
     public static VehicleGarage findVehicleGarageByVehicle(Vehicle vehicle) {
         return vehicleGarages.stream().filter(x -> x.getUuid() == vehicle.getPropertyString("uuid")).findFirst().orElse(null);
     }

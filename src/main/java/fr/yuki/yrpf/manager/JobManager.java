@@ -462,6 +462,12 @@ public class JobManager {
         result.getVehicle().setColor(new Color(color.getRed(), color.getGreen(), color.getBlue()));
         UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, I18n.t(account.getLang(), "toast.job_vehicle.success_rental",
                 String.valueOf(nearbyJobVehicleRental.getCost())));
+
+
+        Onset.getServer().callLuaEvent("YRPF:JobAPI:OnVehicleRental", player.getId(),
+                nearbyJobVehicleRental.getJobId(),
+                nearbyJobVehicleRental.getVehicleModelId(),
+                result.getVehicle().getId());
         return true;
     }
 

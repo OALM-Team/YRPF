@@ -451,4 +451,9 @@ public class VehicleManager {
         if(!zone.canInteractWithDoor(player, nearestDoor)) return;
         nearestDoor.setOpen(!nearestDoor.isOpen());
     }
+
+    public static ArrayList<VehicleStoreLayout> getVehicleStoreLayouts() {
+        return vehicleStoreLayouts;
+    }
+
 }

@@ -45,4 +45,12 @@ public class TruckStoreLayout extends VehicleStoreLayout {
         if(!this.layoutTransforms.containsKey(modelId)) return 0;
         return this.layoutTransforms.get(modelId).size();
     }
+
+    @Override
+    public void addStoreTransform(int modelId, StoreLayoutTransform storeLayoutTransform) {
+        if(!this.layoutTransforms.containsKey(modelId)) {
+            this.layoutTransforms.put(modelId, new ArrayList<>());
+        }
+        this.layoutTransforms.get(modelId).add(storeLayoutTransform);
+    }
 }

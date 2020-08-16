@@ -3,15 +3,15 @@ package fr.yuki.yrpf.luaapi;
 import fr.yuki.yrpf.luaapi.genericmenu.AddGenericMenuItemEF;
 import fr.yuki.yrpf.luaapi.genericmenu.CreateGenericMenuEF;
 import fr.yuki.yrpf.luaapi.genericmenu.ShowGenericMenuEF;
+import fr.yuki.yrpf.luaapi.house.SetHouseObjectBehaviorEF;
 import fr.yuki.yrpf.luaapi.items.CreateItemTemplateEF;
 import fr.yuki.yrpf.luaapi.items.GetItemQuantityEF;
 import fr.yuki.yrpf.luaapi.items.RemoveItemEF;
 import fr.yuki.yrpf.luaapi.job.*;
 import fr.yuki.yrpf.luaapi.map.AddMapMarkerEF;
 import fr.yuki.yrpf.luaapi.map.RemoveMapMarkerEF;
-import fr.yuki.yrpf.luaapi.vehicle.GetWorldVehicleByPlayerEF;
-import fr.yuki.yrpf.luaapi.vehicle.PersistVehicleEF;
-import fr.yuki.yrpf.luaapi.vehicle.SetVehicleItemChestSizeEF;
+import fr.yuki.yrpf.luaapi.player.AddBankMoneyEF;
+import fr.yuki.yrpf.luaapi.vehicle.*;
 import net.onfirenetwork.onsetjava.Onset;
 
 public class LuaAPIManager {
@@ -31,6 +31,8 @@ public class LuaAPIManager {
         Onset.getServer().addFunctionExport("AddItemResourceRequirement", new AddItemResourceRequirementEF());
         Onset.getServer().addFunctionExport("SetHarvestAnimation", new SetHarvestAnimationEF());
         Onset.getServer().addFunctionExport("IsJobWhitelisted", new IsJobWhitelistedEF());
+        Onset.getServer().addFunctionExport("SpawnWearableObject", new SpawnWearableObjectEF());
+        Onset.getServer().addFunctionExport("AddJobExp", new AddJobExpEF());
 
         // Item API
         Onset.getServer().addFunctionExport("CreateItemTemplate", new CreateItemTemplateEF());
@@ -51,5 +53,14 @@ public class LuaAPIManager {
         Onset.getServer().addFunctionExport("PersistVehicleInstance", new PersistVehicleEF());
         Onset.getServer().addFunctionExport("GetWorldVehicleByPlayer", new GetWorldVehicleByPlayerEF());
         Onset.getServer().addFunctionExport("SetVehicleItemChestSize", new SetVehicleItemChestSizeEF());
+        Onset.getServer().addFunctionExport("DeleteWearableObject", new DeleteWearableObjectEF());
+        Onset.getServer().addFunctionExport("CreateVehicleStoreLayout", new CreateVehicleStoreLayoutEF());
+        Onset.getServer().addFunctionExport("AddVehicleStoreLayoutItemPlacement", new AddVehicleStoreLayoutItemPlacementEF());
+
+        // House
+        Onset.getServer().addFunctionExport("SetHouseObjectBehavior", new SetHouseObjectBehaviorEF());
+
+        // Player
+        Onset.getServer().addFunctionExport("AddBankMoney", new AddBankMoneyEF());
     }
 }

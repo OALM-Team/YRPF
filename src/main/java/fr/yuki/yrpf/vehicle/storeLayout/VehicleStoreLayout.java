@@ -11,6 +11,7 @@ public abstract class VehicleStoreLayout {
     public abstract StoreLayoutTransform getStoreTransform(int index, WearableWorldObject wearableWorldObject);
     public abstract int maxStorageQuantity();
     public abstract int maxLayoutSlot(int modelId);
+    public abstract void addStoreTransform(int modelId, StoreLayoutTransform storeLayoutTransform);
 
     public boolean store(Vehicle vehicle, WearableWorldObject wearableWorldObject) {
         ArrayList<WearableWorldObject> wearableWorldObjectsChest = VehicleManager.getVehicleWearableObjects(vehicle);

@@ -47,6 +47,28 @@ public class HouseItemObject extends Model {
         this.worldObject.setStreamDistance(2500);
 
         if(this.functionId != -1) {
+            this.reapplyFunctionId();
+
+            if(this.itemBehavior != null) {
+                this.itemBehavior.onSpawn();
+            }
+        }
+
+        Onset.getServer().callLuaEvent("YRPF:HouseAPI:OnHouseItemSpawned",
+                this.house.getId(),
+                this.id,
+                this.modelId,
+                this.functionId,
+                this.x,
+                this.y,
+                this.z,
+                this.rx,
+                this.ry,
+                this.rz);
+    }
+
+    public void reapplyFunctionId() {
+        if(this.functionId != -1) {
             switch (this.functionId) {
                 case 1: // Radio
                     this.itemBehavior = new RadioBehavior(this);
@@ -59,10 +81,6 @@ public class HouseItemObject extends Model {
                 case 3: // Chest
                     this.itemBehavior = new HouseChestBehavior(this);
                     break;
-            }
-
-            if(this.itemBehavior != null) {
-                this.itemBehavior.onSpawn();
             }
         }
     }

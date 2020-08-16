@@ -83,6 +83,11 @@ public class WearableWorldObject {
                     deliveryPointGoal.getPosition().getX(), deliveryPointGoal.getPosition().getY(),
                     deliveryPointGoal.getPosition().getZ());
         }
+
+        Onset.getServer().callLuaEvent("YRPF:JobAPI:OnWearWearableWorldObject", player.getId(),
+                this.modelId,
+                this.uuid,
+                this.position.getX(), this.position.getY(), this.position.getZ());
     }
 
     /**
@@ -151,6 +156,12 @@ public class WearableWorldObject {
             this.lastInteractionAt = System.currentTimeMillis();
 
             if(delete) JobManager.getWearableWorldObjects().remove(this);
+            if(!delete) {
+                Onset.getServer().callLuaEvent("YRPF:JobAPI:OnDropWearableWorldObject", player.getId(),
+                        this.modelId,
+                        this.uuid,
+                        this.position.getX(), this.position.getY(), this.position.getZ());
+            }
         }
         catch (Exception ex) {
             ex.printStackTrace();

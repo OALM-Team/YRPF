@@ -17,10 +17,7 @@ import fr.yuki.yrpf.job.placementObject.GeneratorPlacementInstance;
 import fr.yuki.yrpf.job.placementObject.GrowBoxPlacementInstance;
 import fr.yuki.yrpf.job.tools.Generator;
 import fr.yuki.yrpf.model.*;
-import fr.yuki.yrpf.net.payload.AddCustomItemImagePayload;
-import fr.yuki.yrpf.net.payload.AddI18NKey;
-import fr.yuki.yrpf.net.payload.RequestUseItemPayload;
-import fr.yuki.yrpf.net.payload.UrgencyRequestPayload;
+import fr.yuki.yrpf.net.payload.*;
 import fr.yuki.yrpf.phone.UrgencyPhoneMessage;
 import fr.yuki.yrpf.utils.Basic;
 import net.onfirenetwork.onsetjava.Onset;
@@ -70,6 +67,10 @@ public class ItemManager {
             player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new AddCustomItemImagePayload(
                     image.getKey(), image.getValue()
             )));
+        }
+        for(AddImageResourcePayload payload : ModdingManager.getImageResourcePayloads()) {
+            Onset.print("Dispatch image resource group=" + payload.getGroup() + " key=" + payload.getKey() + " value="+payload.getValue());
+            player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(payload));
         }
     }
 

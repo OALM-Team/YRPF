@@ -37,7 +37,7 @@ public class TruckStoreLayout extends VehicleStoreLayout {
 
     @Override
     public int maxStorageQuantity() {
-        return 15;
+        return 100;
     }
 
     @Override

@@ -298,6 +298,10 @@ public class JobManager {
         CharacterJobLevel characterJobLevel = characterJobLevels.stream().filter(x -> x.getJobId().equals(job)).findFirst().orElse(null);
         if(characterJobLevel == null) return;
 
+        if(!characterJobLevel.hasNextLevel()) {
+            return;
+        }
+
         JobLevel previousJobLevel = characterJobLevel.getJobLevel();
         characterJobLevel.setExp(characterJobLevel.getExp() + amount);
         account.setJobLevels(characterJobLevels);
@@ -488,6 +492,8 @@ public class JobManager {
         Account account = WorldManager.getPlayerAccount(player);
         ArrayList<CharacterJobLevel> characterJobLevels = account.decodeCharacterJob();
         for(CharacterJobLevel characterJobLevel : characterJobLevels) {
+            Onset.print(characterJobLevel.getJobId());
+            Onset.print(characterJobLevel.getJobLevel().getTranslateName());
             player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new AddCharacterJobPayload(characterJobLevel)));
         }
     }

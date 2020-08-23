@@ -37,4 +37,11 @@ public class CharacterJobLevel {
         }
         return level;
     }
+
+    public boolean hasNextLevel() {
+        ArrayList<JobLevel> levels = new ArrayList<>(JobManager.getJobLevels().stream()
+                .filter(x -> x.getJobId().equals(this.getJobId())).collect(Collectors.toList()));
+        JobLevel jobLevel = this.getJobLevel();
+        return levels.stream().filter(x -> x.getLevel() == jobLevel.getLevel() + 1).findFirst().orElse(null) != null;
+    }
 }

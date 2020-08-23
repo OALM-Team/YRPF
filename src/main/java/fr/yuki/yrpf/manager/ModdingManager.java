@@ -1,8 +1,10 @@
 package fr.yuki.yrpf.manager;
 
 import com.google.gson.Gson;
+import fr.yuki.yrpf.luaapi.AddImageResourceEF;
 import fr.yuki.yrpf.modding.ModdingCustomModel;
 import fr.yuki.yrpf.modding.ModdingFile;
+import fr.yuki.yrpf.net.payload.AddImageResourcePayload;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.entity.Pickup;
 import net.onfirenetwork.onsetjava.entity.Player;
@@ -10,11 +12,14 @@ import net.onfirenetwork.onsetjava.entity.WorldObject;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.util.ArrayList;
 
 public class ModdingManager {
     private static ModdingFile moddingFile;
+    private static ArrayList<AddImageResourcePayload> imageResourcePayloads;
 
     public static void init() throws FileNotFoundException {
+        imageResourcePayloads = new ArrayList<>();
         moddingFile = new Gson().fromJson(new FileReader("yrpf/modding.json"), ModdingFile.class);
         Onset.print("Modding file loaded with " + moddingFile.getCustomModels().size() + " custom model(s)");
     }
@@ -50,5 +55,13 @@ public class ModdingManager {
         for(ModdingCustomModel customModel : moddingFile.getCustomModels()) {
             player.callRemoteEvent("Editor:AddCustomObject", customModel.getId(), customModel.getPath());
         }
+    }
+
+    public static ArrayList<AddImageResourcePayload> getImageResourcePayloads() {
+        return imageResourcePayloads;
+    }
+
+    public static void setImageResourcePayloads(ArrayList<AddImageResourcePayload> imageResourcePayloads) {
+        ModdingManager.imageResourcePayloads = imageResourcePayloads;
     }
 }

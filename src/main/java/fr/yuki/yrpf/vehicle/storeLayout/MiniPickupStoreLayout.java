@@ -65,7 +65,7 @@ public class MiniPickupStoreLayout extends VehicleStoreLayout {
 
     @Override
     public int maxStorageQuantity() {
-        return 7;
+        return 100;
     }
 
     @Override

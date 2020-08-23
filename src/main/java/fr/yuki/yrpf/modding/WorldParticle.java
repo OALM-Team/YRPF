@@ -1,10 +1,15 @@
 package fr.yuki.yrpf.modding;
 
+import lombok.Getter;
 import net.onfirenetwork.onsetjava.Onset;
 import net.onfirenetwork.onsetjava.data.Vector;
 import net.onfirenetwork.onsetjava.entity.WorldObject;
 
 public class WorldParticle {
+    private static int PARTICLE_ID = 1;
+
+    @Getter
+    private int id;
     private WorldObject dummyObject;
     private String particleAsset;
     private Vector position;
@@ -12,6 +17,7 @@ public class WorldParticle {
     private double radius;
 
     public WorldParticle(String particleAsset, Vector position, Vector scale, double radius) {
+        this.id = PARTICLE_ID++;
         this.particleAsset = particleAsset;
         this.position = position;
         this.scale = scale;

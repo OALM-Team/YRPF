@@ -13,6 +13,7 @@ import fr.yuki.yrpf.inventory.InventoryItem;
 import fr.yuki.yrpf.job.Job;
 import fr.yuki.yrpf.job.ObjectPlacementInstance;
 import fr.yuki.yrpf.job.placementObject.GenericPlacementInstance;
+import fr.yuki.yrpf.modding.WorldParticle;
 import fr.yuki.yrpf.model.*;
 import fr.yuki.yrpf.net.payload.AddSellerItemPayload;
 import fr.yuki.yrpf.net.payload.BuySellItemRequestPayload;
@@ -48,6 +49,8 @@ public class WorldManager {
     private static List<RestrictedZone> restrictedZones;
     @Getter
     private static List<OutfitPoint> outfitPoints;
+    @Getter
+    private static HashMap<Integer, WorldParticle> worldParticleHashMap = new HashMap<>();
 
     /**
      * Init the world manager
@@ -262,6 +265,14 @@ public class WorldManager {
             if(player.getVehicle() == null) if(handleSellerInteract(player)) return;
             if(player.getVehicle() == null) {
                 if(HouseManager.handleInteractWithHouseItems(player)) return;
+            }
+            if(state.getCurrentChest() != null) {
+                if(state.getUiState().isTransfertInventory()) {
+                    if(!UIStateManager.handleUIToogle(player, "transfertInventory")) {
+                        state.setCurrentChest(null);
+                        return;
+                    }
+                }
             }
         } catch (Exception ex) {
             ex.printStackTrace();

@@ -172,6 +172,7 @@ public class YukiRPFrameworkPlugin {
             Onset.registerRemoteEvent("Vehicle:OnHornCasted");
             Onset.registerRemoteEvent("Character:HandsUp");
             Onset.registerRemoteEvent("Phone:DeleteContact");
+            Onset.registerRemoteEvent("WUI:RequestSync");
 
             // Init discord bot
             if(!WorldManager.getServerConfig().getDiscordBotToken().equals("")) {
@@ -614,6 +615,10 @@ public class YukiRPFrameworkPlugin {
 
                 case "Phone:DeleteContact":
                     PhoneManager.handleDeletePhoneContact(evt.getPlayer(), (evt.getArgs()[0]).toString());
+                    break;
+
+                case "WUI:RequestSync":
+                    WorldUIManager.handleRequestSync(evt.getPlayer(), Integer.parseInt((evt.getArgs()[0]).toString()));
                     break;
             }
         }

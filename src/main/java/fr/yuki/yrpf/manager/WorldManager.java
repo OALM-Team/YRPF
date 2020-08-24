@@ -85,6 +85,20 @@ public class WorldManager {
         outfitPoints = Repo.get(OutfitPoint.class).all();
         Onset.print("Loaded " + outfitPoints.size() + " outfit point(s) from the database");
         spawnOutfitPoints();
+
+        Onset.timer(60000 * 5, () -> {
+            saveAll();
+        });
+    }
+
+    public static void saveAll() {
+        Onset.print("Autosave players ..");
+        for (Player player : Onset.getPlayers()) {
+            try {
+                savePlayer(player);
+            }catch (Exception ex) {}
+        }
+        Onset.print("Autosave done");
     }
 
     public static void initServerConfig() throws IOException {

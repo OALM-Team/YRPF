@@ -13,6 +13,7 @@ import fr.yuki.yrpf.luaapi.player.AddBankMoneyEF;
 import fr.yuki.yrpf.luaapi.vehicle.*;
 import fr.yuki.yrpf.luaapi.worldui.CreateWorldUIEF;
 import fr.yuki.yrpf.luaapi.worldui.DestroyWUIEF;
+import fr.yuki.yrpf.luaapi.worldui.SetImageWUIEF;
 import fr.yuki.yrpf.luaapi.worldui.SetProgressWUIEF;
 import net.onfirenetwork.onsetjava.Onset;
 
@@ -85,5 +86,6 @@ public class LuaAPIManager {
         Onset.getServer().addFunctionExport("CreateWUI", new CreateWorldUIEF());
         Onset.getServer().addFunctionExport("DestroyWUI", new DestroyWUIEF());
         Onset.getServer().addFunctionExport("SetProgressWUI", new SetProgressWUIEF());
+        Onset.getServer().addFunctionExport("SetImageWUI", new SetImageWUIEF());
     }
 }

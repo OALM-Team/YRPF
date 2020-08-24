@@ -14,11 +14,13 @@ import net.onfirenetwork.onsetjava.entity.Player;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.util.HashMap;
 
 public class MapManager {
     private static GameMapConfig mapConfig;
     @Getter @Setter
     private static int markerId = 1;
+    public HashMap<String, String> customMarkers = new HashMap<>();
 
     public static void init() throws FileNotFoundException {
         new File("yrpf").mkdir();

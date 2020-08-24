@@ -1,6 +1,7 @@
 package fr.yuki.yrpf.luaapi.worldui;
 
 import fr.yuki.yrpf.manager.WorldUIManager;
+import fr.yuki.yrpf.world.WImageContainerWUI;
 import fr.yuki.yrpf.world.WProgressBarWUI;
 import fr.yuki.yrpf.world.WorldUI;
 import net.onfirenetwork.onsetjava.data.Vector;
@@ -17,6 +18,11 @@ public class CreateWorldUIEF implements ExportFunction {
         switch (objects[8].toString()) {
             case "wProgressBar":
                 worldUI = new WProgressBarWUI(position, rotation, Integer.parseInt(objects[6].toString()), Integer.parseInt(objects[7].toString()),
+                        objects[8].toString());
+                break;
+
+            case "wImageContainer":
+                worldUI = new WImageContainerWUI(position, rotation, Integer.parseInt(objects[6].toString()), Integer.parseInt(objects[7].toString()),
                         objects[8].toString());
                 break;
         }

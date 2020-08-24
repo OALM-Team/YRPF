@@ -41,10 +41,11 @@ public abstract class WorldUI {
         this.spawn();
     }
 
-    public abstract void sync();
+    public abstract void sync(Player player);
 
     private void spawn() {
         this.worldObject = Onset.getServer().createObject(this.position, 1);
+        this.worldObject.setRotation(this.rotation);
         this.worldObject.setProperty("isWorldUI", "true", true);
         this.worldObject.setProperty("uiID", this.id, true);
         this.worldObject.setProperty("uiType", this.uiType, true);
@@ -57,6 +58,12 @@ public abstract class WorldUI {
         if(this.worldObject != null) {
             this.worldObject.destroy();
             this.worldObject = null;
+        }
+    }
+
+    public void syncAll() {
+        for(Player player : this.getPlayersInRange()) {
+            this.sync(player);
         }
     }
 

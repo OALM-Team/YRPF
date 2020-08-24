@@ -19,14 +19,11 @@ public class WProgressBarWUI extends WorldUI {
 
     public void setProgress(int progress) {
         this.progress = progress;
-        this.sync();
+        this.syncAll();
     }
 
     @Override
-    public void sync() {
-        Onset.print("sync progress: " + this.progress);
-        for(Player player : this.getPlayersInRange()) {
-            this.dispatchToPlayerUI(player, new Gson().toJson(new SetProgressWUIPayload(this.progress)));
-        }
+    public void sync(Player player) {
+        this.dispatchToPlayerUI(player, new Gson().toJson(new SetProgressWUIPayload(this.progress)));
     }
 }

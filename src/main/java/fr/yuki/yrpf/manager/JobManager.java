@@ -356,7 +356,7 @@ public class JobManager {
         return true;
     }
 
-    public static void handleUnwearObject(Player player) {
+    public static void handleUnwearObject(Player player, int hitType, int hitId) {
         if(CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject() == null) return;
         Account account = WorldManager.getPlayerAccount(player);
 
@@ -367,7 +367,7 @@ public class JobManager {
             if(jobNPCListItem != null) {
                 Onset.print("Selling item to the npc price=" + jobNPCListItem.getPrice());
                 InventoryManager.addItemToPlayer(player, ItemTemplateEnum.CASH.id, jobNPCListItem.getPrice(), false);
-                CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject().requestUnwear(player, true);
+                CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject().requestUnwear(player, true,1 ,1);
                 jobNPCNearby.getNpc().setAnimation(Animation.THUMBSUP);
                 SoundManager.playSound3D("sounds/cash_register.mp3", player.getLocation(), 200, 1);
                 //UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, "Vous avez vendu votre ressource pour " + jobNPCListItem.getPrice() + "$");
@@ -388,7 +388,7 @@ public class JobManager {
             if(jobToolNearby.getJobToolHandler().canInteract(player)) {
                 Onset.print("Use job tool type="+jobToolNearby.getJobToolType());
                 if(jobToolNearby.getJobToolHandler().onUnwear(player, CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject())) {
-                    CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject().requestUnwear(player, true);
+                    CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject().requestUnwear(player, true, hitType, hitId);
                 }
             }
             else {
@@ -398,7 +398,7 @@ public class JobManager {
         }
 
         // Unwear the item
-        CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject().requestUnwear(player, false);
+        CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject().requestUnwear(player, false, hitType, hitId);
     }
 
     public static boolean isWhitelistForThisJob(Player player, String jobType) {
@@ -492,9 +492,9 @@ public class JobManager {
         Account account = WorldManager.getPlayerAccount(player);
         ArrayList<CharacterJobLevel> characterJobLevels = account.decodeCharacterJob();
         for(CharacterJobLevel characterJobLevel : characterJobLevels) {
-            Onset.print(characterJobLevel.getJobId());
-            Onset.print(characterJobLevel.getJobLevel().getTranslateName());
-            player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new AddCharacterJobPayload(characterJobLevel)));
+            try {
+                player.callRemoteEvent("GlobalUI:DispatchToUI", new Gson().toJson(new AddCharacterJobPayload(characterJobLevel)));
+            } catch (Exception ex) {}
         }
     }
 

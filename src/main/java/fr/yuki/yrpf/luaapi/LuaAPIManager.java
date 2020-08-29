@@ -1,6 +1,7 @@
 package fr.yuki.yrpf.luaapi;
 
 import fr.yuki.yrpf.luaapi.genericmenu.*;
+import fr.yuki.yrpf.luaapi.house.CanBuildHereEF;
 import fr.yuki.yrpf.luaapi.house.SetHouseObjectBehaviorEF;
 import fr.yuki.yrpf.luaapi.inventory.*;
 import fr.yuki.yrpf.luaapi.items.CreateItemTemplateEF;
@@ -42,6 +43,7 @@ public class LuaAPIManager {
         Onset.getServer().addFunctionExport("AddJobExp", new AddJobExpEF());
         Onset.getServer().addFunctionExport("GetWearedObject", new GetWearedObjectEF());
         Onset.getServer().addFunctionExport("GetPlayerJobLevel", new GetJobLevelEF());
+        Onset.getServer().addFunctionExport("SpawnRentalVehicle", new SpawnRentalVehicleEF());
 
         // Item API
         Onset.getServer().addFunctionExport("CreateItemTemplate", new CreateItemTemplateEF());
@@ -70,6 +72,7 @@ public class LuaAPIManager {
 
         // House
         Onset.getServer().addFunctionExport("SetHouseObjectBehavior", new SetHouseObjectBehaviorEF());
+        Onset.getServer().addFunctionExport("CanBuildHere", new CanBuildHereEF());
 
         // Player
         Onset.getServer().addFunctionExport("AddBankMoney", new AddBankMoneyEF());

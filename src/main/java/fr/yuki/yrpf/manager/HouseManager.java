@@ -147,6 +147,21 @@ public class HouseManager {
         UIStateManager.sendNotification(playerTarget, ToastTypeEnum.SUCCESS, "Vous avez désormais les clés de la maison");
     }
 
+    public static void handleRevokeKeys(Player player, int target) {
+        Player playerTarget = Onset.getPlayers().stream().filter(x -> x.getId() == target)
+                .findFirst().orElse(null);
+        if(playerTarget == null) return;
+        House house = HouseManager.getHouseAtLocation(player.getLocation());
+        if(house == null) return;
+        if(!HouseManager.canBuildInHouse(player, house)) return;
+        Account targetAccount = WorldManager.getPlayerAccount(playerTarget);
+        if(playerTarget.getId() == house.getAccountId()) return;
+        if(!house.getAllowedPlayers().contains(targetAccount)) return;
+        house.getAllowedPlayers().add(targetAccount.getId());
+        UIStateManager.sendNotification(playerTarget, ToastTypeEnum.WARN, "Vous n'avez désormais plus les clés de la maison");
+        UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS,  targetAccount.getCharacterName() + " n'as désormais plus les clés de la maison");
+    }
+
     public static boolean handleInteractWithHouseItems(Player player) {
         House house = HouseManager.getHouseAtLocation(player.getLocation());
         if(house == null) return false;

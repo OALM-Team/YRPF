@@ -166,6 +166,7 @@ public class YukiRPFrameworkPlugin {
             Onset.registerRemoteEvent("Character:InspectCharacter");
             Onset.registerRemoteEvent("GenericMenu:Dismiss");
             Onset.registerRemoteEvent("Character:GiveHouseKey");
+            Onset.registerRemoteEvent("Character:RevokeHouseKey");
             Onset.registerRemoteEvent("Chest:TransfertToChest");
             Onset.registerRemoteEvent("Chest:TransfertToInventory");
             Onset.registerRemoteEvent("Police:KickDoor");
@@ -374,7 +375,7 @@ public class YukiRPFrameworkPlugin {
                     break;
 
                 case "Object:Interact":
-                    WorldManager.handleInteract(evt.getPlayer());
+                    WorldManager.handleInteract(evt.getPlayer(), evt.getArgs().length == 0 ? 0 : Integer.parseInt((evt.getArgs()[0]).toString()), evt.getArgs().length == 0 ? 0 : Integer.parseInt((evt.getArgs()[1]).toString()));
                     break;
 
                 case "ATM:Deposit":
@@ -591,6 +592,10 @@ public class YukiRPFrameworkPlugin {
 
                 case "Character:GiveHouseKey":
                     HouseManager.handleGiveHouseKey(evt.getPlayer(), Integer.parseInt((evt.getArgs()[0]).toString()));
+                    break;
+
+                case "Character:RevokeHouseKey":
+                    HouseManager.handleRevokeKeys(evt.getPlayer(), Integer.parseInt((evt.getArgs()[0]).toString()));
                     break;
 
                 case "Chest:TransfertToChest":

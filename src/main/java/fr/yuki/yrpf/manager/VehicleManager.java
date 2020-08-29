@@ -367,12 +367,13 @@ public class VehicleManager {
                 .collect(Collectors.toList()));
     }
 
-    public static boolean handleVehicleChestStorageRequest(Player player) {
+    public static boolean handleVehicleChestStorageRequest(Player player, int hitId) {
         if(player.getVehicle() != null) return false;
         Vehicle vehicle = getNearestVehicle(player.getLocation());
         if(vehicle == null) return false;
         if(vehicle.getModel() == 33 || vehicle.getModel() == 34) return false;
         if(vehicle.getLocation().distance(player.getLocation()) > getInteractionDistance(vehicle)) return false;
+        if(vehicle.getId() != hitId) return false;
 
         Account account = WorldManager.getPlayerAccount(player);
         try{

@@ -37,7 +37,7 @@ public class OreFurnace implements JobToolHandler {
     @Override
     public boolean onUnwear(Player player, WearableWorldObject wearableWorldObject) {
         Account account = WorldManager.getPlayerAccount(player);
-        CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject().requestUnwear(player, true);
+        CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject().requestUnwear(player, true, 1, 1);
         WorldParticle particle = new WorldParticle("/Game/Vehicle/VFX/PS_VehicleSmoke",
                 new Vector(this.jobTool.getPosition().getX(), this.jobTool.getPosition().getY(), this.jobTool.getPosition().getZ() + 50),
                 new Vector(0.7, 0.7, 0.7), 5000);

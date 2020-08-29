@@ -94,13 +94,13 @@ public class WearableWorldObject {
      * Throw the object on the ground and recreate the world object properly
      * @param player The player
      */
-    public void requestUnwear(Player player, boolean delete) {
+    public void requestUnwear(Player player, boolean delete, int hitType, int hitId) {
         Account account = WorldManager.getPlayerAccount(player);
         try {
             // Put this resource in the chest
             if(!delete) {
                 Vehicle nearbyVehicle = VehicleManager.getNearestVehicle(player.getLocation());
-                if(nearbyVehicle != null) {
+                if(nearbyVehicle != null && hitType == 3 && hitId == nearbyVehicle.getId()) {
                     if(nearbyVehicle.getLocation().distance(player.getLocation()) < VehicleManager.getInteractionDistance(nearbyVehicle)) {
                         /**if(!VehicleManager.canStoreWorldWearableObject(nearbyVehicle)) {
                          UIStateManager.sendNotification(player, ToastTypeEnum.ERROR, "Impossible car ce véhicule ne le permet pas");

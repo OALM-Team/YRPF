@@ -12,6 +12,7 @@ import fr.yuki.yrpf.inventory.Inventory;
 import fr.yuki.yrpf.inventory.InventoryItem;
 import fr.yuki.yrpf.job.Job;
 import fr.yuki.yrpf.model.Account;
+import fr.yuki.yrpf.model.House;
 import fr.yuki.yrpf.net.payload.RequestThrowItemPayload;
 import fr.yuki.yrpf.net.payload.SetFoodPayload;
 import fr.yuki.yrpf.net.payload.StyleSavePartPayload;
@@ -53,6 +54,7 @@ public class CharacterManager {
     public static void applyFoodChange(Player player, int value) {
         Account account = WorldManager.getPlayerAccount(player);
         if(account == null) return;
+        if(value < 0 && account.getAdminLevel() > 0) return;
         CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
         if(state.isDead()) return;
         account.setFoodState(account.getFoodState() + value);
@@ -67,6 +69,7 @@ public class CharacterManager {
     public static void applyDrinkChange(Player player, int value) {
         Account account = WorldManager.getPlayerAccount(player);
         if(account == null) return;
+        if(value < 0 && account.getAdminLevel() > 0) return;
         CharacterState state = CharacterManager.getCharacterStateByPlayer(player);
         if(state.isDead()) return;
         account.setDrinkState(account.getDrinkState() + value);
@@ -259,6 +262,7 @@ public class CharacterManager {
 
         GenericMenu genericMenu = new GenericMenu(player);
         CharacterState characterState = CharacterManager.getCharacterStateByPlayer(player);
+        Account account = WorldManager.getPlayerAccount(player);
 
         if(characterState.isHasHandsup()) {
             genericMenu.getItems().add(new GenericMenuItem("Baisser les mains", "window.CallEvent(\"RemoteCallInterface\"," +
@@ -267,6 +271,9 @@ public class CharacterManager {
             genericMenu.getItems().add(new GenericMenuItem("Lever les mains", "window.CallEvent(\"RemoteCallInterface\"," +
                     " \"Character:HandsUp\");"));
         }
+
+
+
         // Police Menu
         if(JobManager.isWhitelistForThisJob(player, JobEnum.POLICE.name())) {
             genericMenu.getItems().add(new GenericMenuItem("Enfoncer la porte", "window.CallEvent(\"RemoteCallInterface\"," +
@@ -278,9 +285,15 @@ public class CharacterManager {
                 // Build generic menu
                 genericMenu.getItems().add(new GenericMenuItem("Fouiller la personne", "window.CallEvent(\"RemoteCallInterface\"," +
                         " \"Character:InspectCharacter\", \"" + nearestPlayer.getId() + "\");"));
-                genericMenu.getItems().add(new GenericMenuItem("Donner les clés de la maison", "window.CallEvent(\"RemoteCallInterface\"," +
-                        " \"Character:GiveHouseKey\", \"" + nearestPlayer.getId() + "\");"));
-
+                House house = HouseManager.getHouseAtLocation(player.getLocation());
+                if(house != null) {
+                    if(house.getAccountId() == account.getId()) {
+                        genericMenu.getItems().add(new GenericMenuItem("Donner les clés de la maison", "window.CallEvent(\"RemoteCallInterface\"," +
+                            " \"Character:GiveHouseKey\", \"" + nearestPlayer.getId() + "\");"));
+                        genericMenu.getItems().add(new GenericMenuItem("Récupérer les clés de la maison", "window.CallEvent(\"RemoteCallInterface\"," +
+                                " \"Character:RevokeHouseKey\", \"" + nearestPlayer.getId() + "\");"));
+                    }
+                }
             }
         }
         genericMenu.addCloseItem();

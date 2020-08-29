@@ -35,7 +35,7 @@ public class GarbageBin implements JobToolHandler {
 
         InventoryManager.addItemToPlayer(player, ItemTemplateEnum.CASH.id, reward, true);
         SoundManager.playSound3D("sounds/cash_register.mp3", player.getLocation(), 200, 1);
-        CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject().requestUnwear(player, true);
+        CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject().requestUnwear(player, true,1 ,1);
 
         UIStateManager.sendNotification(player, ToastTypeEnum.SUCCESS, "Vous avez vendu votre ressource pour " + reward + "$");
         return false;

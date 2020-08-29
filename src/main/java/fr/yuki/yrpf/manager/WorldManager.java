@@ -239,7 +239,7 @@ public class WorldManager {
      * Handle the interaction request and send it to all interactible elements
      * @param player The player
      */
-    public static void handleInteract(Player player) {
+    public static void handleInteract(Player player, int hitType, int hitId) {
         try {
             if(CharacterManager.getCharacterStateByPlayer(player).isDead()) {
                 return;
@@ -250,7 +250,7 @@ public class WorldManager {
 
             // Check weared object
             if(CharacterManager.getCharacterStateByPlayer(player).getWearableWorldObject() != null && player.getVehicle() == null) {
-                JobManager.handleUnwearObject(player);
+                JobManager.handleUnwearObject(player, hitType, hitId);
                 return;
             }
 
@@ -262,7 +262,9 @@ public class WorldManager {
             if(FuelManager.interactFuelPoint(player, false)) return;
             if(JobManager.tryToHarvest(player)) return;
             if(player.getVehicle() == null) {
-                if(VehicleManager.handleVehicleChestStorageRequest(player)) return;
+                if(hitType == 3) {
+                    if(VehicleManager.handleVehicleChestStorageRequest(player, hitId)) return;
+                }
             }
             if(GarageManager.handleGarageInteract(player)) return;
             if(player.getVehicle() == null){
@@ -288,6 +290,9 @@ public class WorldManager {
                     }
                 }
             }
+
+            // If nothing has been done
+            Onset.getServer().callLuaEvent("Object:AfterInteract", player.getId(), hitType, hitId);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
